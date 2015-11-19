@@ -52,16 +52,26 @@
   </servlet-mapping>
   <filter>
     <filter-name>encodingFilter</filter-name>
-	<filter-class>
+    <filter-class>
         org.springframework.web.filter.CharacterEncodingFilter
 	</filter-class>
-	<init-param>
-    	<param-name>encoding</param-name>
-    	<param-value>utf-8</param-value>
-	</init-param>
-   </filter>
-	<filter-mapping>
-    	<filter-name>encodingFilter</filter-name>
-	<url-pattern>*.do</url-pattern>
-</filter-mapping>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>utf-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>encodingFilter</filter-name>
+    <url-pattern>*.do</url-pattern>
+  </filter-mapping>
+  <servlet>
+    <description></description>
+    <display-name>SendHTML</display-name>
+    <servlet-name>SendHTML</servlet-name>
+    <servlet-class>kr.co.moa.collector.SendHTML</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SendHTML</servlet-name>
+    <url-pattern>/SendHTML</url-pattern>
+  </servlet-mapping>
 </web-app>
