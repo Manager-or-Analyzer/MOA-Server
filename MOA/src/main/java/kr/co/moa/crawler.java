@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import kr.co.moa.morpheme.MorphemeAnalyzer;
-
 /**
  * Servlet implementation class crawler
  */
@@ -29,8 +27,9 @@ public class crawler extends HttpServlet {
 		//Document doc = Jsoup.connect("http://www.nextree.co.kr/p11205/").get();
 		Document doc = Jsoup.connect("http://addio3305.tistory.com/41").get();
 		System.out.println("the cralser2");		
-		out.println(doc.html());
-		System.out.println("the cralser3");		
+		
+		out.println(doc.html().toString());
+		System.out.println(doc.html().toString());		
 		
 		
 		//response.getWriter().append("Served at: ").append(request.getContextPath());

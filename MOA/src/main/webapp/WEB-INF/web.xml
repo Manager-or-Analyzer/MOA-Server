@@ -72,6 +72,16 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>SendHTML</servlet-name>
-    <url-pattern>/SendHTML</url-pattern>
+    <url-pattern>/send/HTML</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>test_module</display-name>
+    <servlet-name>test_module</servlet-name>
+    <servlet-class>kr.co.test_module</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>test_module</servlet-name>
+    <url-pattern>/test_module</url-pattern>
   </servlet-mapping>
 </web-app>
