@@ -1,6 +1,7 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -10,23 +11,86 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 /* 2015-12-30
  * <body> 위주의  CBT완성.
- * 
+ * 람다 값을 정한 후 CBT로 부터 noise를 제거한 TT완성
  */
 public class HtmlParser {
+	class Info{
+		String parent,child;		
+		public Info(String p, String c){
+			parent=p; child =c; 
+		}
+	}
 	private Queue<Element> que = new LinkedList<Element>();
-	//make ContentBlockTree
+	private Queue<Info> del_list = new LinkedList<Info>();
+	private Tree CBT,TT;
 	
-	public void makeCBT(String html, Map<String,String> uselessTag){
+	// 0 < lamda < 1 테스트를 통해 값 수정 필요
+	private static final double lamda = 0.5;	
+			
+	// sgn(len(ti)/len(t)*1/lamda -1)
+	private boolean isTopicNode(Node parent, Node child){
+		
+		double len_p = parent.getContent().length();
+		double len_c = child.getContent().length();
+		
+		if(len_p == 0 || len_c == 0)
+			return false;
+		
+		double res = ((len_c/len_p)/lamda)-1;
+		if(res <1)
+			return false;
+		else		
+			return true;
+	}
+	
+	public void makeTopicTree(){
+		//Tree 초기화
+		TT = CBT;
+		if(TT == null){
+			System.out.println("CBT가 만들어지지 않았습니다.");
+			return;
+		}
+		TopicTree(TT.getRoot());
+		System.out.println("size :"+del_list.size());
+		for(Info info : del_list){
+			System.out.println(info.parent);
+			System.out.println(info.child+"\n\n");
+			TT.deleteNode(info.parent, info.child);
+		}
+		TT.print();
+		
+	}	
+	private void TopicTree(Node n){
+		if(n!= null && n.child_list.size() != 0){
+			List<Integer> tmp = new LinkedList<Integer>();
+			for(int i=0; i<n.child_list.size(); i++){
+				Node child = n.child_list.get(i);
+				if(!isTopicNode(n,child)){
+					del_list.add(new Info(n.name, child.name));
+					tmp.add(i);
+					TT.deleteNode(n.name, child.name);
+				}
+			}
+			for(int i=0; i<n.child_list.size(); i++){				
+				if(tmp.size() !=0 && tmp.get(i) == i)continue;
+				Node child = n.child_list.get(i);
+				TopicTree(child);				
+			}			
+		}
+	}
+	
+	//make ContentBlockTree
+	public HtmlParser makeCBT(String html, Map<String,String> uselessTag){
 		int tagCnt = 0;
 		// 1. 특수문자 처리 일단 &nbsp만 처리
 		html = html.replaceAll("&nbsp;","").trim();
 		Document doc = Jsoup.parse(html);
-		System.out.println("title: " +doc.title());
-		System.out.println("child size: "+doc.childNodeSize());
+		//System.out.println("title: " +doc.title());
+		//System.out.println("child size: "+doc.childNodeSize());
 		
 			
 		// 2. <body>만 추출
-		Tree CBT = new Tree();		
+		CBT = new Tree();		
 		Elements body_els = doc.getElementsByTag("body");		
 		Element body_e = body_els.first();		
 		body_e.tagName("body" + tagCnt++);
@@ -59,9 +123,8 @@ public class HtmlParser {
 			if(que.size() == 0)
 				break;
 		}
-		CBT.print();
-		
-		
+		//CBT.print();	
+		return this;
 	}
 
 }

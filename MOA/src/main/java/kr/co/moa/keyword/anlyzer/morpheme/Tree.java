@@ -30,7 +30,9 @@ public class Tree {
 		root = new Node("ROOT"," ");
 		cashing = new ArrayList<Cash>();
 	}
-	
+	public Node getRoot(){
+		return root;
+	}
 	public void addNode(String parent, Node child){
 		//parent가 root일때
 		if(parent.equals("ROOT")){
@@ -157,7 +159,8 @@ public class Tree {
 		}					
 	}
 	public void print(){
-		this.print_tree(root, 0);
+		//this.print_tree(root, 0);
+		this.print_tree_data(root,0);
 		
 	}
 	public void print_tree(Node node, int level){
@@ -177,6 +180,24 @@ public class Tree {
 			}
 				
 			print_tree(n,level+1);
+		}
+	}
+	public void print_tree_data(Node node, int level){
+		if(node.child_list.size() == 0)
+			return;
+		if(level == 0)System.out.println(node.getContent()+" ");
+		for(Node n : node.child_list){
+			System.out.print(node.getContent()+" ");
+		}
+		System.out.println("");
+		for(Node n : node.child_list){
+			if(n.child_list.size() !=0 ){
+				for(int i=0; i<level; i++)
+					System.out.print("\t");
+				System.out.print(node.getContent()+" ");
+			}
+				
+			print_tree_data(n,level+1);
 		}
 	}
 

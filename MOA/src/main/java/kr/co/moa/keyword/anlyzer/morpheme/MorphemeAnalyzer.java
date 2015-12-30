@@ -19,7 +19,7 @@ public class MorphemeAnalyzer {
 	            "noframes", "section", "nav", "aside", "hgroup", "header", "footer", "math",
 	            "button", "fieldset", "input", "keygen", "object", "output", "select", "textarea",
 	            "img", "br", "wbr", "embed", "hr","col", "command",
-	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a", "font", "span",
+	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a", "font",
 	            "i","aside"
 	 };
 	
@@ -38,7 +38,7 @@ public class MorphemeAnalyzer {
 	
 	public void parsingHTML(String html){
 		HtmlParser hp = new HtmlParser();
-		hp.makeCBT(html, TagsMap);
+		hp.makeCBT(html, TagsMap).makeTopicTree();
 	}
 	
 	

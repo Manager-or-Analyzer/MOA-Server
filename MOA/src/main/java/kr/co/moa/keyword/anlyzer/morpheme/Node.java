@@ -21,7 +21,7 @@ public class Node {
 		name= n;
 		content = data;
 	}
-	public String getContent(String str){
+	public String getContent(){
 		return content;
 	}	
 	public void setChild(Node child){

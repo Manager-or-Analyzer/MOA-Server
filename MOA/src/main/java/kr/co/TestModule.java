@@ -3,6 +3,8 @@ package kr.co;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import org.jsoup.Jsoup;
@@ -10,7 +12,6 @@ import org.jsoup.Jsoup;
 import com.google.gson.Gson;
 
 import kr.co.data.HtmlData;
-import kr.co.moa.keyword.anlyzer.morpheme.HtmlParser;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 import kr.co.moa.keyword.anlyzer.morpheme.Tree;
 
@@ -61,6 +62,7 @@ public class TestModule {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+				
 		MorphemeAnalyzer.getInstance().parsingHTML(hd.html);
 		//HtmlParser hp = new HtmlParser();
 		//hp.makeCBT(hd.html);
