@@ -1,4 +1,4 @@
-package kr.co.moa.analyzer.morpheme;
+package kr.co.moa.keyword.anlyzer.morpheme;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,8 +7,8 @@ import kr.co.moa.HomeController;
 import scala.collection.concurrent.Debug;
 /*
  * 2015-12-25
- * Content Block Tree, Topic Tree¸¦ ¸¸µé±â À§ÇÑ ³ëµå
- * Remove noise¸¦ ÇÏ±â À§ÇÑ °úÁ¤.
+ * Content Block Tree, Topic Treeë¥¼ ë§Œë“¤ê¸° ìœ„í•œ ë…¸ë“œ
+ * Remove noiseë¥¼ í•˜ê¸° ìœ„í•œ ê³¼ì •.
  * 
  * Author by dongyoung  
  * */
@@ -17,11 +17,9 @@ public class Node {
 	private String content;
 	List<Node> child_list = new LinkedList<Node>();
 	
-	public Node(String n){
+	public Node(String n, String data){
 		name= n;
-	}
-	public void setContent(String str){
-		content = str;
+		content = data;
 	}
 	public String getContent(String str){
 		return content;

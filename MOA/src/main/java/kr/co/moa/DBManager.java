@@ -19,9 +19,9 @@ import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
 import kr.co.data.HtmlData;
-import kr.co.moa.analyzer.morpheme.HtmlParser;
+import kr.co.moa.keyword.anlyzer.morpheme.HtmlParser;
 
-//singletonÀ¸·Î ±¸Çö 
+//singletonï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
 public class DBManager {	
 	private static final String DB_NAME = "test";
     private static final String IP = "127.0.0.1";
@@ -87,7 +87,7 @@ public class DBManager {
     	//Document doc = Jsoup.parse(everything);
     	//System.out.println(doc.select("html"));
     	
-    	HtmlParser.makeCBT(everything);
+    	//HtmlParser.makeCBT(everything);
    	    return res;	 
        	   
     }
