@@ -37,6 +37,7 @@ public class Tree {
 		//parent가 root일때
 		if(parent.equals("ROOT")){
 			root.setChild(child);
+			root.setContent(child.getContent());
 		}else{
 			//parent를 찾는다.
 			Node p = findNode(root, parent);			
@@ -128,17 +129,18 @@ public class Tree {
 	}	
 	public void deleteNode(String parent, String target){
 		//parent가 root일때
-		if(parent.equals("ROOT")){
-			
-			root.delChild(target);
+		if(parent.equals("ROOT")){			
+			root.delChild(target,"");
+			root.setContent("");
 		}else{
 			//parent를 찾는다.
 			Node p = findDelNode(root, parent);
 			if(p == null){
-				System.err.println("findDelNode err");
+				System.err.println("findDelNode err: " + parent);
 				return;
 			}
-			p.delChild(target);
+			String tmp = p.delChild(target,root.getContent());
+			root.setContent(tmp);
 		}	
 	}	
 	private Node findDelNode(Node node, String parent){
@@ -159,8 +161,8 @@ public class Tree {
 		}					
 	}
 	public void print(){
-		//this.print_tree(root, 0);
-		this.print_tree_data(root,0);
+		this.print_tree(root, 0);
+		//this.print_tree_data(root,0);
 		
 	}
 	public void print_tree(Node node, int level){

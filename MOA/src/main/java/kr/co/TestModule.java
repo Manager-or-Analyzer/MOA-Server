@@ -55,17 +55,18 @@ public class TestModule {
 	public static void Test_makeCBT(){
 		Gson gson = new Gson();
 		HtmlData hd = new HtmlData();
-		hd.url = "http://addio3305.tistory.com/41";
+		//hd.url = "http://addio3305.tistory.com/41";
+		//hd.url = "http://news.naver.com/main/read.nhn?oid=008&sid1=103&aid=0003606076&mid=shm&cid=428288&mode=LSD&nh=20151231163858";
+		//hd.url ="http://gogorchg.tistory.com/entry/Android-javautilconcurrentmodificationexception";
+		hd.url="http://osen.mt.co.kr/article/G1110323676";
 		try {
 			hd.html = Jsoup.connect(hd.url).get().toString();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-				
+		
 		MorphemeAnalyzer.getInstance().parsingHTML(hd.html);
-		//HtmlParser hp = new HtmlParser();
-		//hp.makeCBT(hd.html);
 		
 	}
 	

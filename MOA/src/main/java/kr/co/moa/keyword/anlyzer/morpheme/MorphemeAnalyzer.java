@@ -13,14 +13,20 @@ public class MorphemeAnalyzer {
 	 */
 	private static MorphemeAnalyzer instance;
 	private Map<String,String> TagsMap;
+	private Map<String,String> TexttagMap;
 	
 	 private static final String[] uselessTags = {
-	            "script", "noscript", "style", "meta", "link", "frame",
+	            "script", "noscript", "style", "meta", "link",
 	            "noframes", "section", "nav", "aside", "hgroup", "header", "footer", "math",
 	            "button", "fieldset", "input", "keygen", "object", "output", "select", "textarea",
-	            "img", "br", "wbr", "embed", "hr","col", "command",
+	            "img", "br", "wbr", "embed", "hr","col", "colgroup", "command",
 	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a", "font",
 	            "i","aside"
+	 };
+	 //표는 버린다.ㅋ
+	 private static final String[] textTags = {
+			 "title", "p", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "address", "li", 
+	         "ins", "textarea","blockquote", "dt","dd","span","b"
 	 };
 	
 	public static MorphemeAnalyzer getInstance(){
@@ -34,11 +40,16 @@ public class MorphemeAnalyzer {
 		for(String tag : uselessTags){
 			TagsMap.put(tag, null);
 		}
+		TexttagMap = new HashMap<String,String>();
+		for(String tag : textTags){
+			TexttagMap.put(tag, null);
+		}
 	}
 	
 	public void parsingHTML(String html){
 		HtmlParser hp = new HtmlParser();
-		hp.makeCBT(html, TagsMap).makeTopicTree();
+		hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+		//hp.makeCBT(html, TagsMap);
 	}
 	
 	

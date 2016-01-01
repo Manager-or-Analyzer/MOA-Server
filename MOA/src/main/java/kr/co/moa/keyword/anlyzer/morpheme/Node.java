@@ -24,18 +24,24 @@ public class Node {
 	public String getContent(){
 		return content;
 	}	
+	public void setContent(String str){
+		content = str;
+	}
 	public void setChild(Node child){
 		if(!child_list.add(child)){
 			HomeController.logger.debug("addNode fail, size : "+ child_list.size());
 		}		
 	}
-	public void delChild(String target){
+	public String delChild(String target, String text){
 		for(int i=0; i<child_list.size(); i++){
 			if(child_list.get(i).name.equals(target)){
+				String tmp = child_list.get(i).getContent();							
+				text = text.replace(tmp, "");
 				child_list.remove(i);
-				return;
+				return text;
 			}
 		}
+		return text;
 	}
 
 }
