@@ -12,6 +12,8 @@ import org.jsoup.select.Elements;
 /* 2015-12-30
  * <body> 위주의  CBT완성.
  * 람다 값을 정한 후 CBT로 부터 noise를 제거한 TT완성
+ * 
+ * Author by dongyoung  
  */
 public class HtmlParser {
 	class Info{
@@ -70,7 +72,7 @@ public class HtmlParser {
 			TT.deleteNode(info.parent, info.child);
 		}
 		System.out.println(TT.getRoot().getContent());
-		//TT.print();
+		TT.print();
 		
 	}	
 	private void TopicTree(Node n){
@@ -149,7 +151,7 @@ public class HtmlParser {
 			if(que.size() == 0)
 				break;
 		}
-		CBT.print();	
+		//CBT.print();	
 		return this;
 	}
 	void printLog(String msg, Element e){

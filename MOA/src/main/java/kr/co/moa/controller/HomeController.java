@@ -1,4 +1,4 @@
-package kr.co.moa;
+package kr.co.moa.controller;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import kr.co.TestModule;
 
 /**
  * Handles requests for the application home page.
@@ -31,7 +33,7 @@ public class HomeController {
 		
 		String formattedDate = dateFormat.format(date);
 		
-		model.addAttribute("serverTime", formattedDate );	
+		model.addAttribute("serverTime", formattedDate );		
 		return "home";
 	}
 	

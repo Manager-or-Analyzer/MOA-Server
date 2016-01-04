@@ -133,8 +133,8 @@
 		<dependency>
         	<groupId>org.bitbucket.eunjeon</groupId>
         	<artifactId>seunjeon_2.11</artifactId>
-        	<version>0.6.0</version>
-    	</dependency>
+        	<version>0.7.0-SNAPSHOT</version>
+   		</dependency>
     	<!--  Gson: Java to Json conversion -->
     	<dependency>
       		<groupId>com.google.code.gson</groupId>
@@ -142,7 +142,17 @@
       		<version>2.3.1</version>
       		<scope>compile</scope>
     	</dependency>
-	</dependencies>
+	</dependencies>	
+	<repositories>
+    	<repository>
+	        <id>oss-sonatype</id>
+	        <name>oss-sonatype</name>
+	        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	        </snapshots>
+    	</repository>
+	</repositories>
     <build>
         <plugins>
             <plugin>
@@ -179,6 +189,8 @@
                     <mainClass>org.test.int1.Main</mainClass>
                 </configuration>
             </plugin>
+            
         </plugins>
     </build>
+    <url>http://maven.apache.org</url>
 </project>

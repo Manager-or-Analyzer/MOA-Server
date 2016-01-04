@@ -1,12 +1,18 @@
 package kr.co;
 
 import java.io.IOException;
+
+import scala.Enumeration.Val;
+import scala.io.Codec;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.CodingErrorAction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.bitbucket.eunjeon.seunjeon.Analyzer;
+import org.bitbucket.eunjeon.seunjeon.LNode;
 import org.jsoup.Jsoup;
 
 import com.google.gson.Gson;
@@ -14,6 +20,7 @@ import com.google.gson.Gson;
 import kr.co.data.HtmlData;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 import kr.co.moa.keyword.anlyzer.morpheme.Tree;
+import scala.io.Source;
 
 public class TestModule {
 	public static void TestTree(){
@@ -51,7 +58,7 @@ public class TestModule {
 		
 		t.print();			
 	}
-	
+		
 	public static void Test_makeCBT(){
 		Gson gson = new Gson();
 		HtmlData hd = new HtmlData();
@@ -65,8 +72,32 @@ public class TestModule {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		 
+		String test = "아버지가방에들어가신다.";
+		byte[] utf8 = null;
+		try {
+			utf8 = test.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String test2 = new String(utf8);
+		List<LNode> result = Analyzer.parseJava("as");
+		for (LNode term: result) {
+		    System.out.println(term);
+		}
 		MorphemeAnalyzer.getInstance().parsingHTML(hd.html);
+//		Thread tr = new Thread(new Runnable() {
+//			public void run() {
+//				String test = "아버지가방에들어가신다.";
+//				List<LNode> result = Analyzer.parseJava(test2);
+//				for (LNode term: result) {
+//				    System.out.println(term);
+//				}
+//			}
+//		});
+//		tr.start();
+		
 		
 	}
 	

@@ -78,7 +78,7 @@
     <description></description>
     <display-name>test_module</display-name>
     <servlet-name>test_module</servlet-name>
-    <servlet-class>kr.co.test_module</servlet-class>
+    <servlet-class>kr.co.moa.controller.test_module</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>test_module</servlet-name>

@@ -1,7 +1,10 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.bitbucket.eunjeon.seunjeon.Analyzer;
 
 public class MorphemeAnalyzer {
 
@@ -10,6 +13,7 @@ public class MorphemeAnalyzer {
 	 * 2. 형태소 분석 by 메캅
 	 * 3. indexing to DB
 	 * 
+	 * Author by dongyoung  
 	 */
 	private static MorphemeAnalyzer instance;
 	private Map<String,String> TagsMap;
@@ -50,6 +54,8 @@ public class MorphemeAnalyzer {
 		HtmlParser hp = new HtmlParser();
 		hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
 		//hp.makeCBT(html, TagsMap);
+		
+		
 	}
 	
 	

@@ -3,7 +3,7 @@ package kr.co.moa.keyword.anlyzer.morpheme;
 import java.util.LinkedList;
 import java.util.List;
 
-import kr.co.moa.HomeController;
+import kr.co.moa.controller.HomeController;
 import scala.collection.concurrent.Debug;
 /*
  * 2015-12-25
