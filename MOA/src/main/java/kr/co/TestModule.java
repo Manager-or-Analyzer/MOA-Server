@@ -65,39 +65,18 @@ public class TestModule {
 		//hd.url = "http://addio3305.tistory.com/41";
 		//hd.url = "http://news.naver.com/main/read.nhn?oid=008&sid1=103&aid=0003606076&mid=shm&cid=428288&mode=LSD&nh=20151231163858";
 		//hd.url ="http://gogorchg.tistory.com/entry/Android-javautilconcurrentmodificationexception";
-		hd.url="http://osen.mt.co.kr/article/G1110323676";
+		//hd.url="http://osen.mt.co.kr/article/G1110323676";
+		hd.url="http://www.reversecore.com/38";
 		try {
 			hd.html = Jsoup.connect(hd.url).get().toString();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 
-		String test = "아버지가방에들어가신다.";
-		byte[] utf8 = null;
-		try {
-			utf8 = test.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String test2 = new String(utf8);
-		List<LNode> result = Analyzer.parseJava("as");
-		for (LNode term: result) {
-		    System.out.println(term);
-		}
-		MorphemeAnalyzer.getInstance().parsingHTML(hd.html);
-//		Thread tr = new Thread(new Runnable() {
-//			public void run() {
-//				String test = "아버지가방에들어가신다.";
-//				List<LNode> result = Analyzer.parseJava(test2);
-//				for (LNode term: result) {
-//				    System.out.println(term);
-//				}
-//			}
-//		});
-//		tr.start();
 		
+		
+		MorphemeAnalyzer.getInstance().parsingHTML(hd.html);
+
 		
 	}
 	

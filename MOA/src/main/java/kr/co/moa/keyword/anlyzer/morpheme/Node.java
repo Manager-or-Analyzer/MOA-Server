@@ -35,8 +35,10 @@ public class Node {
 	public String delChild(String target, String text){
 		for(int i=0; i<child_list.size(); i++){
 			if(child_list.get(i).name.equals(target)){
-				String tmp = child_list.get(i).getContent();							
-				text = text.replace(tmp, "");
+				String tmp = child_list.get(i).getContent();	
+				//System.out.println(tmp);
+				if(tmp.length() >1)
+					text = text.replace(tmp, "");
 				child_list.remove(i);
 				return text;
 			}

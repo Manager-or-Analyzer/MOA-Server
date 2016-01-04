@@ -84,4 +84,24 @@
     <servlet-name>test_module</servlet-name>
     <url-pattern>/test_module</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>mecab_test</display-name>
+    <servlet-name>mecab_test</servlet-name>
+    <servlet-class>kr.co.mecab_test</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>mecab_test</servlet-name>
+    <url-pattern>/mecab_test</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>EventReceiverController</display-name>
+    <servlet-name>EventReceiverController</servlet-name>
+    <servlet-class>kr.co.moa.controller.EventReceiverController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>EventReceiverController</servlet-name>
+    <url-pattern>/send/Event</url-pattern>
+  </servlet-mapping>
 </web-app>

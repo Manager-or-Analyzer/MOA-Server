@@ -27,7 +27,7 @@ public class HtmlParser {
 	private Tree CBT,TT;
 	
 	// 0 < lamda < 1 테스트를 통해 값 수정 필요
-	private static final double lamda = 0.4;	
+	private static final double lamda = 0.05;	
 			
 	// sgn(len(ti)/len(t)*1/lamda -1)
 	private boolean isTopicNode(Node parent, Node child){
@@ -36,44 +36,46 @@ public class HtmlParser {
 		double len_c = child.getContent().trim().length();
 		
 		if(len_p == 0 || len_c == 0){
-			//System.out.println("0 parent: "+parent.name+" child :"+child.name);
-			//System.out.println("p: "+len_p+" c: "+len_c);
+			System.out.println("0 parent: "+parent.name+" child :"+child.name);
+			System.out.println("p: "+len_p+" c: "+len_c);
 			return false;
 		}
 			
 		
 		double res = ((len_c/len_p)/lamda)-1;
 		if(res <1){
-			//System.out.println("parent: "+parent.name+"child :"+child.name);
-			//System.out.println("false : "+res);
+			System.out.println("parent: "+parent.name+"child :"+child.name);
+			System.out.println("false : "+res+"\n");
 			return false;
 		}
 			
 		else{
-			//System.out.println("true : "+(len_c/len_p));
+			System.out.println("parent: "+parent.name+"child :"+child.name);
+			System.out.println("true : "+(len_c/len_p)+"\n");
 			return true;
 		}
 			
 	}
 	
-	public void makeTopicTree(){
+	public String makeTopicTree(){
 		//Tree 초기화
 		TT = CBT;
 		if(TT == null){
 			System.out.println("CBT가 만들어지지 않았습니다.");
-			return;
+			return null;
 		}
 		TopicTree(TT.getRoot());
-		System.out.println("size :"+del_list.size());
+		//System.out.println("size :"+del_list.size());
 		//System.out.println(TT.getRoot().getContent());
 		for(Info info : del_list){
 			//System.out.println(info.parent);
 			//System.out.println(info.child+"\n\n");
 			TT.deleteNode(info.parent, info.child);
 		}
-		System.out.println(TT.getRoot().getContent());
-		TT.print();
-		
+		//TT.print();
+		return TT.getRoot().getContent();
+		//System.out.println(TT.getRoot().getContent());
+			
 	}	
 	private void TopicTree(Node n){
 		if(n!= null && n.child_list.size() != 0){

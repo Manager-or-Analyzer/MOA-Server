@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bitbucket.eunjeon.seunjeon.Analyzer;
+import org.bitbucket.eunjeon.seunjeon.LNode;
 
 public class MorphemeAnalyzer {
 
@@ -24,13 +25,13 @@ public class MorphemeAnalyzer {
 	            "noframes", "section", "nav", "aside", "hgroup", "header", "footer", "math",
 	            "button", "fieldset", "input", "keygen", "object", "output", "select", "textarea",
 	            "img", "br", "wbr", "embed", "hr","col", "colgroup", "command",
-	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a", "font",
+	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a",
 	            "i","aside"
 	 };
 	 //표는 버린다.ㅋ
 	 private static final String[] textTags = {
-			 "title", "p", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "address", "li", 
-	         "ins", "textarea","blockquote", "dt","dd","span","b"
+			 "title", "p", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "address",
+	         "ins", "textarea","blockquote", "dt","dd","span","b","font","strong"
 	 };
 	
 	public static MorphemeAnalyzer getInstance(){
@@ -52,8 +53,13 @@ public class MorphemeAnalyzer {
 	
 	public void parsingHTML(String html){
 		HtmlParser hp = new HtmlParser();
-		hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
-		//hp.makeCBT(html, TagsMap);
+		String content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+		
+		 System.out.println(content);
+//		List<LNode> result = Analyzer.parseJava(content);
+//		for (LNode term: result) {
+//		    System.out.println(term);
+//		}
 		
 		
 	}
