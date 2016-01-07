@@ -18,6 +18,7 @@ import org.jsoup.Jsoup;
 import com.google.gson.Gson;
 
 import kr.co.data.HtmlData;
+import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 import kr.co.moa.keyword.anlyzer.morpheme.Tree;
 import scala.io.Source;
@@ -61,44 +62,50 @@ public class TestModule {
 		
 	public static void Test_makeCBT(){
 		Gson gson = new Gson();
-		HtmlData hd = new HtmlData();
+		HtmlData hd = null;
+		try {
+			hd = DBManager.getInstnace().getData("HtmlData");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//hd.url = "http://addio3305.tistory.com/41";
 		//hd.url = "http://news.naver.com/main/read.nhn?oid=008&sid1=103&aid=0003606076&mid=shm&cid=428288&mode=LSD&nh=20151231163858";
 		//hd.url ="http://gogorchg.tistory.com/entry/Android-javautilconcurrentmodificationexception";
 		//hd.url="http://osen.mt.co.kr/article/G1110323676";
-		hd.url="http://www.reversecore.com/38";
-		try {
-			hd.html = Jsoup.connect(hd.url).get().toString();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//hd.url="http://www.reversecore.com/38";
+//		try {
+//			//hd.html = Jsoup.connect(hd.url).get().toString();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		
-		MorphemeAnalyzer.getInstance().parsingHTML(hd.html);
+		MorphemeAnalyzer.getInstance().parsingHTML(hd);
 
 		
 	}
 	
-	
-	public static String SendHTML(){
-		Gson gson = new Gson();
-		HtmlData hd = new HtmlData();
-		hd.url = "http://addio3305.tistory.com/41";
-		try {
-			hd.html = Jsoup.connect(hd.url).get().toString();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		hd.userId = "chemicalatom";
-		
-		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat ( "yyyy.MM.dd HH:mm:ss", Locale.KOREA );
-		Date currentTime = new Date ( );
-		String mTime = mSimpleDateFormat.format ( currentTime );
-		hd.time = mTime;
-		
-		String json = gson.toJson(hd);
-		return json;		
-	}
+//	
+//	public static String SendHTML(){
+//		Gson gson = new Gson();
+//		HtmlData hd = new HtmlData();
+//		hd.url = "http://addio3305.tistory.com/41";
+//		try {
+//			hd.html = Jsoup.connect(hd.url).get().toString();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		hd.userId = "chemicalatom";
+//		
+//		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat ( "yyyy.MM.dd HH:mm:ss", Locale.KOREA );
+//		Date currentTime = new Date ( );
+//		String mTime = mSimpleDateFormat.format ( currentTime );
+//		hd.time = mTime;
+//		
+//		String json = gson.toJson(hd);
+//		return json;		
+//	}
 }

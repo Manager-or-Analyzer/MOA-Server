@@ -20,36 +20,6 @@
     <servlet-name>appServlet</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>test</display-name>
-    <servlet-name>test</servlet-name>
-    <servlet-class>kr.co.moa.test</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>test</servlet-name>
-    <url-pattern>/test</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>test1</display-name>
-    <servlet-name>test1</servlet-name>
-    <servlet-class>kr.co.moa.test1</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>test1</servlet-name>
-    <url-pattern>/test1</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>crawler</display-name>
-    <servlet-name>crawler</servlet-name>
-    <servlet-class>kr.co.moa.crawler</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>crawler</servlet-name>
-    <url-pattern>/crawler</url-pattern>
-  </servlet-mapping>
   <filter>
     <filter-name>encodingFilter</filter-name>
     <filter-class>
@@ -66,12 +36,12 @@
   </filter-mapping>
   <servlet>
     <description></description>
-    <display-name>SendHTML</display-name>
-    <servlet-name>SendHTML</servlet-name>
-    <servlet-class>kr.co.moa.collector.SendHTML</servlet-class>
+    <display-name>HTMLReceiverController</display-name>
+    <servlet-name>HTMLReceiverController</servlet-name>
+    <servlet-class>kr.co.moa.controller.collector.HTMLReceiverController</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>SendHTML</servlet-name>
+    <servlet-name>HTMLReceiverController</servlet-name>
     <url-pattern>/send/HTML</url-pattern>
   </servlet-mapping>
   <servlet>
@@ -86,22 +56,32 @@
   </servlet-mapping>
   <servlet>
     <description></description>
-    <display-name>mecab_test</display-name>
-    <servlet-name>mecab_test</servlet-name>
-    <servlet-class>kr.co.mecab_test</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>mecab_test</servlet-name>
-    <url-pattern>/mecab_test</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
     <display-name>EventReceiverController</display-name>
     <servlet-name>EventReceiverController</servlet-name>
-    <servlet-class>kr.co.moa.controller.EventReceiverController</servlet-class>
+    <servlet-class>kr.co.moa.controller.collector.EventReceiverController</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>EventReceiverController</servlet-name>
     <url-pattern>/send/Event</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>PopupSenderController</display-name>
+    <servlet-name>PopupSenderController</servlet-name>
+    <servlet-class>kr.co.moa.controller.analyzer.PopupSenderController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>PopupSenderController</servlet-name>
+    <url-pattern>/receive/popup</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>KeywordsSenderController</display-name>
+    <servlet-name>KeywordsSenderController</servlet-name>
+    <servlet-class>kr.co.moa.controller.analyzer.KeywordsSenderController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>KeywordsSenderController</servlet-name>
+    <url-pattern>/receive/keyword</url-pattern>
   </servlet-mapping>
 </web-app>

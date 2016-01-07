@@ -1,11 +1,9 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.bitbucket.eunjeon.seunjeon.Analyzer;
-import org.bitbucket.eunjeon.seunjeon.LNode;
+import kr.co.data.HtmlData;
 
 public class MorphemeAnalyzer {
 
@@ -26,7 +24,7 @@ public class MorphemeAnalyzer {
 	            "button", "fieldset", "input", "keygen", "object", "output", "select", "textarea",
 	            "img", "br", "wbr", "embed", "hr","col", "colgroup", "command",
 	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a",
-	            "i","aside"
+	            "i","aside","embed"
 	 };
 	 //표는 버린다.ㅋ
 	 private static final String[] textTags = {
@@ -51,7 +49,7 @@ public class MorphemeAnalyzer {
 		}
 	}
 	
-	public void parsingHTML(String html){
+	public void parsingHTML(HtmlData html){
 		HtmlParser hp = new HtmlParser();
 		String content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
 		

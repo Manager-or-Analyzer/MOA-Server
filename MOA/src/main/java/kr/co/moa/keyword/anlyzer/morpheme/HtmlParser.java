@@ -9,6 +9,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import kr.co.data.HtmlData;
 /* 2015-12-30
  * <body> 위주의  CBT완성.
  * 람다 값을 정한 후 CBT로 부터 noise를 제거한 TT완성
@@ -36,22 +38,22 @@ public class HtmlParser {
 		double len_c = child.getContent().trim().length();
 		
 		if(len_p == 0 || len_c == 0){
-			System.out.println("0 parent: "+parent.name+" child :"+child.name);
-			System.out.println("p: "+len_p+" c: "+len_c);
+			//System.out.println("0 parent: "+parent.name+" child :"+child.name);
+			//System.out.println("p: "+len_p+" c: "+len_c);
 			return false;
 		}
 			
 		
 		double res = ((len_c/len_p)/lamda)-1;
 		if(res <1){
-			System.out.println("parent: "+parent.name+"child :"+child.name);
-			System.out.println("false : "+res+"\n");
+			//System.out.println("parent: "+parent.name+"child :"+child.name);
+			//System.out.println("false : "+res+"\n");
 			return false;
 		}
 			
 		else{
-			System.out.println("parent: "+parent.name+"child :"+child.name);
-			System.out.println("true : "+(len_c/len_p)+"\n");
+			//System.out.println("parent: "+parent.name+"child :"+child.name);
+			//System.out.println("true : "+(len_c/len_p)+"\n");
 			return true;
 		}
 			
@@ -104,22 +106,94 @@ public class HtmlParser {
 		}
 	}
 	
+	private void makeChild(Element e, HtmlData hd, Map<String,String> uselessTag){
+		
+		String src = e.attr("src");
+		
+		// 상대경로 인지 파악하기.
+		if(src.startsWith("/")){
+			String[] tokens = src.split("redirect");
+			
+			for(HtmlData chd : hd.children){
+				boolean flag = false;
+				for(String token : tokens){
+					//System.out.println("token " + token);
+					if(chd.url.contains(token)){
+						src = chd.url;
+						flag = true;
+						break;
+					}
+				}
+				if(flag)
+					break;								
+			}
+			System.out.println("src " + src);
+		}		
+		int i;
+		for(i=0; i<hd.children.size(); i++){
+			if(hd.children.get(i).url.equals(src)){
+				String html = hd.children.get(i).doc;
+				html = html.replaceAll("&nbsp;","").trim();
+				Document doc = Jsoup.parse(html);
+				
+				for(Element ee : doc.getAllElements()){
+					if(uselessTag.containsKey(ee.tagName())){
+						ee.remove();
+					}
+				}		
+					
+				Elements body_els = doc.getElementsByTag("body");
+				// body가 없고 frameset이 있을경우 -> html 엤날 방식.
+				if(body_els.isEmpty()){
+					body_els = doc.getElementsByTag("frameset");
+				}
+				body_els.tagName("child"+i);
+				System.out.println(e.childNodeSize());
+				e.append(body_els.html());
+				System.out.println(e.childNodeSize());
+				System.out.println(body_els.html());
+				//e.append(body_els.outerHtml());
+				for(Element ee : doc.getAllElements()){
+					if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
+						System.out.println(ee.tagName());
+						makeChild(ee,hd,uselessTag);
+					}
+				}				
+				break;					
+			}
+		}	
+	}
 	//make ContentBlockTree
-	public HtmlParser makeCBT(String html, Map<String,String> uselessTag, Map<String,String> TextTag){
+	public HtmlParser makeCBT(HtmlData hd, Map<String,String> uselessTag, Map<String,String> TextTag){
 		int tagCnt = 0;
 		// 1. 특수문자 처리 일단 &nbsp만 처리
+		String html = hd.doc;
 		html = html.replaceAll("&nbsp;","").trim();
 		Document doc = Jsoup.parse(html);
-		// decription tag 삭제
+		
+		// decription tag 삭제 및 iframe 추가
 		for(Element e : doc.getAllElements()){
 			if(uselessTag.containsKey(e.tagName())){
 				e.remove();
 			}
 		}
+		
+		for(HtmlData chd : hd.children){
+			System.out.println(chd.url);
+		}
+		for(Element e : doc.getAllElements()){
+			if(e.tagName() == "frame" || e.tagName() == "iframe"){
+				makeChild(e,hd,uselessTag);
+			}
+		}
 			
 		// 2. <body>만 추출
 		CBT = new Tree();		
-		Elements body_els = doc.getElementsByTag("body");		
+		Elements body_els = doc.getElementsByTag("body");
+		// body가 없고 frameset이 있을경우 -> html 엤날 방식.
+		if(body_els.isEmpty()){
+			body_els = doc.getElementsByTag("frameset");
+		}
 		Element body_e = body_els.first();		
 		//System.out.println("size :"+body_e.child(1).className()+" id: "+body_e.child(1).id());
 		body_e.tagName("body" + tagCnt++);
@@ -138,10 +212,8 @@ public class HtmlParser {
 			//System.out.println("size :"+ele.children().size()+"text size:"+ele.textNodes().size());
 			for(Element e : ele.children()){
 				if(TextTag.containsKey(e.tagName())){
-					//printLog("useless",e);					
 					continue;
-				}
-					
+				}					
 				e.tagName(e.tagName()+tagCnt++);
 				que.add(e);				
 				Node n = new Node(e.tagName(), e.text());				
@@ -153,9 +225,10 @@ public class HtmlParser {
 			if(que.size() == 0)
 				break;
 		}
-		//CBT.print();	
+		CBT.print();	
 		return this;
 	}
+	
 	void printLog(String msg, Element e){
 		System.out.println(msg);
 		System.out.println("tagaName: "+e.tagName());
