@@ -64,7 +64,7 @@ public class TestModule {
 		Gson gson = new Gson();
 		HtmlData hd = null;
 		try {
-			hd = DBManager.getInstnace().getData("HtmlData");
+			hd = DBManager.getInstnace().getHtmlData();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

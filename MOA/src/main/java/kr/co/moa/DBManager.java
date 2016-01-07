@@ -1,8 +1,5 @@
 package kr.co.moa;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.UnknownHostException;
 
 import com.google.gson.Gson;
@@ -13,6 +10,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
+import kr.co.data.EventData;
 import kr.co.data.HtmlData;
 
 //singleton���� ���� 
@@ -49,10 +47,21 @@ public class DBManager {
     	 collection.insert(dbObject);    	    
     }
     
-    public HtmlData getData(String collection_name) throws Exception{
+    public EventData getEventData() throws Exception{
     	db = mongoClient.getDB(DB_NAME);
    	 
-    	DBCollection collection = db.getCollection(collection_name);
+    	DBCollection collection = db.getCollection("EventData");
+    	String res = collection.findOne().toString();
+    	    	 
+    	Gson gson = new Gson();
+    	EventData ed = gson.fromJson(res, EventData.class);    	
+
+    	return ed;
+    }
+    public HtmlData getHtmlData() throws Exception{
+    	db = mongoClient.getDB(DB_NAME);
+   	 
+    	DBCollection collection = db.getCollection("HtmlData");
     	String res = collection.findOne().toString();
     	    	 
     	Gson gson = new Gson();

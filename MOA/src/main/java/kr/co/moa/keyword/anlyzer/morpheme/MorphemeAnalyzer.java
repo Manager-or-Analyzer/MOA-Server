@@ -3,7 +3,9 @@ package kr.co.moa.keyword.anlyzer.morpheme;
 import java.util.HashMap;
 import java.util.Map;
 
+import kr.co.data.EventData;
 import kr.co.data.HtmlData;
+import kr.co.moa.DBManager;
 
 public class MorphemeAnalyzer {
 
@@ -54,16 +56,33 @@ public class MorphemeAnalyzer {
 		String content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
 		
 		 System.out.println(content);
+		 //DBManager.getInstnace().insertData("HtmlCollection", doMecab(content));
+
+		
+	}
+	
+	public void parsingEvent(EventData eventData){
+		//String content = eventData.data;
+		//DBManager.getInstnace().insertData("EventCollection", doMecab(content));
+	}
+	
+	private String doMecab(String content){
 //		List<LNode> result = Analyzer.parseJava(content);
 //		for (LNode term: result) {
 //		    System.out.println(term);
 //		}
+		// return 저장할 Json 형태
+		// Event 경우 
+		/*
+		"url" : "http://yeop9657.blog.me/220374891289",
+		"keword" : cnt,
+		"keword" : cnt,
+		"type" : "scroll",
+		 등등 등
 		
-		
+		*/
+		return null;
 	}
-	
-	
-	
 	
 	
 	//int i=0;

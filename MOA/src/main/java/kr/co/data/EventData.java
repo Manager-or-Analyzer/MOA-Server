@@ -1,10 +1,11 @@
 package kr.co.data;
 
 public class EventData {
-	String userid;
-	String url;
-	String type;
-	String time;
-	String x;
-	String y;
+	public String userid;
+	public String url;
+	public String type;
+	public String data;
+	public String time;
+	public String x;
+	public String y;
 }
