@@ -29,7 +29,8 @@ public class HtmlParser {
 	private Tree CBT,TT;
 	
 	// 0 < lamda < 1 테스트를 통해 값 수정 필요
-	private static final double lamda = 0.05;	
+	//private static final double lamda = 0.05;
+	public double lamda = 0.35;
 			
 	// sgn(len(ti)/len(t)*1/lamda -1)
 	private boolean isTopicNode(Node parent, Node child){
@@ -46,14 +47,14 @@ public class HtmlParser {
 		
 		double res = ((len_c/len_p)/lamda)-1;
 		if(res <1){
-			//System.out.println("parent: "+parent.name+"child :"+child.name);
-			//System.out.println("false : "+res+"\n");
+//			System.out.println("parent: "+parent.name+" child :"+child.name);
+//			System.out.println("false : "+res+"\n");
 			return false;
 		}
 			
 		else{
-			//System.out.println("parent: "+parent.name+"child :"+child.name);
-			//System.out.println("true : "+(len_c/len_p)+"\n");
+//			System.out.println("parent: "+parent.name+"child :"+child.name);
+//			System.out.println("true : "+(len_c/len_p)+"\n");
 			return true;
 		}
 			
@@ -106,6 +107,16 @@ public class HtmlParser {
 		}
 	}
 	
+	// 일부 일치를 찾아 주는 함수
+	private String findPart(String src, HtmlData hd){
+		String str = src.substring(0,(src.length()-1)/2);
+		for(HtmlData tmp : hd.children){
+			if(tmp.url.contains(str)){
+				return tmp.url;
+			}
+		}
+		return findPart(str,hd);
+	}
 	private void makeChild(Element e, HtmlData hd, Map<String,String> uselessTag){
 		
 		String src = e.attr("src");
@@ -113,9 +124,9 @@ public class HtmlParser {
 		// 상대경로 인지 파악하기.
 		if(src.startsWith("/")){
 			String[] tokens = src.split("redirect");
-			
+			boolean flag = false;
 			for(HtmlData chd : hd.children){
-				boolean flag = false;
+				flag = false;
 				for(String token : tokens){
 					//System.out.println("token " + token);
 					if(chd.url.contains(token)){
@@ -125,13 +136,18 @@ public class HtmlParser {
 					}
 				}
 				if(flag)
-					break;								
+					break;										
 			}
-			System.out.println("src " + src);
+			//찾지 못한 경우
+			if(!flag){
+				src = findPart(src, hd);
+			}
+			//System.out.println("src " + src);
 		}		
 		int i;
 		for(i=0; i<hd.children.size(); i++){
 			if(hd.children.get(i).url.equals(src)){
+				//System.out.println("element :"+e.tagName());
 				String html = hd.children.get(i).doc;
 				html = html.replaceAll("&nbsp;","").trim();
 				Document doc = Jsoup.parse(html);
@@ -141,21 +157,19 @@ public class HtmlParser {
 						ee.remove();
 					}
 				}		
-					
-				Elements body_els = doc.getElementsByTag("body");
+				Element body = doc.body();
 				// body가 없고 frameset이 있을경우 -> html 엤날 방식.
-				if(body_els.isEmpty()){
-					body_els = doc.getElementsByTag("frameset");
+				if(body == null){
+					body = doc.select("frameset").first();
 				}
-				body_els.tagName("child"+i);
-				System.out.println(e.childNodeSize());
-				e.append(body_els.html());
-				System.out.println(e.childNodeSize());
-				System.out.println(body_els.html());
-				//e.append(body_els.outerHtml());
-				for(Element ee : doc.getAllElements()){
+				
+				body.tagName(body.tagName()+"child"+i);				
+				e.appendChild(body);
+				
+				///System.out.println(e.outerHtml());
+				for(Element ee : body.getAllElements()){
 					if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
-						System.out.println(ee.tagName());
+						//System.out.println("makechild "+ ee.tagName());
 						makeChild(ee,hd,uselessTag);
 					}
 				}				
@@ -177,10 +191,7 @@ public class HtmlParser {
 				e.remove();
 			}
 		}
-		
-		for(HtmlData chd : hd.children){
-			System.out.println(chd.url);
-		}
+				
 		for(Element e : doc.getAllElements()){
 			if(e.tagName() == "frame" || e.tagName() == "iframe"){
 				makeChild(e,hd,uselessTag);
@@ -225,8 +236,15 @@ public class HtmlParser {
 			if(que.size() == 0)
 				break;
 		}
-		CBT.print();	
+		//CBT.print();	
 		return this;
+	}
+	
+	public String getTitle(HtmlData hd){
+		String html = hd.doc;
+		html = html.replaceAll("&nbsp;","").trim();
+		Document doc = Jsoup.parse(html);
+		return doc.title();		
 	}
 	
 	void printLog(String msg, Element e){

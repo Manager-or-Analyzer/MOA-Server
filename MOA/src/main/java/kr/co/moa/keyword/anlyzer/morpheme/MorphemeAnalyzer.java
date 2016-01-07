@@ -26,7 +26,7 @@ public class MorphemeAnalyzer {
 	            "button", "fieldset", "input", "keygen", "object", "output", "select", "textarea",
 	            "img", "br", "wbr", "embed", "hr","col", "colgroup", "command",
 	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a",
-	            "i","aside","embed"
+	            "i","aside"
 	 };
 	 //표는 버린다.ㅋ
 	 private static final String[] textTags = {
@@ -54,8 +54,17 @@ public class MorphemeAnalyzer {
 	public void parsingHTML(HtmlData html){
 		HtmlParser hp = new HtmlParser();
 		String content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+		if(content.equals("") || content.trim().length() <100){
+			System.out.println("lamda decrease");
+			hp = new HtmlParser();
+			hp.lamda = 0.05;
+			content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+		}else
+			System.out.println("length :" + content.length());
+		String title = hp.getTitle(html);
 		
-		 System.out.println(content);
+		System.out.println("title : " + title);
+		 System.out.println("content : "+content);
 		 //DBManager.getInstnace().insertData("HtmlCollection", doMecab(content));
 
 		

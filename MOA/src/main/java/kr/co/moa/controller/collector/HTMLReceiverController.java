@@ -22,6 +22,7 @@ import kr.co.Log;
 import kr.co.TestModule;
 import kr.co.data.HtmlData;
 import kr.co.moa.DBManager;
+import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 /**
  * Servlet implementation class SendHTML
@@ -43,9 +44,9 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		if(!htmlData.equals("") && htmlData != null){
 			try {
-				//DBManager.getInstnace().insertData("HtmlData", htmlData);
+				DBManager.getInstnace().insertData("HtmlData", htmlData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
-				
+				MorphemeAnalyzer.getInstance().parsingHTML(hd);
 				
 			} catch (Exception e) {
 				//Log.getInstance().severe(CLASS, "DB :insertData fail");
