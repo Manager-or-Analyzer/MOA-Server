@@ -8,9 +8,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+
 import kr.co.DebuggingLog;
 import kr.co.Log;
+import kr.co.data.EventData;
+import kr.co.data.HtmlData;
 import kr.co.moa.DBManager;
+import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 /**
  * Servlet implementation class EventReceiverController
@@ -26,9 +31,13 @@ public class EventReceiverController extends HttpServlet {
 		PrintWriter out = response.getWriter();	
 		
 		String eventData = request.getParameter("data");
+		
+		EventData ed = new Gson().fromJson(eventData, EventData.class);
 		//DebuggingLog.getInstance().info(CLASS, eventData);				
 		if(!eventData.equals("") && eventData != null){
 			try {
+				if(ed.type.equals("drag"))
+					MorphemeAnalyzer.getInstance().parsingEvent(ed);
 				//DBManager.getInstnace().insertData("EventData", eventData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 			} catch (Exception e) {

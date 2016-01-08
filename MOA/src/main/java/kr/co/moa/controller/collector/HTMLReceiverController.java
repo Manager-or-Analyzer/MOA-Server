@@ -37,6 +37,8 @@ public class HTMLReceiverController extends HttpServlet {
 		PrintWriter out = response.getWriter();	
 		
 		String htmlData = request.getParameter("data");
+		//System.out.println(htmlData);
+		
 		//DebuggingLog.getInstance().info(CLASS, htmlData);		
 		HtmlData hd = new Gson().fromJson(htmlData, HtmlData.class);
 		
@@ -44,7 +46,7 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		if(!htmlData.equals("") && htmlData != null){
 			try {
-				DBManager.getInstnace().insertData("HtmlData", htmlData);
+				//DBManager.getInstnace().insertData("HtmlData", htmlData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 				MorphemeAnalyzer.getInstance().parsingHTML(hd);
 				

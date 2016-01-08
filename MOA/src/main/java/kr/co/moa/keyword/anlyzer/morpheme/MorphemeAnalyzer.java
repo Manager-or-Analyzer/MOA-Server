@@ -1,11 +1,23 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import kr.co.data.EventData;
+import kr.co.data.EventParsedData;
 import kr.co.data.HtmlData;
+import kr.co.data.HtmlParsedData;
 import kr.co.moa.DBManager;
+
+import org.bitbucket.eunjeon.seunjeon.Analyzer;
+import org.bitbucket.eunjeon.seunjeon.LNode;
+
+import com.google.gson.Gson;
 
 public class MorphemeAnalyzer {
 
@@ -22,11 +34,11 @@ public class MorphemeAnalyzer {
 	
 	 private static final String[] uselessTags = {
 	            "script", "noscript", "style", "meta", "link",
-	            "noframes", "section", "nav", "aside", "hgroup", "header", "footer", "math",
+	            "noframes", "nav", "aside", "hgroup", "header", "footer", "math",
 	            "button", "fieldset", "input", "keygen", "object", "output", "select", "textarea",
 	            "img", "br", "wbr", "embed", "hr","col", "colgroup", "command",
 	            "device", "area", "basefont", "bgsound", "menuitem", "param", "track","a",
-	            "i","aside"
+	            "i","aside","embed"
 	 };
 	 //표는 버린다.ㅋ
 	 private static final String[] textTags = {
@@ -54,32 +66,80 @@ public class MorphemeAnalyzer {
 	public void parsingHTML(HtmlData html){
 		HtmlParser hp = new HtmlParser();
 		String content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
-		if(content.equals("") || content.trim().length() <100){
-			System.out.println("lamda decrease");
-			hp = new HtmlParser();
-			hp.lamda = 0.05;
-			content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
-		}else
-			System.out.println("length :" + content.length());
-		String title = hp.getTitle(html);
-		
-		System.out.println("title : " + title);
-		 System.out.println("content : "+content);
-		 //DBManager.getInstnace().insertData("HtmlCollection", doMecab(content));
+		  if(content.equals("") || content.trim().length() <120){
+	         System.out.println("lamda decrease");
+	         hp = new HtmlParser();
+	         hp.lamda = 0.05;
+	         content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+	      }else
+	         System.out.println("length :" + content.length());
+	      String title = hp.getTitle(html);
+	      
+	      System.out.println("title : " + title);
+
+	      System.out.println("content : "+content);
+	      Map words_map = doMecab(content);
+	      HtmlParsedData hdd = new HtmlParsedData(html.userid, html.url, html.time, words_map);
+	      
+	      
+	      try {
+			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hdd));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		
 	}
 	
 	public void parsingEvent(EventData eventData){
-		//String content = eventData.data;
-		//DBManager.getInstnace().insertData("EventCollection", doMecab(content));
+		String content = eventData.data;
+		System.out.println(content);
+		
+		Map words_map = doMecab(content);
+		EventParsedData epd = new EventParsedData(eventData.userid, eventData.url, eventData.time, words_map);
+		
+		try {
+			DBManager.getInstnace().insertData("ParsedEventCollection", new Gson().toJson(epd));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	private String doMecab(String content){
-//		List<LNode> result = Analyzer.parseJava(content);
-//		for (LNode term: result) {
-//		    System.out.println(term);
-//		}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Map doMecab(String content){
+		List<LNode> result = Analyzer.parseJava(content);
+		String word, type;
+		Map<String, Integer> countingMap = new HashMap<String, Integer>();
+		ValueComparator bvc = new ValueComparator(countingMap);
+        TreeMap sorted_map = new TreeMap(bvc);
+        
+        for (LNode term: result) {
+			type = term.morpheme().feature().head();
+			
+			if(type.charAt(0) != 'N'   && 			//ignore NOT a noun
+					!type.equals("SL") &&			//ignore NOT a foreign language
+					!type.equals("SN") ) continue;	//ignore NOT a number
+			
+			word = term.morpheme().surface();
+			//System.out.println(type + " : " + word +"\n");
+			
+			if(countingMap.containsKey(word)) 	countingMap.put(word, countingMap.get(word) + 1);
+			else 								countingMap.put(word, 1);
+		}
+
+		sorted_map.putAll(countingMap);
+		Collection<String>  keys 	= sorted_map.keySet();
+		Collection<Integer> values	= sorted_map.values();
+		Iterator key_iter = keys.iterator();
+		Iterator val_iter = values.iterator();
+		int count = 10;
+		System.out.println("key\t count\t");
+		while(key_iter.hasNext()){//count-- > 0){
+			System.out.println(key_iter.next() + "\t " + val_iter.next());
+		}
+		System.out.println("done");
 		// return 저장할 Json 형태
 		// Event 경우 
 		/*
@@ -90,17 +150,26 @@ public class MorphemeAnalyzer {
 		 등등 등
 		
 		*/
-		return null;
+		return sorted_map;
 	}
 	
-	
-	//int i=0;
-//	List<TermNode> result = Analyzer.parseJava("�ƹ������濡���Ŵ�.");
-//	
-//	public void doAnalyze(){
-//		for (TermNode term: result) {
-//		    System.out.println(term);
-//		}
-//	}
+	class ValueComparator implements Comparator {
+	    Map<String, Integer> base;
+
+	    public ValueComparator(Map base) {
+	        this.base = base;
+	    }
+
+		@Override
+		public int compare(Object o1, Object o2) {
+			if (base.get(o1) >= base.get(o2)) {
+	            return -1;
+	        } else {
+	            return 1;
+	        } // returning 0 would merge keys
+		}
+	}
 		
 }
+
+
