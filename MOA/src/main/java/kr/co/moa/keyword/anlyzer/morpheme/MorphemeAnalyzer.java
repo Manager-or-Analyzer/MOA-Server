@@ -1,5 +1,6 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import org.bitbucket.eunjeon.seunjeon.Analyzer;
 import org.bitbucket.eunjeon.seunjeon.LNode;
 
 import com.google.gson.Gson;
+
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class MorphemeAnalyzer {
 
@@ -90,7 +93,6 @@ public class MorphemeAnalyzer {
 	      Map words_map = doMecab(content);
 	      hpd.keywordList = words_map;
 	      
-	      
 	      try {
 			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
 		} catch (Exception e) {
@@ -124,13 +126,29 @@ public class MorphemeAnalyzer {
 		ValueComparator bvc = new ValueComparator(countingMap);
         TreeMap sorted_map = new TreeMap(bvc);
         
+        //Stanford POS tagger
+        MaxentTagger tagger = null;
+	    try {
+	    	tagger = new MaxentTagger("/Users/chan/git/MOA_SERVER/MOA/left3words-wsj-0-18.tagger");
+	    } catch (ClassNotFoundException e1) {
+	    	e1.printStackTrace();
+	    } catch (IOException e1) {
+	    	e1.printStackTrace();
+	    }
+	    
+	    //System.out.println(tagger.tagString(content));
+        
         for (LNode term: result) {
 			type = term.morpheme().feature().head();
 			
 			if(type.charAt(0) != 'N'   && 			//ignore NOT a noun
 					!type.equals("SL") &&			//ignore NOT a foreign language
 					!type.equals("SN") ) continue;	//ignore NOT a number
-			
+			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
+				word = tagger.tagString(term.morpheme().surface());
+				String[] temp = word.split("/");
+				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
+			}
 			word = term.morpheme().surface();
 			//System.out.println(type + " : " + word +"\n");
 			
