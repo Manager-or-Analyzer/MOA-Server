@@ -6,12 +6,14 @@ public class HtmlParsedData {
 	public String userid;
 	public String url;
 	public String time;
+		
+	public String title;
+	public String decription;
 	public Map<String,String> keywordList;
 	
-	public HtmlParsedData(String id, String url, String time, Map words){
-		userid = id;
+	public HtmlParsedData(String id, String url, String time){
+		this.userid = id;
 		this.url = url;
-		this.time = time;
-		keywordList = words;
+		this.time = time;		
 	}
 }

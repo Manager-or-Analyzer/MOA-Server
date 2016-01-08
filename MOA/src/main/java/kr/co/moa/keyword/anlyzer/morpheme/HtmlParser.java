@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import kr.co.data.HtmlData;
+import kr.co.data.HtmlParsedData;
 /* 2015-12-30
  * <body> 위주의  CBT완성.
  * 람다 값을 정한 후 CBT로 부터 noise를 제거한 TT완성
@@ -177,14 +178,32 @@ public class HtmlParser {
 			}
 		}	
 	}
+	private String getDescription(Document doc){
+		
+		Elements metaTags = doc.head().select("meta");
+		if(metaTags.size() != 0){
+			for(Element e :metaTags){
+				String name = e.attr("name");
+				if(name.equals("description")){
+					return e.attr("content");
+				}
+			}
+		}else
+			System.out.println("meta size : 0");
+		return null;
+	}
 	//make ContentBlockTree
-	public HtmlParser makeCBT(HtmlData hd, Map<String,String> uselessTag, Map<String,String> TextTag){
+	public HtmlParser makeCBT(HtmlData hd, Map<String,String> uselessTag, Map<String,String> TextTag, HtmlParsedData hdp){
 		int tagCnt = 0;
 		// 1. 특수문자 처리 일단 &nbsp만 처리
 		String html = hd.doc;
 		html = html.replaceAll("&nbsp;","").trim();
 		Document doc = Jsoup.parse(html);
 		
+		//title 가져오기
+		hdp.title = doc.title();
+		//decription 가져오기
+		hdp.decription = getDescription(doc);
 		// decription tag 삭제 및 iframe 추가
 		for(Element e : doc.getAllElements()){
 			if(uselessTag.containsKey(e.tagName())){
@@ -239,14 +258,7 @@ public class HtmlParser {
 		//CBT.print();	
 		return this;
 	}
-	
-	public String getTitle(HtmlData hd){
-		String html = hd.doc;
-		html = html.replaceAll("&nbsp;","").trim();
-		Document doc = Jsoup.parse(html);
-		return doc.title();		
-	}
-	
+			
 	void printLog(String msg, Element e){
 		System.out.println(msg);
 		System.out.println("tagaName: "+e.tagName());

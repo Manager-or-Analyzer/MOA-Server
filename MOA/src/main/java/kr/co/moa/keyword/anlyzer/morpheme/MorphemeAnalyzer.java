@@ -65,25 +65,34 @@ public class MorphemeAnalyzer {
 	
 	public void parsingHTML(HtmlData html){
 		HtmlParser hp = new HtmlParser();
-		String content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+		HtmlParsedData hpd = new HtmlParsedData(html.userid, html.url, html.time);
+		/*
+		 *  public String userid = html.userid;
+			public String url = html.url;
+			public String time = html.time;
+		
+			public String title = makeCBT()에서 처리;
+			public String decription = makeCBT()에서 처리;
+			public Map<String,String> keywordList= domecab();
+		 */
+		String content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
 		  if(content.equals("") || content.trim().length() <120){
 	         System.out.println("lamda decrease");
 	         hp = new HtmlParser();
 	         hp.lamda = 0.05;
-	         content = hp.makeCBT(html, TagsMap, TexttagMap).makeTopicTree();
+	         content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
 	      }else
 	         System.out.println("length :" + content.length());
-	      String title = hp.getTitle(html);
 	      
-	      System.out.println("title : " + title);
-
+	      System.out.println("title : " + hpd.title);
 	      System.out.println("content : "+content);
+	      System.out.println("decription : "+hpd.decription);
 	      Map words_map = doMecab(content);
-	      HtmlParsedData hdd = new HtmlParsedData(html.userid, html.url, html.time, words_map);
+	      hpd.keywordList = words_map;
 	      
 	      
 	      try {
-			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hdd));
+			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
