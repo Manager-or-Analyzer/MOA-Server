@@ -1,9 +1,8 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.Stack;
+
+import kr.co.DebuggingLog;
 /*
 + * 2015-12-26
 + * Content Block Tree, Topic Tree를 만들기 위한 tree
@@ -164,6 +163,31 @@ public class Tree {
 		this.print_tree(root, 0);
 		//this.print_tree_data(root,0);
 		
+	}
+	public void print_debug(DebuggingLog debug){
+		this.print_tree_debug(root, 0, debug);
+	}
+	public void print_tree_debug(Node node, int level, DebuggingLog debug){
+		if(node.child_list.size() == 0)
+			return;
+		if(level == 0){
+			debug.write(node.name+" level:" +level+++" ");
+			debug.writeln();
+		}
+		for(Node n : node.child_list){
+			debug.write(n.name+" ");
+		}
+		debug.write(" level:"+level);
+		debug.writeln();
+		for(Node n : node.child_list){
+			if(n.child_list.size() !=0 ){
+				for(int i=0; i<level; i++)
+					debug.write("\t");
+				debug.write(n.name+" child: ");
+			}
+				
+			print_tree_debug(n,level+1, debug);
+		}
 	}
 	public void print_tree(Node node, int level){
 		if(node.child_list.size() == 0)

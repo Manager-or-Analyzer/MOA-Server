@@ -46,7 +46,7 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		if(!htmlData.equals("") && htmlData != null){
 			try {
-				//DBManager.getInstnace().insertData("HtmlData", htmlData);
+				DBManager.getInstnace().insertData("HtmlData", htmlData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 				MorphemeAnalyzer.getInstance().parsingHTML(hd);
 				

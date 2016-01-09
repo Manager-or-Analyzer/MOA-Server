@@ -38,7 +38,7 @@ public class EventReceiverController extends HttpServlet {
 			try {
 				if(ed.type.equals("drag"))
 					MorphemeAnalyzer.getInstance().parsingEvent(ed);
-				//DBManager.getInstnace().insertData("EventData", eventData);
+				DBManager.getInstnace().insertData("EventData", eventData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 			} catch (Exception e) {
 				//Log.getInstance().severe(CLASS, "DB :insertData fail");

@@ -8,7 +8,7 @@ public class HtmlParsedData {
 	public String time;
 		
 	public String title;
-	public String decription;
+	public String imrsrc;
 	public Map<String,String> keywordList;
 	
 	public HtmlParsedData(String id, String url, String time){

@@ -1,10 +1,14 @@
 package kr.co.moa;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
@@ -12,6 +16,7 @@ import com.mongodb.util.JSON;
 
 import kr.co.data.EventData;
 import kr.co.data.HtmlData;
+import kr.co.data.HtmlParsedData;
 
 //singleton���� ���� 
 public class DBManager {	
@@ -46,13 +51,28 @@ public class DBManager {
     	 System.out.println(data_json);
     	 collection.insert(dbObject);    	    
     }
-    
+    public List<HtmlParsedData> getHtmlParsedDataList(String userid, String keyword){
+    	db = mongoClient.getDB(DB_NAME);
+    	
+    	DBCollection collection = db.getCollection("ParsedHtmlCollection");
+    	BasicDBObject whereQuery = new BasicDBObject();
+    	whereQuery.put("userid", userid);
+    	DBCursor cursor = collection.find(whereQuery);
+    	
+    	Gson gson = new Gson();
+    	List<HtmlParsedData> list = new ArrayList<HtmlParsedData>();
+    	while(cursor.hasNext()){
+    		HtmlParsedData hpd = gson.fromJson(cursor.next().toString(), HtmlParsedData.class);
+    		list.add(hpd);    		
+    	}
+    	
+    	return list;
+    }
     public EventData getEventData() throws Exception{
     	db = mongoClient.getDB(DB_NAME);
    	 
     	DBCollection collection = db.getCollection("EventData");
-    	String res = collection.findOne().toString();
-    	    	 
+    	String res = collection.findOne().toString();    	    	 
     	Gson gson = new Gson();
     	EventData ed = gson.fromJson(res, EventData.class);    	
 

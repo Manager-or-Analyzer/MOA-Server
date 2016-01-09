@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import kr.co.DebuggingLog;
 import kr.co.data.HtmlData;
 import kr.co.data.HtmlParsedData;
 /* 2015-12-30
@@ -25,6 +26,7 @@ public class HtmlParser {
 			parent=p; child =c; 
 		}
 	}
+	DebuggingLog debug;
 	private Queue<Element> que = new LinkedList<Element>();
 	private Queue<Info> del_list = new LinkedList<Info>();
 	private Tree CBT,TT;
@@ -76,6 +78,11 @@ public class HtmlParser {
 			//System.out.println(info.child+"\n\n");
 			TT.deleteNode(info.parent, info.child);
 		}
+		//debug용
+		debug.write("TT----------------------");
+		debug.writeln();
+		TT.print_debug(debug);
+		debug.close();
 		//TT.print();
 		return TT.getRoot().getContent();
 		//System.out.println(TT.getRoot().getContent());
@@ -178,14 +185,14 @@ public class HtmlParser {
 			}
 		}	
 	}
-	private String getDescription(Document doc){
+	private String getImagesrc(Document doc){
 		
-		Elements metaTags = doc.head().select("meta");
+		Elements metaTags = doc.head().select("link");
 		if(metaTags.size() != 0){
 			for(Element e :metaTags){
-				String name = e.attr("name");
-				if(name.equals("description")){
-					return e.attr("content");
+				String name = e.attr("rel");
+				if(name.equals("shortcut icon")){
+					return e.attr("href");
 				}
 			}
 		}else
@@ -203,7 +210,7 @@ public class HtmlParser {
 		//title 가져오기
 		hdp.title = doc.title();
 		//decription 가져오기
-		hdp.decription = getDescription(doc);
+		hdp.imrsrc = getImagesrc(doc);
 		// decription tag 삭제 및 iframe 추가
 		for(Element e : doc.getAllElements()){
 			if(uselessTag.containsKey(e.tagName())){
@@ -255,9 +262,15 @@ public class HtmlParser {
 			if(que.size() == 0)
 				break;
 		}
+		//Debug용 파일 출력
+		debug = new DebuggingLog("TREE");
+		debug.write("CBT----------------------");
+		debug.writeln();
+		CBT.print_debug(debug);
 		//CBT.print();	
 		return this;
 	}
+	
 			
 	void printLog(String msg, Element e){
 		System.out.println(msg);

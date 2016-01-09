@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import kr.co.DebuggingLog;
 import kr.co.data.EventData;
 import kr.co.data.EventParsedData;
 import kr.co.data.HtmlData;
@@ -34,6 +35,7 @@ public class MorphemeAnalyzer {
 	private static MorphemeAnalyzer instance;
 	private Map<String,String> TagsMap;
 	private Map<String,String> TexttagMap;
+	
 	
 	 private static final String[] uselessTags = {
 	            "script", "noscript", "style", "meta", "link",
@@ -67,6 +69,7 @@ public class MorphemeAnalyzer {
 	}
 	
 	public void parsingHTML(HtmlData html){
+		DebuggingLog debug = new DebuggingLog("Content");
 		HtmlParser hp = new HtmlParser();
 		HtmlParsedData hpd = new HtmlParsedData(html.userid, html.url, html.time);
 		/*
@@ -87,12 +90,16 @@ public class MorphemeAnalyzer {
 	      }else
 	         System.out.println("length :" + content.length());
 	      
+		  debug.write(content);
+		  debug.writeln();
+		  debug.writeln();
 	      System.out.println("title : " + hpd.title);
 	      System.out.println("content : "+content);
-	      System.out.println("decription : "+hpd.decription);
-	      Map words_map = doMecab(content);
+	      System.out.println("decription : "+hpd.imrsrc);
+	      Map words_map = doMecab(content, "html");
 	      hpd.keywordList = words_map;
 	      
+	      debug.close();
 	      try {
 			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
 		} catch (Exception e) {
@@ -107,7 +114,11 @@ public class MorphemeAnalyzer {
 		String content = eventData.data;
 		System.out.println(content);
 		
-		Map words_map = doMecab(content);
+		
+		//debug.write(content);
+		//debug.writeln();
+		//debug.writeln();
+		Map words_map = doMecab(content, "event");
 		EventParsedData epd = new EventParsedData(eventData.userid, eventData.url, eventData.time, words_map);
 		
 		try {
@@ -119,7 +130,12 @@ public class MorphemeAnalyzer {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Map doMecab(String content){
+	private Map doMecab(String content, String kind){
+		DebuggingLog debug;
+		if(kind.equals("event"))
+			 debug = new DebuggingLog("KeywordsEvent");
+		else
+			 debug = new DebuggingLog("KeywordsHTml");
 		List<LNode> result = Analyzer.parseJava(content);
 		String word, type;
 		Map<String, Integer> countingMap = new HashMap<String, Integer>();
@@ -129,7 +145,7 @@ public class MorphemeAnalyzer {
         //Stanford POS tagger
         MaxentTagger tagger = null;
 	    try {
-	    	tagger = new MaxentTagger("/Users/chan/git/MOA_SERVER/MOA/left3words-wsj-0-18.tagger");
+	    	tagger = new MaxentTagger("C:\\Users\\dong\\Documents\\moa_gitt\\MOA\\left3words-wsj-0-18.tagger");
 	    } catch (ClassNotFoundException e1) {
 	    	e1.printStackTrace();
 	    } catch (IOException e1) {
@@ -163,8 +179,13 @@ public class MorphemeAnalyzer {
 		Iterator val_iter = values.iterator();
 		int count = 10;
 		System.out.println("key\t count\t");
+		debug.write("key\t count\t");
 		while(key_iter.hasNext()){//count-- > 0){
-			System.out.println(key_iter.next() + "\t " + val_iter.next());
+			String ikey = (String)  key_iter.next();
+			int ival 	= (Integer) val_iter.next();
+			System.out.println(ikey + "\t " + ival);
+			debug.write(ikey + "\t " + ival);
+			debug.writeln();
 		}
 		System.out.println("done");
 		// return 저장할 Json 형태
@@ -177,6 +198,7 @@ public class MorphemeAnalyzer {
 		 등등 등
 		
 		*/
+		debug.close();
 		return sorted_map;
 	}
 	
