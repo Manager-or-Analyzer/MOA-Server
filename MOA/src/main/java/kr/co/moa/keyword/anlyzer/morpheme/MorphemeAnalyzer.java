@@ -285,6 +285,7 @@ public class MorphemeAnalyzer {
 			
 			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
 				word = tagger.tagString(term.word);
+				System.out.println(word);
 				String[] temp = word.split("/");
 				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
 			}
@@ -356,7 +357,8 @@ public class MorphemeAnalyzer {
 		    while ((str = in.readLine()) != null) {
 		    	if(str.length() == 3 && str.equals("EOS")) continue;
 		    	String[] tok = str.split("\t");
-		    	if(tok[1].charAt(0) != 'N' 						&& 		//ignore NOT a noun
+		    	if(!tok[1].substring(0, 3).equals("NNG") 		&& 		//ignore NOT a noun
+		    			!tok[1].substring(0, 3).equals("NNP") 	&&		//ignore NOT a foreign language
 		    			!tok[1].substring(0, 2).equals("SL") 	&&		//ignore NOT a foreign language
 		    			!tok[1].substring(0, 2).equals("SN")) continue;	//ignore NOT a number
 		    	WordTagPair entry = new WordTagPair();
