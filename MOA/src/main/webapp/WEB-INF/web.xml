@@ -84,4 +84,14 @@
     <servlet-name>KeywordsSenderController</servlet-name>
     <url-pattern>/receive/keyword</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>SearchingDocumentController</display-name>
+    <servlet-name>SearchingDocumentController</servlet-name>
+    <servlet-class>kr.co.moa.controller.analyzer.SearchingDocumentController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SearchingDocumentController</servlet-name>
+    <url-pattern>/searching</url-pattern>
+  </servlet-mapping>
 </web-app>

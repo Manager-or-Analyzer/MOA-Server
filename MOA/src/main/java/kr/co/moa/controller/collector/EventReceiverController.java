@@ -15,6 +15,7 @@ import kr.co.Log;
 import kr.co.data.EventData;
 import kr.co.data.HtmlData;
 import kr.co.moa.DBManager;
+import kr.co.moa.event.TimeCalculator;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 /**
@@ -38,6 +39,9 @@ public class EventReceiverController extends HttpServlet {
 			try {
 				if(ed.type.equals("drag"))
 					MorphemeAnalyzer.getInstance().parsingEvent(ed);
+				else if(ed.type.equals("pageout"))
+					TimeCalculator.getInstance().calcTime(ed);
+					
 				DBManager.getInstnace().insertData("EventData", eventData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 			} catch (Exception e) {

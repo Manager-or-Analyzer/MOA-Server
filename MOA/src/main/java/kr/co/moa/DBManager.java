@@ -21,8 +21,8 @@ import kr.co.data.HtmlParsedData;
 //singleton���� ���� 
 public class DBManager {	
 	
-	private static final String DB_NAME = "test";
-    private static final String IP = "127.0.0.1";
+	private static final String DB_NAME = "test_CF";
+    private static final String IP = "210.118.74.183";
     private static final int PORT = 27017;
     private static DBManager instance;
     private MongoClient mongoClient;
@@ -117,4 +117,47 @@ public class DBManager {
    	    //return res;	 
        	   
     }
+    
+    
+	public void getBaseDocumentKeywords(String searches) {
+		db = mongoClient.getDB(DB_NAME);
+
+    	DBCollection collection = db.getCollection("");
+    	String res = collection.findOne().toString();
+    	
+    	Gson gson = new Gson();
+    	HtmlData hd = gson.fromJson(res, HtmlData.class);    	
+
+	}
+	public List<EventData> getTimeEvent(EventData pageout) {
+		db = mongoClient.getDB(DB_NAME);
+    	
+    	DBCollection collection = db.getCollection("EventData");
+    	BasicDBObject whereQuery = new BasicDBObject();
+    	whereQuery.put("userid", pageout.userid);
+    	whereQuery.put("url", pageout.url);
+    	whereQuery.put("isUsed", false);
+    	
+    	//get data from MongoDB
+		DBCursor cursor = collection.find(whereQuery);
+    	Gson gson = new Gson();
+    	List<EventData> list = new ArrayList<EventData>();
+    	while(cursor.hasNext()){
+    		String jsondata = cursor.next().toString();
+    		EventData ed = gson.fromJson(jsondata, EventData.class);
+    		list.add(ed);
+    	}
+    	
+    	//update data in MongoDB
+    	BasicDBObject updateData = new BasicDBObject();
+    	updateData.append("$set", new BasicDBObject().append("isUsed", true));
+    	BasicDBObject updateQuery = new BasicDBObject();
+    	updateQuery.
+    			append("userid", pageout.userid).
+    			append("url", pageout.url).
+    			append("isUsed", false);
+    	collection.update(updateQuery, updateData);
+    	
+    	return list;
+	}
 }
