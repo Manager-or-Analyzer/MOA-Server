@@ -79,10 +79,10 @@ public class HtmlParser {
 			TT.deleteNode(info.parent, info.child);
 		}
 		//debug용
-		debug.write("TT----------------------");
-		debug.writeln();
-		TT.print_debug(debug);
-		debug.close();
+		//debug.write("TT----------------------");
+		//debug.writeln();
+		//TT.print_debug(debug);
+		//debug.close();
 		//TT.print();
 		return TT.getRoot().getContent();
 		//System.out.println(TT.getRoot().getContent());
@@ -263,10 +263,10 @@ public class HtmlParser {
 				break;
 		}
 		//Debug용 파일 출력
-		debug = new DebuggingLog("TREE");
-		debug.write("CBT----------------------");
-		debug.writeln();
-		CBT.print_debug(debug);
+//		debug = new DebuggingLog("TREE");
+//		debug.write("CBT----------------------");
+//		debug.writeln();
+//		CBT.print_debug(debug);
 		//CBT.print();	
 		return this;
 	}

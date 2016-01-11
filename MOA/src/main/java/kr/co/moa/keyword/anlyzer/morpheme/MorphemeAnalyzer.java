@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import kr.co.DebuggingLog;
 import kr.co.data.EventData;
@@ -80,7 +81,7 @@ public class MorphemeAnalyzer {
 	public void parsingHTML(HtmlData html){
 		url = html.url;
 		userid = html.userid;
-		DebuggingLog debug = new DebuggingLog("Content");
+		//DebuggingLog debug = new DebuggingLog("Content");
 		HtmlParser hp = new HtmlParser();
 		HtmlParsedData hpd = new HtmlParsedData(html.userid, html.url, html.time);
 		/*
@@ -89,7 +90,7 @@ public class MorphemeAnalyzer {
 			public String time = html.time;
 		
 			public String title = makeCBT()에서 처리;
-			public String decription = makeCBT()에서 처리;
+			public String imgsrc = makeCBT()에서 처리;
 			public Map<String,String> keywordList= domecab();
 		 */
 		String content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
@@ -101,9 +102,9 @@ public class MorphemeAnalyzer {
 	    }else
 	        System.out.println("length :" + content.length());
 	      
-		debug.write(content);
-		debug.writeln();
-	  	debug.writeln();
+//		debug.write(content);
+//		debug.writeln();
+//	  	debug.writeln();
 	  	System.out.println("title : "  		+ hpd.title );
 	  	System.out.println("content : "		+ content   );
 	  	System.out.println("decription : "	+ hpd.imrsrc);
@@ -111,7 +112,7 @@ public class MorphemeAnalyzer {
 	  	Map words_map = doMecabProcess(content, "html");
 	  	hpd.keywordList = words_map;
 	     
-	  	debug.close();
+	  	//debug.close();
 	  	try {
 	  		DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
 	  	} catch (Exception e) {
@@ -147,11 +148,11 @@ public class MorphemeAnalyzer {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Map doMecab(String content, String kind){
-		DebuggingLog debug;
-		if(kind.equals("event"))
-			 debug = new DebuggingLog("KeywordsEvent");
-		else
-			 debug = new DebuggingLog("KeywordsHTml");
+//		DebuggingLog debug;
+//		if(kind.equals("event"))
+//			 debug = new DebuggingLog("KeywordsEvent");
+//		else
+//			 debug = new DebuggingLog("KeywordsHTml");
 		List<LNode> result = Analyzer.parseJava(content);
 		String word, type;
 		Map<String, Integer> countingMap = new HashMap<String, Integer>();
@@ -195,13 +196,13 @@ public class MorphemeAnalyzer {
 		Iterator val_iter = values.iterator();
 		int count = 10;
 		System.out.println("key\t count\t");
-		debug.write("key\t count\t");
+		//debug.write("key\t count\t");
 		while(key_iter.hasNext()){//count-- > 0){
 			String ikey = (String)  key_iter.next();
 			int ival 	= (Integer) val_iter.next();
 			System.out.println(ikey + "\t " + ival);
-			debug.write(ikey + "\t " + ival);
-			debug.writeln();
+			//debug.write(ikey + "\t " + ival);
+			//debug.writeln();
 		}
 		System.out.println("done");
 		// return 저장할 Json 형태
@@ -214,43 +215,51 @@ public class MorphemeAnalyzer {
 		 등등 등
 		
 		*/
-		debug.close();
+		//debug.close();
 		return sorted_map;
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Map doMecabProcess(String content, String kind){
 		DebuggingLog debug;
-		if(kind.equals("event"))
-			 debug = new DebuggingLog("KeywordsEvent");
-		else
-			 debug = new DebuggingLog("KeywordsHTml");
+//		if(kind.equals("event"))
+//			 debug = new DebuggingLog("KeywordsEvent");
+//		else
+//			 debug = new DebuggingLog("KeywordsHTml");
+//		
+		UUID uuid = UUID.randomUUID();
+		String inputPath  = "D:/mecab/" + userid + "/";
+		String outputPath = "D:/mecab/" + userid + "/";
+		String inputFile  = uuid+".txt";
+		String outputFile = uuid+"_out.txt";
 		
-		String inputPath  = "/librarys/" + userid + "/";
-		String outputPath = "/librarys/" + userid + "/";
-		String inputFile  = "test.txt";
-		String outputFile = "test_out.txt";
+//		String inputPath  = "/librarys/mecab-ko/";
+//		String outputPath = "/librarys/mecab-ko/";
+//		String inputFile  = "test.txt";
+//		String outputFile = "test_out.txt";
+		
+		System.out.println(uuid);
 		
 		if(!makeInputFile(inputPath + inputFile, content)){
 			//inputfile 생성 오류처리
 		}
 		
 		List<String> arg = new ArrayList<String>();
-		arg.add("/librarys/mecab-ko/mecab");
+		arg.add("D:/mecab/mecab-ko/mecab");
 		arg.add("-d");
-		arg.add("/librarys/mecab-ko/dic/mecab-ko-dic");
+		arg.add("D:/mecab/mecab-ko/dic/mecab-ko-dic");
 		arg.add(inputPath + inputFile);
 		arg.add("-o");
 		arg.add(outputPath + outputFile);
 		
 		try {
-			//System.out.println("start process------------------------");
+			System.out.println("start process------------------------");
 			ProcessBuilder mecab_builder = new ProcessBuilder(arg);
 			mecab_builder.redirectOutput(Redirect.INHERIT);	//에러와 출력을 표준스트림으로 출력시킴
 			mecab_builder.redirectError(Redirect.INHERIT);	//input-buffer overflow. The line is split. use -b #SIZE option.
 			Process mecab_process = mecab_builder.start();
 			mecab_process.waitFor();
-			//System.out.println("end process--------------------------");
+			System.out.println("end process--------------------------");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -285,7 +294,7 @@ public class MorphemeAnalyzer {
 			
 			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
 				word = tagger.tagString(term.word);
-				System.out.println(word);
+				//System.out.println(word);
 				String[] temp = word.split("/");
 				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
 			}
@@ -302,13 +311,13 @@ public class MorphemeAnalyzer {
 		Iterator val_iter = values.iterator();
 		int count = 10;
 		System.out.println("key\t count\t");
-		debug.write("key\t count\t");
+		//debug.write("key\t count\t");
 		while(key_iter.hasNext()){//count-- > 0){
 			String ikey = (String)  key_iter.next();
 			int ival 	= (Integer) val_iter.next();
 			System.out.println(ikey + "\t " + ival);
-			debug.write(ikey + "\t " + ival);
-			debug.writeln();
+			//debug.write(ikey + "\t " + ival);
+			//debug.writeln();
 		}
 		System.out.println("done");
 		// return 저장할 Json 형태
@@ -321,7 +330,7 @@ public class MorphemeAnalyzer {
 		 등등 등
 		
 		*/
-		debug.close();
+		//debug.close();
 		return sorted_map;
 	}
 	
@@ -382,16 +391,16 @@ public class MorphemeAnalyzer {
 	}
 	
 	private boolean makeInputFile(String path, String content){
-		String dirpath = "/librarys/" + userid;
+		String dirpath = "/mecab/" + userid;
 		dirpath.replace("/", "\\\\");
-		dirpath = "C:" + dirpath;
+		dirpath = "D:" + dirpath;
 		File dir = new File(dirpath);
 		if( !dir.exists() ){
 			dir.mkdir();
 		}
 					
 		path.replace("/", "\\\\");
-		path = "C:" + path;
+		//path = "D:" + path;
 		BufferedWriter out;
 		try {
 			out = new BufferedWriter(new FileWriter(path));
