@@ -8,4 +8,5 @@ public class EventData {
 	public String time;
 	public String x;
 	public String y;
+	public boolean isUsed;
 }

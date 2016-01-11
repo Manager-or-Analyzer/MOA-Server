@@ -34,6 +34,7 @@ public class EventReceiverController extends HttpServlet {
 		String eventData = request.getParameter("data");
 		
 		EventData ed = new Gson().fromJson(eventData, EventData.class);
+		ed.isUsed = false;
 		//DebuggingLog.getInstance().info(CLASS, eventData);				
 		if(!eventData.equals("") && eventData != null){
 			try {
@@ -41,8 +42,7 @@ public class EventReceiverController extends HttpServlet {
 					MorphemeAnalyzer.getInstance().parsingEvent(ed);
 				else if(ed.type.equals("pageout"))
 					TimeCalculator.getInstance().calcTime(ed);
-					
-				DBManager.getInstnace().insertData("EventData", eventData);
+				DBManager.getInstnace().insertData("EventData", new Gson().toJson(ed));
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 			} catch (Exception e) {
 				//Log.getInstance().severe(CLASS, "DB :insertData fail");
