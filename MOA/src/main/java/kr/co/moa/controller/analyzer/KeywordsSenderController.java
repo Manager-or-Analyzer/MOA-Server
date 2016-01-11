@@ -41,46 +41,46 @@ public class KeywordsSenderController extends HttpServlet {
 		
 		List<Snippet> list_snippet = new ArrayList<Snippet>();
 		
-//		List<HtmlParsedData> list_hpd = DBManager.getInstnace().getHtmlParsedDataList(userid, keyword);
-//		for(HtmlParsedData h : list_hpd){
-//			Snippet s = new Snippet();
-//			s.title = h.title;
-//			s.url = h.url;
-//			s.keyword = "세미";
-//			s.time = h.time;
-//			
-//			System.out.println("img : "+ h.imrsrc);
-//			if(h.imrsrc != null && h.imrsrc.equals("/favicon.ico")){
-//				String[] tokens = h.url.split("/");
-//				s.img="http://";
-//				for(int i=2; i<tokens.length-1; i++)
-//					s.img += tokens[i];
-//				s.img += h.imrsrc;
-//				System.out.println("simg : "+ s.img);
-//			}else{
-//				s.img = h.imrsrc;
-//				System.out.println("simg : "+ s.img);
-//			}
-//			list_snippet.add(s);
-//		}
+		List<HtmlParsedData> list_hpd = DBManager.getInstnace().getHtmlParsedDataList(userid, keyword);
+		for(HtmlParsedData h : list_hpd){
+			Snippet s = new Snippet();
+			s.title = h.title;
+			s.url = h.url;
+			s.keyword = "세미";
+			s.time = h.time;
 			
-		
-		for(int i=0; i<10 ;++i){
-			Snippet sn = new Snippet();
-			sn.title = "김세미다"+i;
-			sn.keyword = "세미"+i;
-			sn.url ="http://www.facebook.com";
-			sn.time = "Fri Jan 08 2016 03:31:59 GMT+0900 (대한민국 표준시)";
-			if(i==0)
-				sn.img = "";
-			else if(i%2 == 0)
-				sn.img = "http://blog.naver.com/favicon.ico";
-			else
-				sn.img = "https://fbstatic-a.akamaihd.net/rsrc.php/yl/r/H3nktOa7ZMg.ico";
-			
-			list_snippet.add(sn);
+			System.out.println("img : "+ h.imrsrc);
+			if(h.imrsrc != null && h.imrsrc.equals("/favicon.ico")){
+				String[] tokens = h.url.split("/");
+				s.img="http://";
+				for(int i=2; i<tokens.length-1; i++)
+					s.img += tokens[i];
+				s.img += h.imrsrc;
+				System.out.println("simg : "+ s.img);
+			}else{
+				s.img = h.imrsrc;
+				System.out.println("simg : "+ s.img);
+			}
+			list_snippet.add(s);
 		}
-		
+			
+//		
+//		for(int i=0; i<10 ;++i){
+//			Snippet sn = new Snippet();
+//			sn.title = "김세미다"+i;
+//			sn.keyword = "세미"+i;
+//			sn.url ="http://www.facebook.com";
+//			sn.time = "Fri Jan 08 2016 03:31:59 GMT+0900 (대한민국 표준시)";
+//			if(i==0)
+//				sn.img = "";
+//			else if(i%2 == 0)
+//				sn.img = "http://blog.naver.com/favicon.ico";
+//			else
+//				sn.img = "https://fbstatic-a.akamaihd.net/rsrc.php/yl/r/H3nktOa7ZMg.ico";
+//			
+//			list_snippet.add(sn);
+//		}
+//		
 		
 		Gson gson = new Gson();
 		String res = gson.toJson(list_snippet);

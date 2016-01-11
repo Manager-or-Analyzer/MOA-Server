@@ -33,12 +33,13 @@ public class EventReceiverController extends HttpServlet {
 		String eventData = request.getParameter("data");
 		
 		EventData ed = new Gson().fromJson(eventData, EventData.class);
+		ed.isUsed = false;
 		//DebuggingLog.getInstance().info(CLASS, eventData);				
 		if(!eventData.equals("") && eventData != null){
 			try {
 				if(ed.type.equals("drag"))
 					MorphemeAnalyzer.getInstance().parsingEvent(ed);
-				DBManager.getInstnace().insertData("EventData", eventData);
+				DBManager.getInstnace().insertData("EventData", new Gson().toJson(ed));
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 			} catch (Exception e) {
 				//Log.getInstance().severe(CLASS, "DB :insertData fail");
