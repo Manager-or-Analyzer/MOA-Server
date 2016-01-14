@@ -6,6 +6,7 @@ public class EventParsedData {
 	public String userid;
 	public String url;
 	public String time;
+	public boolean isUsed;
 	
 	public Map<String,String> keywordList;
 	
@@ -14,5 +15,6 @@ public class EventParsedData {
 		this.url = url;
 		this.time = time;
 		keywordList = words;
+		isUsed = false;
 	}
 }

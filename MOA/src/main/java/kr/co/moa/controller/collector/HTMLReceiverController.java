@@ -22,6 +22,7 @@ import kr.co.Log;
 import kr.co.TestModule;
 import kr.co.data.HtmlData;
 import kr.co.moa.DBManager;
+import kr.co.moa.keyword.KeywordManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 /**
@@ -48,7 +49,7 @@ public class HTMLReceiverController extends HttpServlet {
 			try {
 				DBManager.getInstnace().insertData("HtmlData", htmlData);
 				//Log.getInstance().info(CLASS, "DB :insertData success");
-				MorphemeAnalyzer.getInstance().parsingHTML(hd);
+				KeywordManager.getInstance().calTF_IDF(hd);
 				
 			} catch (Exception e) {
 				//Log.getInstance().severe(CLASS, "DB :insertData fail");

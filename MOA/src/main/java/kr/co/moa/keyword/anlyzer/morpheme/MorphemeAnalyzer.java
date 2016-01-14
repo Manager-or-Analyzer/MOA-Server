@@ -78,7 +78,7 @@ public class MorphemeAnalyzer {
 		for(String tag : textTags)   {	TexttagMap.put(tag, null);	}
 	}
 	
-	public void parsingHTML(HtmlData html){
+	public HtmlParsedData parsingHTML(HtmlData html){
 		url = html.url;
 		userid = html.userid;
 		//DebuggingLog debug = new DebuggingLog("Content");
@@ -118,6 +118,8 @@ public class MorphemeAnalyzer {
 	  	} catch (Exception e) {
 	  		e.printStackTrace();
 	  	}
+	  	
+	  	return hpd;
 	}
 	
 	public void parsingEvent(EventData eventData){
@@ -220,7 +222,7 @@ public class MorphemeAnalyzer {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Map doMecabProcess(String content, String kind){
+	public Map doMecabProcess(String content, String kind){
 		DebuggingLog debug;
 //		if(kind.equals("event"))
 //			 debug = new DebuggingLog("KeywordsEvent");
@@ -337,13 +339,13 @@ public class MorphemeAnalyzer {
 	class ValueComparator implements Comparator {
 	    Map<String, Integer> base;
 
-	    public ValueComparator(Map base) {
+	    public ValueComparator(Map<String, Integer> base) {
 	        this.base = base;
 	    }
 
 		@Override
 		public int compare(Object o1, Object o2) {
-			if (base.get(o1) >= base.get(o2)) {
+			if (((Integer)base.get(o1)).intValue() >= ((Integer)base.get(o2)).intValue()) {
 	            return -1;
 	        } else {
 	            return 1;
