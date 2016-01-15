@@ -8,8 +8,9 @@ public class HtmlParsedData {
 	public String time;
 		
 	public String title;
+	
 	public String imrsrc;
-	public Map<String,String> keywordList;
+	public Map<String,Integer> keywordList;
 	
 	public HtmlParsedData(String id, String url, String time){
 		this.userid = id;

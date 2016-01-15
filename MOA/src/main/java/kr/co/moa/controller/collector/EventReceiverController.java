@@ -33,6 +33,7 @@ public class EventReceiverController extends HttpServlet {
 		
 		String eventData = request.getParameter("data");
 		
+	    System.out.println("eventData: "+eventData);
 		EventData ed = new Gson().fromJson(eventData, EventData.class);
 		ed.isUsed = false;
 		//DebuggingLog.getInstance().info(CLASS, eventData);				

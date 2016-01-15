@@ -1,18 +1,12 @@
 package kr.co.moa.controller.analyzer;
 
-import info.debatty.java.lsh.LSHMinHash;
-import info.debatty.java.lsh.MinHash;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,8 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import kr.co.MapUtil;
-import kr.co.data.KeywordData;
 import kr.co.data.SearchData;
+import kr.co.data.TF_IDF;
 import kr.co.moa.DBManager;
 
 import com.google.gson.Gson;
@@ -59,7 +53,7 @@ public class SearchingDocumentController extends HttpServlet {
 		String str = request.getParameter("data");		
 		DBCursor cursor = null;
 		SearchData sd = new Gson().fromJson(str, SearchData.class);
-		HashMap<String, KeywordData> rawdata = new HashMap<String, KeywordData>();
+		HashMap<String, TF_IDF> rawdata = new HashMap<String, TF_IDF>();
 		
 		if(sd.searches.equals("") && sd.searches == null){ 
 			out.println("fail");
@@ -78,7 +72,7 @@ public class SearchingDocumentController extends HttpServlet {
 		while(cursor.hasNext()){
 			//parsing
 			BasicDBObject obj = (BasicDBObject) cursor.next();
-			KeywordData temp = new KeywordData();
+			TF_IDF temp = new TF_IDF();
 			//gson.fromJson(cursor.next().toString(), KeywordData.class);    
 			temp.userid = (String) obj.get("userid");
 			temp.url = (String) obj.get("url");
@@ -97,12 +91,12 @@ public class SearchingDocumentController extends HttpServlet {
 		System.out.println(standard_url + " / " + maxWeight);
 		
 		//3. url군집에 속하는 상위 keyword_num개의 키워드 가져옴
-		ArrayList<KeywordData> arr = new ArrayList<KeywordData>(rawdata.values());
+		ArrayList<TF_IDF> arr = new ArrayList<TF_IDF>(rawdata.values());
  		HashMap<Integer, ArrayList<String>> reduced = new HashMap<Integer, ArrayList<String>>();
 		int[] standard_hashcodes = new int[DIFF_NUM];
 		String[] standard_keywords = null;
 		
-		for(KeywordData entry : arr){
+		for(TF_IDF entry : arr){
 			String[] keyword = getFirstEntries(KEYWORD_NUM, entry.keywordList);
 			int[] hashcodes = new int[KEYWORD_NUM];
 			
@@ -138,7 +132,7 @@ public class SearchingDocumentController extends HttpServlet {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Map<String, Double> cosineSimilarity(
-			ArrayList<String> clustedGroup, String standard_url, HashMap<String, KeywordData> rawdata, String[] standard_keywords) {
+			ArrayList<String> clustedGroup, String standard_url, HashMap<String, TF_IDF> rawdata, String[] standard_keywords) {
 		/*
 		 * 문서간의 유사도를 코사인 유사도를 이용하여 계산한 후
 		 * 코사인유사도 값이 높은 문서 순으로 소팅하여 map에 넣어 반환해주는 함수 
@@ -154,7 +148,7 @@ public class SearchingDocumentController extends HttpServlet {
 		
 		for(int i = 0; i<clustedGroup.size(); i++){
 			String target_url = clustedGroup.get(i);
-			KeywordData data = rawdata.get(target_url);
+			TF_IDF data = rawdata.get(target_url);
 			double target_doc_div = 0;
 			double numerator = 0;
 			

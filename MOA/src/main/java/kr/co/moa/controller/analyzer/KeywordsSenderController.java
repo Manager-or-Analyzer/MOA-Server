@@ -41,7 +41,13 @@ public class KeywordsSenderController extends HttpServlet {
 		
 		List<Snippet> list_snippet = new ArrayList<Snippet>();
 		
-		List<HtmlParsedData> list_hpd = DBManager.getInstnace().getHtmlParsedDataList(userid, keyword);
+		List<HtmlParsedData> list_hpd = null;
+		try {
+			list_hpd = DBManager.getInstnace().getHtmlParsedDataList(userid, keyword);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for(HtmlParsedData h : list_hpd){
 			Snippet s = new Snippet();
 			s.title = h.title;
@@ -49,17 +55,17 @@ public class KeywordsSenderController extends HttpServlet {
 			s.keyword = "세미";
 			s.time = h.time;
 			
-			System.out.println("img : "+ h.imrsrc);
+			//System.out.println("img : "+ h.imrsrc);
 			if(h.imrsrc != null && h.imrsrc.equals("/favicon.ico")){
 				String[] tokens = h.url.split("/");
 				s.img="http://";
 				for(int i=2; i<tokens.length-1; i++)
 					s.img += tokens[i];
 				s.img += h.imrsrc;
-				System.out.println("simg : "+ s.img);
+				//System.out.println("simg : "+ s.img);
 			}else{
 				s.img = h.imrsrc;
-				System.out.println("simg : "+ s.img);
+				//System.out.println("simg : "+ s.img);
 			}
 			list_snippet.add(s);
 		}
