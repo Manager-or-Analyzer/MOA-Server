@@ -40,8 +40,10 @@ public class EventReceiverController extends HttpServlet {
 			try {
 				if(ed.type.equals("drag"))
 					MorphemeAnalyzer.getInstance().parsingEvent(ed);
-				else if(ed.type.equals("pageout"))
+				else if(ed.type.equals("pageout")){
 					TimeCalculator.getInstance().calcTime(ed);
+					ed.isUsed = true;
+				}
 				DBManager.getInstnace().insertData("EventData", new Gson().toJson(ed));
 				//Log.getInstance().info(CLASS, "DB :insertData success");
 			} catch (Exception e) {
