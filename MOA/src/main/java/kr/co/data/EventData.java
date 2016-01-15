@@ -9,5 +9,4 @@ public class EventData {
 	public String x;
 	public String y;
 	public boolean isUsed;
-	public boolean isUsedOnKeyword;
 }

@@ -178,7 +178,7 @@ public class DBManager {
    	 			null, MapReduceCommand.OutputType.INLINE, query);
    	 	
    	 	MapReduceOutput out = collection.mapReduce(cmd);
-   	 	Map keywordlist = new HashMap();
+   	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
    	 	int cnt = 1;
    	 	for(DBObject res :  out.results()){
    	 		System.out.println(res.get("value").toString());
