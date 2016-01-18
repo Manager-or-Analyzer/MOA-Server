@@ -17,10 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import kr.co.MapUtil;
 import kr.co.Util;
-import kr.co.data.DateData;
 import kr.co.data.DomTimeData;
 import kr.co.data.SearchData;
 import kr.co.data.TF_IDF;
+import kr.co.data.receive.DateData;
 import kr.co.data.send.Snippet;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
@@ -69,7 +69,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = {"slider", "팝업"};//getKeywords(sd.searches);
+		String[] keywords = {"감사", "킹덤"};//getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
@@ -110,12 +110,11 @@ public class SearchingDocumentController extends HttpServlet {
 			DomTimeData obj = new DomTimeData();
 			obj.userid = (String) raw.getString("userid");
 			obj.url = (String) raw.getString("url");
-			obj.time = (String) raw.getString("time");
+			obj.time = raw.getDate("time");
 			obj.duration = Double.parseDouble(raw.getString("duration"));//(double) raw.getString("duration");
 			
 			
-			Date time = Util.strToDate(obj.time);
-			if(startDay.compareTo(time) > 0 && endDay.compareTo(time) < 0) continue;		//기간 내 데이터만 고
+			if(startDay.compareTo(obj.time) > 0 && endDay.compareTo(obj.time) < 0) continue;		//기간 내 데이터만 고려 
 			if(map.containsKey(obj.url)) map.put(obj.url, map.get(obj.url) + obj.duration);
 			else 						 map.put(obj.url, obj.duration);
 		}

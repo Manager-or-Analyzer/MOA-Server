@@ -1,14 +1,11 @@
 package kr.co.moa.event;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.Locale;
 
-import com.google.gson.Gson;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
 
 import kr.co.data.DomTimeData;
 import kr.co.data.origin.EventData;
@@ -30,38 +27,43 @@ public class TimeCalculator {
 	}
 
 	public void calcTime(EventData pageout) {
-		ArrayList<EventData> events = 
-				(ArrayList<EventData>) DBManager.getInstnace().getTimeEvent(pageout);
+		ArrayList<EventData> events = new ArrayList<EventData>();
 		ArrayList<Long> eventTimes = new ArrayList<Long>();
-		final SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss", Locale.UK);
+		
+		DBCursor cursor = DBManager.getInstnace().getTimeEvent(pageout);
+		while(cursor.hasNext()){
+    		BasicDBObject obj = (BasicDBObject) cursor.next();
+    		EventData ed = new EventData();
+    		
+    		ed.userid = obj.getString("userid");
+    		ed.url 	  = obj.getString("url");
+    		ed.type   = obj.getString("type");
+    		ed.data   = obj.getString("data");
+    		ed.time   = obj.getDate("time");
+    		ed.x 	  = obj.getString("x");
+    		ed.y 	  = obj.getString("y");
+    		ed.isUsed = obj.getBoolean("isUsed");
+
+    		
+    		events.add(ed);
+    	}
+
 		
 		//Sorting
 		Collections.sort(events, new Comparator<EventData>() {
 			@Override
 			public int compare(EventData o1, EventData o2) {
-				Date d1 = null;
-				Date d2 = null;
-				try {
-					d1 = sdf.parse(o1.time);
-					d2 = sdf.parse(o2.time);
-				} catch (ParseException e1) {
-					e1.printStackTrace();
-				}
-				return d1.compareTo(d2);
+				return o1.time.compareTo(o2.time);
 			}
 		});
 		
 		
 		boolean start = false;
+		int cnt = 0;
 		for(EventData e : events){
 			if(!start && !e.type.equals("pagein")) continue;
-			Date d = null;
-			try {
-				d = sdf.parse(e.time);
-			} catch (ParseException e1) {
-				e1.printStackTrace();
-			}
-			eventTimes.add(d.getTime());
+			start = true;
+			eventTimes.add(e.time.getTime());
 		}
 		
 		//start calc stay time
@@ -88,8 +90,14 @@ public class TimeCalculator {
 		dd.url = pageout.url;
 		dd.time = events.get(0).time;
 		dd.duration = (double) total;
+		
+		BasicDBObject query = new BasicDBObject();
+		query.put("userid", dd.userid);
+		query.put("url", dd.url);
+		query.put("time", dd.time);
+		query.put("duration", dd.duration);
 		try {
-			DBManager.getInstnace().insertData("DurationData", new Gson().toJson(dd));
+			DBManager.getInstnace().insertDurationData(query);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}

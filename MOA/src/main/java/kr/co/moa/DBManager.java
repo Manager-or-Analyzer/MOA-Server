@@ -20,14 +20,15 @@ import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
 import kr.co.data.origin.EventData;
+import kr.co.data.origin.EventData_deprecated;
 import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.HtmlParsedData;
 
 //singleton���� ���� 
 public class DBManager {	
 	
-	private static final String DB_NAME = "MOA";
-    private static final String IP = "210.118.74.183";
+	private static final String DB_NAME = "test";
+    private static final String IP = "localhost";
     private static final int PORT = 27017;
     private static DBManager instance;
     private MongoClient mongoClient;
@@ -366,7 +367,7 @@ public class DBManager {
     	
     	return collection.find(query);
 	}
-	public List<EventData> getTimeEvent(EventData pageout) {
+	public DBCursor getTimeEvent(EventData pageout) {
 		db = mongoClient.getDB(DB_NAME);
     	
     	DBCollection collection = db.getCollection("EventData");
@@ -377,14 +378,7 @@ public class DBManager {
     	
     	//get data from MongoDB
 		DBCursor cursor = collection.find(whereQuery);
-    	Gson gson = new Gson();
-    	List<EventData> list = new ArrayList<EventData>();
-    	while(cursor.hasNext()){
-    		String jsondata = cursor.next().toString();
-    		EventData ed = gson.fromJson(jsondata, EventData.class);
-    		list.add(ed);
-    	}
-    	
+    	    	
     	//update data in MongoDB
     	BasicDBObject updateData = new BasicDBObject();
     	updateData.append("$set", new BasicDBObject().append("isUsed", true));
@@ -395,7 +389,7 @@ public class DBManager {
     			append("isUsed", false);
     	collection.update(updateQuery, updateData, false, true);
     	
-    	return list;
+    	return cursor;
 	}
 	
 	public List getSimilar(BasicDBObject minhashInput){
@@ -462,6 +456,21 @@ public class DBManager {
     	query.put("url", new BasicDBObject("$in", set));
     	
     	return db.getCollection("DurationData").find(query);
+	}
+	
+	public void insertEventData(BasicDBObject query) {
+		db = mongoClient.getDB(DB_NAME);
+		db.getCollection("EventData").insert(query);
+	}
+	
+	public void insertDurationData(BasicDBObject query) {
+		db = mongoClient.getDB(DB_NAME);
+		db.getCollection("DurationData").insert(query);
+	}
+	
+	public DBCursor getFromToUrl(BasicDBObject query) {
+		db = mongoClient.getDB(DB_NAME);
+		return db.getCollection("DurationData").find(query);
 	}
 	
 	
