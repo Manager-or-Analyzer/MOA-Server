@@ -94,9 +94,9 @@ public class KeywordManager {
 //				double ival 	= (Double) val_iter.next();
 //				System.out.println(ikey + "\t " + ival);
 			TF_IDF tfid = new TF_IDF();
-			tfid.url = hpd.url;
+			tfid.snippet.url = hpd.url;
 			tfid.userid = hpd.userid;
-			tfid.keywordList = sorted_tfidf;
+			tfid.keywordList = TF_IDF_list;
 			DBManager.getInstnace().insertData("KeywordCollection", new Gson().toJson(tfid));
 //			}
 		}catch (Exception e) {

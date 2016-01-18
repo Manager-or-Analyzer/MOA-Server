@@ -16,7 +16,7 @@ import kr.co.moa.DBManager;
 
 public class TimeCalculator {
 	private static TimeCalculator instance;
-	private static final long minCalcTime = (long) 30; //second
+	private static final long minCalcTime = (long) 15; //second
 	private static final long maxWaitTime = (long) 5;  //minute
 	
 	
@@ -51,7 +51,10 @@ public class TimeCalculator {
 			}
 		});
 		
+		
+		boolean start = false;
 		for(EventData e : events){
+			if(!start && !e.type.equals("pagein")) continue;
 			Date d = null;
 			try {
 				d = sdf.parse(e.time);
@@ -84,7 +87,7 @@ public class TimeCalculator {
 		dd.userid = pageout.userid;
 		dd.url = pageout.url;
 		dd.time = events.get(0).time;
-		dd.duration = total.toString();
+		dd.duration = (double) total;
 		try {
 			DBManager.getInstnace().insertData("DurationData", new Gson().toJson(dd));
 		} catch (Exception e1) {

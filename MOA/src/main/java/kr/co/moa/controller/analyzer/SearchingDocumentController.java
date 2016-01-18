@@ -3,8 +3,10 @@ package kr.co.moa.controller.analyzer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,9 +16,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import kr.co.MapUtil;
+import kr.co.Util;
+import kr.co.data.DateData;
+import kr.co.data.DomTimeData;
 import kr.co.data.SearchData;
+import kr.co.data.Snippet;
 import kr.co.data.TF_IDF;
 import kr.co.moa.DBManager;
+import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
@@ -30,7 +37,7 @@ public class SearchingDocumentController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final int KEYWORD_NUM = 5;			//p		shrot doc : 5 / long doc : 10
 	private static final int DIFF_NUM = 100;			//q 
-       
+	   
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -47,52 +54,120 @@ public class SearchingDocumentController extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		PrintWriter out = response.getWriter();	
-		String str = request.getParameter("data");		
-		DBCursor cursor = null;
-		SearchData sd = new Gson().fromJson(str, SearchData.class);
-		HashMap<String, TF_IDF> rawdata = new HashMap<String, TF_IDF>();
+		String userid;
+		HashMap<String, TF_IDF> rawdata    = new HashMap<String, TF_IDF>();;
+		HashMap<String, Double> similarDoc = new HashMap<String, Double>();
+	    PrintWriter out = response.getWriter();	
+		String str      = request.getParameter("data");		
+		String str_date = request.getParameter("date");
+		SearchData sd = new Gson().fromJson(str,      SearchData.class);
+		DateData dd   = new Gson().fromJson(str_date, DateData.class  );
 		
-		if(sd.searches.equals("") && sd.searches == null){ 
+		if(sd.searches == null || sd.searches.equals("")){ 
 			out.println("fail");
 			return;
 		}
+		userid = sd.userid;
+		String[] keywords = {"slider", "팝업"};//getKeywords(sd.searches);
+		DBCursor[] cursor = new DBCursor[keywords.length];
 		
-		try {
-			cursor = DBManager.getInstnace().getTargetDocuments(sd);
-		} catch (Exception e) {
-			//DB exception
-		}		
+		for(int i = 0; i < keywords.length; i++){
+			try {
+				cursor[i] = DBManager.getInstnace().getTargetDocuments(userid, keywords[i]);
+			} catch (Exception e) {
+				//DB exception
+			}
+			calcSimilarity(userid, rawdata, similarDoc, cursor[i], keywords[i]);
+		}
+		//sorting
+		Date startDay = null; 	Date endDay = null;
+		if(dd.start == null || dd.start.equals("")) startDay = new Date(0);
+		else 										startDay = Util.strToDate(dd.start);
+		if(dd.end == null   || dd.end.equals("")) 	endDay   = new Date();
+		else 										endDay   = Util.strToDate(dd.end);
 		
-		Gson gson = new Gson();
+		reflectDuration(userid, startDay, endDay, similarDoc);
+		//sorting
+		similarDoc = (HashMap<String, Double>) MapUtil.Map_sortByValue(similarDoc);
+		rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
+		
+		System.out.println(similarDoc);
+		System.out.println(rawdata);
+				
+		out.println("success");
+	}
+	
+	
+	private void reflectDuration(String userid, Date startDay, Date endDay, 
+			HashMap<String, Double> similarDoc) {
+		HashMap<String, Double> map = new HashMap<String, Double>();
+		DBCursor cursor = DBManager.getInstnace().getDurationData(userid, similarDoc.keySet());
+		while(cursor.hasNext()){
+			//parsing
+			BasicDBObject raw = (BasicDBObject) cursor.next();
+			DomTimeData obj = new DomTimeData();
+			obj.userid = (String) raw.getString("userid");
+			obj.url = (String) raw.getString("url");
+			obj.time = (String) raw.getString("time");
+			obj.duration = Double.parseDouble(raw.getString("duration"));//(double) raw.getString("duration");
+			
+			
+			Date time = Util.strToDate(obj.time);
+			if(startDay.compareTo(time) > 0 && endDay.compareTo(time) < 0) continue;		//기간 내 데이터만 고
+			if(map.containsKey(obj.url)) map.put(obj.url, map.get(obj.url) + obj.duration);
+			else 						 map.put(obj.url, obj.duration);
+		}
+		
+		Iterator<String> iter = similarDoc.keySet().iterator();
+		while(iter.hasNext()){
+			String url = iter.next();
+			if(!map.containsKey(url)) continue;
+			similarDoc.put( url, (similarDoc.get(url) * map.get(url)) );
+		}
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	private void calcSimilarity(String userid, HashMap<String, TF_IDF> rawdata, 
+			HashMap<String, Double> similarDoc, DBCursor cursor, String searches) {
+		if(!cursor.hasNext()){			//userid에 해당하는 일치하는 키워드 없음 
+			System.out.println("No match data with keyword : " + searches + " / " + userid);
+			return;
+		}
 		double maxWeight = 0;		
 		String standard_url = null;		//기준문서 
+		ArrayList<TF_IDF> arr = new ArrayList<TF_IDF>();
+		
 		while(cursor.hasNext()){
 			//parsing
 			BasicDBObject obj = (BasicDBObject) cursor.next();
+			BasicDBObject sni_obj = (BasicDBObject) obj.get("snippet");
+			Snippet sni = new Snippet();
 			TF_IDF temp = new TF_IDF();
-			//gson.fromJson(cursor.next().toString(), KeywordData.class);    
+
+			sni.title = sni_obj.getString("title");
+			sni.url   = sni_obj.getString("url");
+			sni.time  = sni_obj.getString("time");
+			sni.img   = sni_obj.getString("img");
 			temp.userid = (String) obj.get("userid");
-			temp.url = (String) obj.get("url");
+			temp.snippet = sni;
 			temp.keywordList = (Map<String, Double>) obj.get("keywordList");
 			
 			//sorting
-	        temp.keywordList = MapUtil.Map_sortByValue(temp.keywordList);
+	        //temp.keywordList = MapUtil.Map_sortByValue(temp.keywordList);
 	        
-	        //최대값 구함 
-	        if(temp.keywordList.get(sd.searches) > maxWeight){
-	        	maxWeight = temp.keywordList.get(sd.searches);
-	        	standard_url = temp.url;
+			//최대값 구함 
+	        if(temp.keywordList.get(searches) > maxWeight){
+	        	maxWeight = temp.keywordList.get(searches);
+	        	standard_url = temp.snippet.url;
 	        }
-			rawdata.put(temp.url, temp);
+			rawdata.put(temp.snippet.url, temp);
+			arr.add(temp);
 		}
 		System.out.println(standard_url + " / " + maxWeight);
 		
 		//3. url군집에 속하는 상위 keyword_num개의 키워드 가져옴
-		ArrayList<TF_IDF> arr = new ArrayList<TF_IDF>(rawdata.values());
- 		HashMap<Integer, ArrayList<String>> reduced = new HashMap<Integer, ArrayList<String>>();
+		HashMap<Integer, ArrayList<String>> reduced = new HashMap<Integer, ArrayList<String>>();
 		int[] standard_hashcodes = new int[DIFF_NUM];
 		String[] standard_keywords = null;
 		
@@ -103,13 +178,14 @@ public class SearchingDocumentController extends HttpServlet {
 			for(int i = 0; i < DIFF_NUM; i++){
 				int minHashcode = 0x00010000;
 				for(int k = 0; k < KEYWORD_NUM; k++){
+					if(keyword[k] == null || keyword[k].equals(""))	break;
 					hashcodes[k] = getHashCode(keyword[k], i);
 					if(minHashcode > hashcodes[k]) minHashcode = hashcodes[k];
 				}
-				emit(reduced, minHashcode, entry.url);	//minhashcode를 key로하여 emit
-				if(entry.url.equals(standard_url)) standard_hashcodes[i] = minHashcode;
+				emit(reduced, minHashcode, entry.snippet.url);	//minhashcode를 key로하여 emit
+				if(entry.snippet.url.equals(standard_url)) standard_hashcodes[i] = minHashcode;
 			}
-			if(entry.url.equals(standard_url))	   standard_keywords     = keyword;
+			if(entry.snippet.url.equals(standard_url))	   standard_keywords     = keyword;
 		}
 		System.out.println(reduced);
 		
@@ -121,26 +197,21 @@ public class SearchingDocumentController extends HttpServlet {
 		/*url-keyword 행렬 생성 
 			행렬생성하지 않고, 코사인 유사도를 구하면서 한꺼번에 계산한
 		*/
-		Map<String, Double> similar_doc = 
-				cosineSimilarity(clustedGroup, standard_url, rawdata, standard_keywords);
-		
-		System.out.println(similar_doc);
-		
-		out.println("success");
-		
+		cosineSimilarity(rawdata, similarDoc, clustedGroup, standard_url, standard_keywords);
+		//System.out.println(similar_doc);
 	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Map<String, Double> cosineSimilarity(
-			ArrayList<String> clustedGroup, String standard_url, HashMap<String, TF_IDF> rawdata, String[] standard_keywords) {
+
+	private void cosineSimilarity(
+			HashMap<String, TF_IDF> rawdata, HashMap<String, Double> similarDoc, 
+			ArrayList<String> clustedGroup, String standard_url, String[] standard_keywords) {
 		/*
 		 * 문서간의 유사도를 코사인 유사도를 이용하여 계산한 후
 		 * 코사인유사도 값이 높은 문서 순으로 소팅하여 map에 넣어 반환해주는 함수 
 		 */
-		HashMap<String, Double> result = new HashMap<String, Double>();
 		double standard_doc_div = 0;
 		double[] standard_wight = new double[KEYWORD_NUM];
 		for(int i = 0; i<KEYWORD_NUM; i++){
+			if(standard_keywords[i] == null || standard_keywords[i].equals(""))	break;
 			standard_wight[i] = rawdata.get(standard_url).keywordList.get(standard_keywords[i]);
 			standard_doc_div += (standard_wight[i] * standard_wight[i]);
 		}
@@ -158,19 +229,31 @@ public class SearchingDocumentController extends HttpServlet {
 					target_doc_div += (weight * weight);
 					numerator 	   += (weight * standard_wight[k]);
 					//System.out.print(weight + " ");
-				}else{
+				}//else{
 					//System.out.print("0 ");
-				}
+				//}
 			}
 			//System.out.println();
 			target_doc_div = Math.sqrt(target_doc_div);
 			
-			result.put(target_url, numerator/(standard_doc_div * target_doc_div));
+			double cos_sim;
+			if(numerator == 0) 	cos_sim = 0;
+			else 				cos_sim = numerator/(standard_doc_div * target_doc_div);
+			
+			if(similarDoc.containsKey(target_url)){
+				//target_url이 이미 존재한다면 두 키워드에 중첩되는 문서 이므로 가중치 값을 더한다 
+				similarDoc.put(target_url, similarDoc.get(target_url) + cos_sim);
+			}else{
+				similarDoc.put(target_url, cos_sim);
+			}
 		}
-		
-		//sorting
-		result = (HashMap<String, Double>) MapUtil.Map_sortByValue(result);
-		return result;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private String[] getKeywords(String searches) {
+		searches = searches.replace('+', ' ');
+		Map temp = MorphemeAnalyzer.getInstance().doMecabProcess(searches, null);	
+		return (String[]) temp.keySet().toArray();
 	}
 	
 	private String[] getFirstEntries(int max, Map<String, Double> keywords) {
@@ -219,6 +302,12 @@ public class SearchingDocumentController extends HttpServlet {
 				1453,	1459,	1471,	1481,	1483,	1487,	1489,	1493,	1499,	1511};
 	    final int bmax = 0x0000FFFF; 
 	    return (((s.hashCode() * (index*2 + 1)) + Math.min(primes[index], bmax)) >> (Integer.SIZE / 2));
+	}
+	public class DomTimeDataTemp {
+		public String userid;
+		public String url;
+		public String time;
+		public String duration;
 	}
 
 }

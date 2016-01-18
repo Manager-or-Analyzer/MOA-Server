@@ -22,15 +22,13 @@ import com.mongodb.util.JSON;
 import kr.co.data.EventData;
 import kr.co.data.HtmlData;
 import kr.co.data.HtmlParsedData;
-
 import kr.co.data.SearchData;
-
 import kr.co.data.IDf;
 
 //singleton���� ���� 
 public class DBManager {	
 	
-	private static final String DB_NAME = "test";
+	private static final String DB_NAME = "MOA";
     private static final String IP = "210.118.74.183";
     private static final int PORT = 27017;
     private static DBManager instance;
@@ -253,14 +251,14 @@ public class DBManager {
     }
     
     
-	public DBCursor getTargetDocuments(SearchData sd) {
+	public DBCursor getTargetDocuments(String userid, String keyword) {
 		db = mongoClient.getDB(DB_NAME);
 
     	DBCollection collection = db.getCollection("KeywordCollection");
     	
     	BasicDBObject query = new BasicDBObject();
-    	query.put("userid", sd.userid);
-    	query.put("keywordList."+sd.searches, new BasicDBObject("$exists", true));
+    	query.put("userid", userid);
+    	query.put("keywordList." + keyword, new BasicDBObject("$exists", true));
     	
     	return collection.find(query);
 	}
@@ -351,6 +349,15 @@ public class DBManager {
 				firstMap, firstReduce, "outputMinhash", 
 				MapReduceCommand.OutputType.REDUCE, null);
 		return null;
+	}
+	public DBCursor getDurationData(String userid, Set<String> set) {
+		db = mongoClient.getDB(DB_NAME);
+    	
+    	BasicDBObject query = new BasicDBObject();
+    	query.put("userid", userid);
+    	query.put("url", new BasicDBObject("$in", set));
+    	
+    	return db.getCollection("DurationData").find(query);
 	}
 	
 	
