@@ -115,6 +115,7 @@ public class KeywordManager {
 			}
 			
 			TF_IDF tfid = new TF_IDF();
+
 			tfid.snippet = hpd.snippet;
 			tfid.userid = hd.userid;
 			tfid.keywordList = MapUtil.Map_sortByValue(TF_IDF_list);

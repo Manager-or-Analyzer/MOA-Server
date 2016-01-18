@@ -147,7 +147,7 @@ public class MorphemeAnalyzer {
 		Map words_map = doMecabProcess(content, "event");
 		EventParsedData epd = new EventParsedData(  eventData.userid, 
 													eventData.url, 
-												    eventData.time, 
+												    eventData.time.toString(), 
 												    words_map);
 		
 		try {
@@ -379,8 +379,8 @@ public class MorphemeAnalyzer {
 		    	if(str.length() == 3 && str.equals("EOS")) continue;
 		    	String[] tok = str.split("\t");
 		    	if(!tok[1].substring(0, 3).equals("NNG") 		&& 		//ignore NOT a noun
-		    			!tok[1].substring(0, 3).equals("NNP") 	&&		//ignore NOT a foreign language
-		    			!tok[1].substring(0, 2).equals("SL") ) continue;//ignore NOT a foreign language
+		    			!tok[1].substring(0, 3).equals("NNP") 	&&		//ignore NOT a noun
+		    			!tok[1].substring(0, 2).equals("SL")) continue;	//ignore NOT a forein language
 		    	WordTagPair entry = new WordTagPair();
 		    	entry.word = tok[0];
 		    	entry.tag = tok[1].split(",")[0];

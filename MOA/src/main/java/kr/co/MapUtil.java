@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.data.TF_IDF;
+
 public class MapUtil<K,V> {
 	public static <K, V extends Comparable<? super V>> Map<K, V> 
     		Map_sortByValue( Map<K, V> map ){
@@ -23,5 +25,19 @@ public class MapUtil<K,V> {
 		}
 		return result;
 	}
-
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Map<String, TF_IDF> sortRawdataAsSimilarity(Map rawdata, Map similarDoc){
+		/*
+		 * rawdata를 simildoc의 순서에 맞게 정렬해 주는 함수 
+		 * 자료형에 종속적임.
+		 */
+		Map<String, TF_IDF> result = new LinkedHashMap<String, TF_IDF>();
+		
+		List<Map.Entry<String, Double>> list = new LinkedList<Map.Entry<String, Double>>( similarDoc.entrySet());
+		for(Map.Entry<String, Double> entry : list){
+			result.put( entry.getKey(), (TF_IDF) rawdata.get(entry.getKey()) );
+		}
+		return result;
+	}
 }
