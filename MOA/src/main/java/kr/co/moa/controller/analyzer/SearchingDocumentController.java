@@ -66,16 +66,19 @@ public class SearchingDocumentController extends HttpServlet {
 			//DB exception
 		}		
 		
-		Gson gson = new Gson();
 		double maxWeight = 0;		
 		String standard_url = null;		//기준문서 
+		if(!cursor.hasNext()){			//userid에 해당하는 일치하는 키워드 없음 
+			System.out.println("No match data with keyword : " + sd.searches + " / " + sd.userid);
+		}
+		
 		while(cursor.hasNext()){
 			//parsing
 			BasicDBObject obj = (BasicDBObject) cursor.next();
 			TF_IDF temp = new TF_IDF();
 			//gson.fromJson(cursor.next().toString(), KeywordData.class);    
 			temp.userid = (String) obj.get("userid");
-			temp.url = (String) obj.get("url");
+			temp.snippet.url = (String) obj.get("url");
 			temp.keywordList = (Map<String, Double>) obj.get("keywordList");
 			
 			//sorting
@@ -84,9 +87,9 @@ public class SearchingDocumentController extends HttpServlet {
 	        //최대값 구함 
 	        if(temp.keywordList.get(sd.searches) > maxWeight){
 	        	maxWeight = temp.keywordList.get(sd.searches);
-	        	standard_url = temp.url;
+	        	standard_url = temp.snippet.url;
 	        }
-			rawdata.put(temp.url, temp);
+			rawdata.put(temp.snippet.url, temp);
 		}
 		System.out.println(standard_url + " / " + maxWeight);
 		
@@ -106,10 +109,10 @@ public class SearchingDocumentController extends HttpServlet {
 					hashcodes[k] = getHashCode(keyword[k], i);
 					if(minHashcode > hashcodes[k]) minHashcode = hashcodes[k];
 				}
-				emit(reduced, minHashcode, entry.url);	//minhashcode를 key로하여 emit
-				if(entry.url.equals(standard_url)) standard_hashcodes[i] = minHashcode;
+				emit(reduced, minHashcode, entry.snippet.url);	//minhashcode를 key로하여 emit
+				if(entry.snippet.url.equals(standard_url)) standard_hashcodes[i] = minHashcode;
 			}
-			if(entry.url.equals(standard_url))	   standard_keywords     = keyword;
+			if(entry.snippet.url.equals(standard_url))	   standard_keywords     = keyword;
 		}
 		System.out.println(reduced);
 		

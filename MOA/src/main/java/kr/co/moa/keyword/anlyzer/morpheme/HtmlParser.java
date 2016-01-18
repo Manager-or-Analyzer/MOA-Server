@@ -12,7 +12,7 @@ import org.jsoup.select.Elements;
 
 import kr.co.DebuggingLog;
 import kr.co.data.HtmlData;
-import kr.co.data.HtmlParsedData;
+import kr.co.data.parsed.HtmlParsedData;
 /* 2015-12-30
  * <body> 위주의  CBT완성.
  * 람다 값을 정한 후 CBT로 부터 noise를 제거한 TT완성
@@ -208,9 +208,9 @@ public class HtmlParser {
 		Document doc = Jsoup.parse(html);
 		
 		//title 가져오기
-		hdp.title = doc.title();
+		hdp.snippet.title = doc.title();
 		//decription 가져오기
-		hdp.imrsrc = getImagesrc(doc);
+		hdp.snippet.img = getImagesrc(doc);
 		// decription tag 삭제 및 iframe 추가
 		for(Element e : doc.getAllElements()){
 			if(uselessTag.containsKey(e.tagName())){
