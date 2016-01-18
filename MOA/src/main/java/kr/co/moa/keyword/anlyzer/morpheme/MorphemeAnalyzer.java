@@ -19,10 +19,11 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import kr.co.DebuggingLog;
-import kr.co.data.EventData;
-import kr.co.data.EventParsedData;
-import kr.co.data.HtmlData;
-import kr.co.data.HtmlParsedData;
+import kr.co.data.origin.EventData;
+import kr.co.data.origin.HtmlData;
+import kr.co.data.parsed.EventParsedData;
+import kr.co.data.parsed.HtmlParsedData;
+import kr.co.data.send.Snippet;
 import kr.co.moa.DBManager;
 
 import org.bitbucket.eunjeon.seunjeon.Analyzer;
@@ -83,7 +84,9 @@ public class MorphemeAnalyzer {
 		userid = html.userid;
 		//DebuggingLog debug = new DebuggingLog("Content");
 		HtmlParser hp = new HtmlParser();
-		HtmlParsedData hpd = new HtmlParsedData(html.userid, html.url, html.time);
+		HtmlParsedData hpd = new HtmlParsedData();
+		hpd.snippet.time = html.time;
+		hpd.snippet.url = html.url;
 		/*
 		 *  public String userid = html.userid;
 			public String url = html.url;
@@ -105,9 +108,9 @@ public class MorphemeAnalyzer {
 //		debug.write(content);
 //		debug.writeln();
 //	  	debug.writeln();
-	  	System.out.println("title : "  		+ hpd.title );
+	  	System.out.println("title : "  		+ hpd.snippet.title );
 	  	System.out.println("content : "		+ content   );
-	  	System.out.println("decription : "	+ hpd.imrsrc);
+	  	System.out.println("decription : "	+ hpd.snippet.img);
 //	    Map words_map = doMecab(content, "html");
 	  	Map words_map = doMecabProcess(content, "html");
 	  	hpd.keywordList = words_map;
@@ -176,9 +179,8 @@ public class MorphemeAnalyzer {
         for (LNode term: result) {
 			type = term.morpheme().feature().head();
 			
-			if(type.charAt(0) != 'N'   && 			//ignore NOT a noun
-					!type.equals("SL") &&			//ignore NOT a foreign language
-					!type.equals("SN") ) continue;	//ignore NOT a number
+			if(type.charAt(0) != 'N' && 			//ignore NOT a noun
+					!type.equals("SL")) continue;	//ignore NOT a foreign language	
 			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
 				word = tagger.tagString(term.morpheme().surface());
 				String[] temp = word.split("/");
@@ -300,7 +302,7 @@ public class MorphemeAnalyzer {
 				String[] temp = word.split("/");
 				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
 			}
-			word = term.word;
+			word = term.word.toLowerCase();
 			
 			if(countingMap.containsKey(word)) 	countingMap.put(word, countingMap.get(word) + 1);
 			else 								countingMap.put(word, 1);

@@ -12,10 +12,11 @@ import com.google.gson.Gson;
 
 import kr.co.DebuggingLog;
 import kr.co.Log;
-import kr.co.data.EventData;
-import kr.co.data.HtmlData;
+import kr.co.data.origin.EventData;
+import kr.co.data.origin.HtmlData;
 import kr.co.moa.DBManager;
 import kr.co.moa.event.TimeCalculator;
+import kr.co.moa.keyword.KeywordManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 /**
@@ -39,8 +40,9 @@ public class EventReceiverController extends HttpServlet {
 		//DebuggingLog.getInstance().info(CLASS, eventData);				
 		if(!eventData.equals("") && eventData != null){
 			try {
-				if(ed.type.equals("drag"))
-					MorphemeAnalyzer.getInstance().parsingEvent(ed);
+				if(ed.type.equals("drag")){
+					KeywordManager.getInstance().applyEvent(ed);
+				}					
 				else if(ed.type.equals("pageout")){
 					TimeCalculator.getInstance().calcTime(ed);
 					ed.isUsed = true;

@@ -1,4 +1,4 @@
-package kr.co.data;
+package kr.co.data.parsed;
 
 import java.util.Map;
 

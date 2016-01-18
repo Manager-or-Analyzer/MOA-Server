@@ -17,7 +17,7 @@ import org.jsoup.Jsoup;
 
 import com.google.gson.Gson;
 
-import kr.co.data.HtmlData;
+import kr.co.data.origin.HtmlData;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 import kr.co.moa.keyword.anlyzer.morpheme.Tree;

@@ -20,8 +20,8 @@ import kr.co.Util;
 import kr.co.data.DateData;
 import kr.co.data.DomTimeData;
 import kr.co.data.SearchData;
-import kr.co.data.Snippet;
 import kr.co.data.TF_IDF;
+import kr.co.data.send.Snippet;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
@@ -87,6 +87,7 @@ public class SearchingDocumentController extends HttpServlet {
 		if(dd.end == null   || dd.end.equals("")) 	endDay   = new Date();
 		else 										endDay   = Util.strToDate(dd.end);
 		
+
 		reflectDuration(userid, startDay, endDay, similarDoc);
 		//sorting
 		similarDoc = (HashMap<String, Double>) MapUtil.Map_sortByValue(similarDoc);
@@ -134,9 +135,12 @@ public class SearchingDocumentController extends HttpServlet {
 			System.out.println("No match data with keyword : " + searches + " / " + userid);
 			return;
 		}
+
 		double maxWeight = 0;		
 		String standard_url = null;		//기준문서 
+
 		ArrayList<TF_IDF> arr = new ArrayList<TF_IDF>();
+
 		
 		while(cursor.hasNext()){
 			//parsing
@@ -155,13 +159,15 @@ public class SearchingDocumentController extends HttpServlet {
 			
 			//sorting
 	        //temp.keywordList = MapUtil.Map_sortByValue(temp.keywordList);
-	        
+
 			//최대값 구함 
 	        if(temp.keywordList.get(searches) > maxWeight){
 	        	maxWeight = temp.keywordList.get(searches);
+
 	        	standard_url = temp.snippet.url;
 	        }
 			rawdata.put(temp.snippet.url, temp);
+
 			arr.add(temp);
 		}
 		System.out.println(standard_url + " / " + maxWeight);
