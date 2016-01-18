@@ -49,7 +49,7 @@ public class HTMLReceiverController extends HttpServlet {
 			try {
 				DBManager.getInstnace().insertData("HtmlData", htmlData);				
 				//Log.getInstance().info(CLASS, "DB :insertData success");
-				if(!DBManager.getInstnace().isDocExist(hd.url)){
+				if(!DBManager.getInstnace().isDocExist(hd.url, hd.userid)){
 					KeywordManager.getInstance().calTF_IDF(hd);
 					
 				}else{

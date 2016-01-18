@@ -8,7 +8,7 @@ public class HtmlParsedData {
 	public Snippet snippet;
 	public String collectionName = "HtmlParsedData";
 	public Map<String,Integer> keywordList;
-	
+	public Map<String,Boolean> userList;
 	public HtmlParsedData(){
 		snippet = new Snippet();
 	}

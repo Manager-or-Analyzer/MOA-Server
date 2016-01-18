@@ -87,6 +87,9 @@ public class MorphemeAnalyzer {
 		HtmlParsedData hpd = new HtmlParsedData();
 		hpd.snippet.time = html.time;
 		hpd.snippet.url = html.url;
+		hpd.userList = new HashMap<String, Boolean>();
+		String unicode_userid = html.userid.replace(".", "\uff0E");
+		hpd.userList.put(unicode_userid, true);
 		/*
 		 *  public String userid = html.userid;
 			public String url = html.url;
@@ -117,7 +120,11 @@ public class MorphemeAnalyzer {
 	     
 	  	//debug.close();
 	  	try {
-	  		DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
+	  		if(!DBManager.getInstnace().isParsedDataExist(html.url))	
+	  			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
+	  		else{
+	  			DBManager.getInstnace().updateParsedData(html.url, unicode_userid);
+	  		}
 	  	} catch (Exception e) {
 	  		e.printStackTrace();
 	  	}
@@ -125,7 +132,7 @@ public class MorphemeAnalyzer {
 	  	return hpd;
 	}
 	
-	public void parsingEvent(EventData eventData){
+	public EventParsedData parsingEvent(EventData eventData){
 		url = eventData.url;
 		userid = eventData.userid;
 		String content = eventData.data;
@@ -148,6 +155,7 @@ public class MorphemeAnalyzer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return epd;
 	}
 	
 	
@@ -372,8 +380,7 @@ public class MorphemeAnalyzer {
 		    	String[] tok = str.split("\t");
 		    	if(!tok[1].substring(0, 3).equals("NNG") 		&& 		//ignore NOT a noun
 		    			!tok[1].substring(0, 3).equals("NNP") 	&&		//ignore NOT a foreign language
-		    			!tok[1].substring(0, 2).equals("SL") 	&&		//ignore NOT a foreign language
-		    			!tok[1].substring(0, 2).equals("SN")) continue;	//ignore NOT a number
+		    			!tok[1].substring(0, 2).equals("SL") ) continue;//ignore NOT a foreign language
 		    	WordTagPair entry = new WordTagPair();
 		    	entry.word = tok[0];
 		    	entry.tag = tok[1].split(",")[0];

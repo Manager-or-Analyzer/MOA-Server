@@ -10,6 +10,7 @@ import kr.co.MapUtil;
 import kr.co.data.TF_IDF;
 import kr.co.data.origin.EventData;
 import kr.co.data.origin.HtmlData;
+import kr.co.data.parsed.EventParsedData;
 import kr.co.data.parsed.HtmlParsedData;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
@@ -34,11 +35,49 @@ public class KeywordManager {
 	}
 	
 	public void applyEvent(EventData ed){
-		MorphemeAnalyzer.getInstance().parsingEvent(ed);
+		EventParsedData epd = MorphemeAnalyzer.getInstance().parsingEvent(ed);
+		HtmlParsedData hpd = DBManager.getInstnace().getHtmlParsedData(ed.url);
+		if(hpd == null){
+			System.out.println("There is no HtmlParsedData at url :"+ed.url);
+			return;
+		}
+		try {			
+			Map<String, Double> Tf_map = cal_TF(hpd.keywordList);
+			Map<String, Double> Tf_Event = cal_TF_Event(DBManager.getInstnace().getParsedEvents(ed.userid, ed.url));
+			if(Tf_map == null){
+				System.out.println("There is no TFList at url :"+ed.url);
+				return;
+			}
+			Map<String, Double> idfList = DBManager.getInstnace().getIDFList(Tf_Event);
+						
+			//event 가중치 계산.
+			
+			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
+			
+			for(String key : Tf_Event.keySet()){
+				Double tf = Tf_Event.get(key)*W_EVNET;				
+				Double idf;
+				if((idf =idfList.get(key)) == null){
+					idf = 0.0;
+				}
+				if(Tf_map.containsKey(key)){					
+					tf += Tf_map.get(key);
+					Tf_map.replace(key, tf*idf );
+				}
+			//	TF_IDF_list.put(key, tf*idf);
+			}
+//			TF_IDF_list = MapUtil.Map_sortByValue(TF_IDF_list);
+//			for(String key : TF_IDF_list.keySet()){
+//				System.out.println("key : "+key+" val:"+TF_IDF_list.get(key));
+//			}
+			Tf_map = MapUtil.Map_sortByValue(Tf_map);
+			System.out.println("start");
+			DBManager.getInstnace().updateTF_IDFByEvent(ed.url, ed.userid, Tf_map);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		//타이머를 돌린다.
-		// 
-		//1. htmlparsedData를 얻어 온다.
 	}
 	public void calTF_IDF(HtmlData hd){
 		HtmlParsedData hpd = MorphemeAnalyzer.getInstance().parsingHTML(hd);
@@ -56,9 +95,7 @@ public class KeywordManager {
 			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList);			
 			//title 가중치 계산
 			Map<String, Double> Tf_Title = cal_TF(MorphemeAnalyzer.getInstance().doMecabProcess(hpd.snippet.title, "html"));	
-			//event 가중치 계산.
-			Map<String, Double> Tf_Event = cal_TF_Event(DBManager.getInstnace().getParsedEvents(hd.userid, hd.url));
-			//Map<String, Double> Tf_Event = new HashMap<String, Double>();
+			
 			
 			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
 			
@@ -68,9 +105,7 @@ public class KeywordManager {
 					
 					tf += Tf_Title.get(key)*W_TITLE;
 				}
-				if(Tf_Event.size()!=0 && Tf_Event.containsKey(key)){
-					tf += Tf_Event.get(key)*W_EVNET;
-				}
+
 				Double idf;
 				if((idf =idfList.get(key)) == null){
 					idf = 0.0;
@@ -89,8 +124,8 @@ public class KeywordManager {
 			for(String key : tfid.keywordList.keySet()){
 				System.out.println(key + "\t " + tfid.keywordList.get(key));
 			}
-					
 			DBManager.getInstnace().insertData("KeywordCollection", new Gson().toJson(tfid));
+			
 		}catch (Exception e) {
 			e.printStackTrace();
 		}

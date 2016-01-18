@@ -8,7 +8,7 @@ public class EventParsedData {
 	public String time;
 	public boolean isUsed;
 	
-	public Map<String,String> keywordList;
+	public Map<String,Integer> keywordList;
 	
 	public EventParsedData(String id, String url, String time, Map words){
 		userid = id;
