@@ -11,7 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import kr.co.DebuggingLog;
-import kr.co.data.HtmlData;
+import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.HtmlParsedData;
 /* 2015-12-30
  * <body> 위주의  CBT완성.

@@ -1,20 +1,15 @@
 
 package kr.co.moa.keyword;
 
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import com.google.gson.Gson;
 
 import kr.co.MapUtil;
-import kr.co.data.HtmlData;
-import kr.co.data.IDf;
 import kr.co.data.TF_IDF;
+import kr.co.data.origin.EventData;
+import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.HtmlParsedData;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
@@ -38,23 +33,25 @@ public class KeywordManager {
 		
 	}
 	
-	public void parsingHTML(String html){
+	public void applyEvent(EventData ed){
+		MorphemeAnalyzer.getInstance().parsingEvent(ed);
 		
+		//타이머를 돌린다.
+		// 
+		//1. htmlparsedData를 얻어 온다.
 	}
-	
 	public void calTF_IDF(HtmlData hd){
 		HtmlParsedData hpd = MorphemeAnalyzer.getInstance().parsingHTML(hd);
 		
 		try {
-			// 이미 방문했던 사이트인진 체크
-			
-			
+			// 이미 방문했던 사이트인진 체크			
 			Map<String, Double> idfList = cal_IDF(hpd.keywordList);
 		 
 //			System.out.println("idfList size"+idfList.size());
 //			for(String key : idfList.keySet()){
 //				System.out.println(key+" "+idfList.get(key));
 //			}
+			
 			//본문 가중치 계산
 			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList);			
 			//title 가중치 계산
@@ -68,6 +65,7 @@ public class KeywordManager {
 			for(String key : Tf_Body.keySet()){
 				Double tf = Tf_Body.get(key)*W_BODY;
 				if(Tf_Title.size() !=0 && Tf_Title.containsKey(key)){
+					
 					tf += Tf_Title.get(key)*W_TITLE;
 				}
 				if(Tf_Event.size()!=0 && Tf_Event.containsKey(key)){
@@ -80,6 +78,7 @@ public class KeywordManager {
 				//System.out.println("tf :"+tf+" idf: "+idf);
 				TF_IDF_list.put(key, tf*idf);
 			}
+			
 			TF_IDF tfid = new TF_IDF();
 			tfid.snippet = hpd.snippet;
 			tfid.userid = hd.userid;
@@ -92,15 +91,13 @@ public class KeywordManager {
 			}
 					
 			DBManager.getInstnace().insertData("KeywordCollection", new Gson().toJson(tfid));
-//			}
 		}catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	private Map cal_TF(Map<String,Integer> wordsByMecab) throws Exception{
-		Map<String,Double> Tf = new HashMap<String, Double>();
+		Map<String,Double> Tf = new HashMap<String, Double>();	
 		
 		int cnt = 0;
 		for(Map.Entry<String, Integer> me : wordsByMecab.entrySet()){
@@ -109,13 +106,6 @@ public class KeywordManager {
 			}else
 				break;
 		}
-//		System.out.println("Tf size: "+Tf.size());
-//		if(Tf.size() !=0){
-//			for(String key : Tf.keySet()){
-//				System.out.println(key+"\t"+Tf.get(key));
-//			}	
-//		}
-		
 		return Tf;
 		
 	}
@@ -129,22 +119,11 @@ public class KeywordManager {
 			}else
 				break;
 		}
-//		System.out.println("Tf size: "+Tf.size());
-//		if(Tf.size() !=0){
-//			for(String key : Tf.keySet()){
-//				System.out.println(key+"\t"+Tf.get(key));
-//			}	
-//		}
+
 		return Tf;
 		
 	}
-	private Map cal_IDF(Map<String,Integer> keywordList) throws Exception{
-		/*
-		 *  DB 연산을 최소화 하는 알고리즘 개선 필요.
-		 *  
-		 *  MongoDB는 wirte 연산이 우선. read 연산 중에도  write 연산이 들어오면 block;
-		 *  해결 필요.
-		 */
+	private Map cal_IDF(Map<String,Integer> keywordList) throws Exception{		
 		DBManager.getInstnace().makeData_IDF();
 		Map<String, Double> idfList = DBManager.getInstnace().getIDFList(keywordList);
 		return idfList;

@@ -19,10 +19,10 @@ import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
-import kr.co.data.EventData;
-import kr.co.data.HtmlData;
 import kr.co.data.IDf;
 import kr.co.data.SearchData;
+import kr.co.data.origin.EventData;
+import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.HtmlParsedData;
 
 //singleton���� ���� 

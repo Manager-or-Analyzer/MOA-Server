@@ -1,4 +1,4 @@
-package kr.co.data;
+package kr.co.data.origin;
 
 public class EventData {
 	public String userid;

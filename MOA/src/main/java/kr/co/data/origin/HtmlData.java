@@ -1,4 +1,4 @@
-package kr.co.data;
+package kr.co.data.origin;
 
 import java.util.ArrayList;
 

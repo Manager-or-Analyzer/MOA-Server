@@ -19,8 +19,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import kr.co.DebuggingLog;
-import kr.co.data.EventData;
-import kr.co.data.HtmlData;
+import kr.co.data.origin.EventData;
+import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.EventParsedData;
 import kr.co.data.parsed.HtmlParsedData;
 import kr.co.data.send.Snippet;

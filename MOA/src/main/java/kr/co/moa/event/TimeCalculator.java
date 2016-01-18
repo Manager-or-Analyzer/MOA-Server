@@ -11,7 +11,7 @@ import java.util.Locale;
 import com.google.gson.Gson;
 
 import kr.co.data.DomTimeData;
-import kr.co.data.EventData;
+import kr.co.data.origin.EventData;
 import kr.co.moa.DBManager;
 
 public class TimeCalculator {
@@ -84,7 +84,7 @@ public class TimeCalculator {
 		dd.userid = pageout.userid;
 		dd.url = pageout.url;
 		dd.time = events.get(0).time;
-		dd.duration = total.toString();
+		dd.duration = total;
 		try {
 			DBManager.getInstnace().insertData("DurationData", new Gson().toJson(dd));
 		} catch (Exception e1) {

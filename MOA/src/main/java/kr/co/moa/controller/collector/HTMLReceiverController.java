@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 import kr.co.DebuggingLog;
 import kr.co.Log;
 import kr.co.TestModule;
-import kr.co.data.HtmlData;
+import kr.co.data.origin.HtmlData;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.KeywordManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
