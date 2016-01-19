@@ -63,6 +63,8 @@ public class SearchingDocumentController extends HttpServlet {
 		String str_date = request.getParameter("date");
 		SearchData sd = new Gson().fromJson(str,      SearchData.class);
 		DateData dd   = new Gson().fromJson(str_date, DateData.class  );
+		System.out.println(str);
+		System.out.println(str_date);
 		
 		if(sd.searches == null || sd.searches.equals("")){ 
 			out.println("fail");
