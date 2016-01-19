@@ -102,8 +102,10 @@ public class SearchingDocumentController extends HttpServlet {
 		System.out.println(sni_list);		
 		System.out.println(new Gson().toJson(sni_list));
 		
-		out.print("snippet : " +new Gson().toJson(sni_list));
-		out.println("success");
+		String res = new Gson().toJson(sni_list);
+		//out.print("snippet : " +new Gson().toJson(sni_list));
+		//out.println("success");
+		out.println(res);
 	}
 	
 	
@@ -263,9 +265,20 @@ public class SearchingDocumentController extends HttpServlet {
 	
 	@SuppressWarnings("rawtypes")
 	private String[] getKeywords(String searches) {
+		
 		searches = searches.replace('+', ' ');
 		Map temp = MorphemeAnalyzer.getInstance().doMecabProcess(searches, null);	
-		return (String[]) temp.keySet().toArray();
+		Iterator iter = temp.keySet().iterator();
+		String[] result = new String[temp.size()];
+		int cnt = 0;
+
+		//System.out.println("keywords~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		while(iter.hasNext()){
+			result[cnt++] = (String) iter.next();
+			//System.out.println(result[cnt-1]);
+		}
+		
+		return result;
 	}
 	
 	private String[] getFirstEntries(int max, Map<String, Double> keywords) {
