@@ -1,5 +1,6 @@
 package kr.co;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import kr.co.data.TF_IDF;
+import kr.co.data.send.Snippet;
 
 public class MapUtil<K,V> {
 	public static <K, V extends Comparable<? super V>> Map<K, V> 

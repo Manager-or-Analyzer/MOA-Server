@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,7 +73,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = {"감사", "킹덤"};//getKeywords(sd.searches);
+		String[] keywords = getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
@@ -93,11 +95,14 @@ public class SearchingDocumentController extends HttpServlet {
 		reflectDuration(userid, startDay, endDay, similarDoc);
 		//sorting
 		similarDoc = (HashMap<String, Double>) MapUtil.Map_sortByValue(similarDoc);
-		rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
+		//rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
+		ArrayList<Snippet> sni_list = makeSniArray(rawdata, similarDoc);
 		
 		System.out.println(similarDoc);
-		System.out.println(rawdata);
-				
+		System.out.println(sni_list);		
+		System.out.println(new Gson().toJson(sni_list));
+		
+		out.print("snippet : " +new Gson().toJson(sni_list));
 		out.println("success");
 	}
 	
@@ -310,11 +315,18 @@ public class SearchingDocumentController extends HttpServlet {
 	    final int bmax = 0x0000FFFF; 
 	    return (((s.hashCode() * (index*2 + 1)) + Math.min(primes[index], bmax)) >> (Integer.SIZE / 2));
 	}
-	public class DomTimeDataTemp {
-		public String userid;
-		public String url;
-		public String time;
-		public String duration;
+	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static ArrayList<Snippet> makeSniArray(Map rawdata, Map similarDoc){
+		ArrayList<Snippet> sni = new ArrayList<Snippet>();
+		
+		List<Map.Entry<String, Double>> list = new LinkedList<Map.Entry<String, Double>>( similarDoc.entrySet());
+		for(Map.Entry<String, Double> entry : list){
+			TF_IDF temp = (TF_IDF) rawdata.get(entry.getKey());
+			sni.add(temp.snippet);
+		}
+		return sni;
 	}
 
 }

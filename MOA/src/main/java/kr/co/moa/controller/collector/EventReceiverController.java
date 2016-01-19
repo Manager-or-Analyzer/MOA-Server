@@ -3,7 +3,6 @@ package kr.co.moa.controller.collector;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import javax.servlet.ServletException;
@@ -14,16 +13,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 
-import kr.co.DebuggingLog;
-import kr.co.Log;
 import kr.co.Util;
 import kr.co.data.origin.EventData;
 import kr.co.data.origin.EventData_deprecated;
-import kr.co.data.origin.HtmlData;
 import kr.co.moa.DBManager;
 import kr.co.moa.event.TimeCalculator;
 import kr.co.moa.keyword.KeywordManager;
-import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 
 /**
  * Servlet implementation class EventReceiverController

@@ -1,7 +1,6 @@
 package kr.co.moa;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
 import kr.co.data.origin.EventData;
-import kr.co.data.origin.EventData_deprecated;
 import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.HtmlParsedData;
 
@@ -28,7 +26,7 @@ import kr.co.data.parsed.HtmlParsedData;
 public class DBManager {	
 	
 	private static final String DB_NAME = "MOA";
-    private static final String IP = "localhost";
+    private static final String IP = "210.118.74.183";
     private static final int PORT = 27017;
     private static DBManager instance;
     private MongoClient mongoClient;
