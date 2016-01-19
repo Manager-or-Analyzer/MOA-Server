@@ -2,10 +2,11 @@ package kr.co;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -31,9 +32,10 @@ public class Util {
 		return sdf.format(date);
 	}
 	
-	public static Set<String> urlFromTo (DateData raw){
+	public static List<String> urlFromTo (DateData raw){
 		Date from = strToDate(raw.start);
 		Date to = strToDate(raw.end);
+		System.out.println("from :"+raw.start+" end:"+raw.end);
 
 		BasicDBObject query = new BasicDBObject();
 		BasicDBObject date_query = new BasicDBObject();
@@ -44,7 +46,7 @@ public class Util {
 		
 		DBCursor cursor = DBManager.getInstnace().getFromToUrl(query);
 		
-		HashSet<String> result = new HashSet<String>();
+		List<String> result = new ArrayList<String>();
 		while(cursor.hasNext()){
 			result.add((String) cursor.next().get("url"));
 		}
