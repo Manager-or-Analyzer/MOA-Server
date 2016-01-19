@@ -62,7 +62,7 @@ public class KeywordManager {
 				}
 				if(Tf_map.containsKey(key)){					
 					tf += Tf_map.get(key);
-					Tf_map.replace(key, tf*idf );
+					Tf_map.replace(key, (Double)tf*idf);
 				}
 			//	TF_IDF_list.put(key, tf*idf);
 			}
