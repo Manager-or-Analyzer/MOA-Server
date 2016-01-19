@@ -26,7 +26,7 @@ import kr.co.data.parsed.HtmlParsedData;
 public class DBManager {	
 	
 	private static final String DB_NAME = "MOA";
-    private static final String IP = "localhost";
+    private static final String IP = "210.118.74.183";
     private static final int PORT = 27017;
     private static DBManager instance;
     private MongoClient mongoClient;
