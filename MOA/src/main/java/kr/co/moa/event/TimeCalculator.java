@@ -27,11 +27,15 @@ public class TimeCalculator {
 	}
 
 	public void calcTime(EventData pageout) {
-		ArrayList<EventData> events = new ArrayList<EventData>();
+		ArrayList<EventData> events;// = new ArrayList<EventData>();
 		ArrayList<Long> eventTimes = new ArrayList<Long>();
 		
+
+/*		System.out.println("calctime");
 		DBCursor cursor = DBManager.getInstnace().getTimeEvent(pageout);
+		System.out.println("cursor size : " + cursor.length());
 		while(cursor.hasNext()){
+			System.out.println("asdfsadfasdfsadf");
     		BasicDBObject obj = (BasicDBObject) cursor.next();
     		EventData ed = new EventData();
     		
@@ -47,8 +51,8 @@ public class TimeCalculator {
     		
     		events.add(ed);
     	}
-
-		
+	*/	
+		events = (ArrayList<EventData>) DBManager.getInstnace().getTimeEvent(pageout);
 		//Sorting
 		Collections.sort(events, new Comparator<EventData>() {
 			@Override
@@ -57,7 +61,6 @@ public class TimeCalculator {
 			}
 		});
 		
-		
 		boolean start = false;
 		int cnt = 0;
 		for(EventData e : events){
@@ -65,7 +68,7 @@ public class TimeCalculator {
 			start = true;
 			eventTimes.add(e.time.getTime());
 		}
-		
+
 		//start calc stay time
 		Long total = (eventTimes.get(events.size()-1) - eventTimes.get(0));
 		if( (total/1000) < minCalcTime ){
@@ -90,6 +93,11 @@ public class TimeCalculator {
 		dd.url = pageout.url;
 		dd.time = events.get(0).time;
 		dd.duration = (double) total;
+
+		System.out.println("userid : " + dd.userid);
+		System.out.println("url : " + dd.url);
+		System.out.println("time : " + dd.time);
+		System.out.println("duration : " + dd.duration);
 		
 		BasicDBObject query = new BasicDBObject();
 		query.put("userid", dd.userid);

@@ -1,6 +1,7 @@
 package kr.co.moa;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -492,7 +493,7 @@ public class DBManager {
     	
     	return collection.find(query);
 	}
-	public DBCursor getTimeEvent(EventData pageout) {
+	public List getTimeEvent(EventData pageout) {
 		db = mongoClient.getDB(DB_NAME);
     	
     	DBCollection collection = db.getCollection("EventData");
@@ -503,6 +504,28 @@ public class DBManager {
     	
     	//get data from MongoDB
 		DBCursor cursor = collection.find(whereQuery);
+		
+		ArrayList<EventData> events = new ArrayList<EventData>();
+		while(cursor.hasNext()){
+			System.out.println("asdfsadfasdfsadf");
+    		BasicDBObject obj = (BasicDBObject) cursor.next();
+    		EventData ed = new EventData();
+    		
+    		ed.userid = obj.getString("userid");
+    		ed.url 	  = obj.getString("url");
+    		ed.type   = obj.getString("type");
+    		ed.data   = obj.getString("data");
+    		ed.time   = obj.getDate("time");
+    		ed.x 	  = obj.getString("x");
+    		ed.y 	  = obj.getString("y");
+    		ed.isUsed = obj.getBoolean("isUsed");
+
+    		//System.out.println(ed.userid);
+    		//System.out.println(ed.url);
+    		//System.out.println(ed.type);
+    		
+       		events.add(ed);
+    	}
     	    	
     	//update data in MongoDB
     	BasicDBObject updateData = new BasicDBObject();
@@ -512,9 +535,14 @@ public class DBManager {
     			append("userid", pageout.userid).
     			append("url", pageout.url).
     			append("isUsed", false);
-    	collection.update(updateQuery, updateData, false, true);
     	
-    	return cursor;
+
+		System.out.println("beforeQuery");
+    	collection.update(updateQuery, updateData, false, true);
+
+		System.out.println("afterQuery");
+    	//return cursor;
+		return events;
 	}
 	
 	public List getSimilar(BasicDBObject minhashInput){
