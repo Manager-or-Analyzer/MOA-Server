@@ -27,7 +27,7 @@ import kr.co.data.parsed.HtmlParsedData;
 //singleton���� ���� 
 public class DBManager {	
 	
-	private static final String DB_NAME = "test";
+	private static final String DB_NAME = "MOA";
     private static final String IP = "localhost";
     private static final int PORT = 27017;
     private static DBManager instance;
@@ -173,10 +173,10 @@ public class DBManager {
    	 			+			"values.forEach(function (doc){"
    	 			+					"for(var k in doc['eventwordsList']){ "
    	 			+						"if(k in map){"
-   	 			+							"map[k] = map[k]+doc['eventwordsList'][k];"
+   	 			+							"map[k] = map[k]+doc['eventwordsList'][k]+0.0;"
    	 			+							"check = 1;"
    	 			+						"}else{"
-   	 			+							"map[k] = doc['eventwordsList'][k];"
+   	 			+							"map[k] = doc['eventwordsList'][k]+0.0;"
    	 			+						"}}});"
    	 			+		"return {eventwordsList :map};};";
    	 	
@@ -193,7 +193,7 @@ public class DBManager {
    	 		System.out.println(res.get("value").toString());
    	 		Object obj = res.get("value");
    	 		DBObject tmp = (DBObject)obj;
-   	 		keywordlist =  (Map)tmp.get("eventwordsList");
+   	 		keywordlist.putAll((Map)tmp.get("eventwordsList"));
    	 	}
    	 	
    	 	return keywordlist;
@@ -215,6 +215,50 @@ public class DBManager {
 //   	 	}
 //   	 	
 //    }
+    public Map getKeywordList(List<String> urls, String userid) throws Exception{
+    	db = mongoClient.getDB(DB_NAME);
+      	for(String s: urls){
+      		System.out.println("url :"+s+" "+userid);
+      	}
+   	 	DBCollection collection = db.getCollection("KeywordCollection");
+   	 	String map = "function() { "
+	 			+		"var key = {name: this.collectionName};"
+	 			+		"emit(key, {keywordsList : this.keywordList});"
+	 			+	"};";
+	 	
+	 	String reduce = "function (key, values) {"
+	 			+			"var map = {};"
+	 			+			"values.forEach(function (doc){"
+	 			+					"for(var k in doc['keywordsList']){ "
+	 			+						"if(k in map){"
+	 			+							"map[k] = map[k]+doc['keywordsList'][k];"
+   	 			+						"}else{"
+   	 			+							"map[k] = doc['keywordsList'][k];"
+   	 			+						"}}});"
+	 			+		"return {keywordsList :map};};";
+
+	 	BasicDBObject query = new BasicDBObject();
+	 		query.append("userid", userid);
+	 		query.append("snippet.url", new BasicDBObject("$in", urls));
+	 		
+	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
+	 			null, MapReduceCommand.OutputType.INLINE, query);
+	 	
+	 		
+	 	MapReduceOutput out = collection.mapReduce(cmd);
+	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
+	 	int cnt = 1;
+	 	for(DBObject res :  out.results()){
+	 		System.out.println("bubble "+res.get("value").toString());
+	 		Object obj = res.get("value");
+	 		DBObject tmp = (DBObject)obj;
+	 		keywordlist.putAll((Map)tmp.get("keywordsList"));
+	 		return keywordlist;
+	 	}
+	 	return null;
+    	
+    }
+    
     public void makeData_IDF() throws Exception{
     	db = mongoClient.getDB(DB_NAME);
       	 
@@ -240,7 +284,7 @@ public class DBManager {
 	 			+							"val = Math.log(totalDoc/cnt);"
 	 			+						"if(val <0)val=0; map[k] = val;"
 	 			+					"}});"
-	 			+		"return {total :totalDoc , idfwordsList :map};};";
+	 			+		"return {key : key , total :totalDoc , idfwordsList :map};};";
 	 	
 	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
 	 			"IdfCollection", MapReduceCommand.OutputType.REPLACE, null);
@@ -410,15 +454,9 @@ public class DBManager {
     }
     public void updateTF_IDFByEvent(String url, String userid, Map<String, Double> keywordList){
     	db = mongoClient.getDB(DB_NAME);
-
-    	System.out.println("updateTF_IDFByEvent");
-    	for(String key : keywordList.keySet()){
-    		System.out.println("key : "+key+" val:"+keywordList.get(key));
-    	}
+    	
     	DBCollection collection = db.getCollection("KeywordCollection");
     	
-    	//BasicDBObject kl = new BasicDBObject((Map) keywordList.entrySet());
-    	//System.out.println(kl);
     	BasicDBObject kl = new BasicDBObject();
     	BasicDBObject searchQuery = new BasicDBObject();
     		searchQuery.put("snippet.url", url);

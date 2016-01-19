@@ -52,8 +52,6 @@ public class KeywordManager {
 						
 			//event 가중치 계산.
 			
-			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
-			
 			for(String key : Tf_Event.keySet()){
 				Double tf = Tf_Event.get(key)*W_EVNET;				
 				Double idf;
@@ -63,15 +61,17 @@ public class KeywordManager {
 				if(Tf_map.containsKey(key)){					
 					tf += Tf_map.get(key);
 					Tf_map.replace(key, tf*idf );
+				}else{
+					Tf_map.put(key, tf*idf);
 				}
-			//	TF_IDF_list.put(key, tf*idf);
 			}
-//			TF_IDF_list = MapUtil.Map_sortByValue(TF_IDF_list);
-//			for(String key : TF_IDF_list.keySet()){
-//				System.out.println("key : "+key+" val:"+TF_IDF_list.get(key));
-//			}
+
 			Tf_map = MapUtil.Map_sortByValue(Tf_map);
 			System.out.println("start");
+			
+			for(String key: Tf_map.keySet()){
+				System.out.println("key : "+key+" val:"+Tf_map.get(key));
+			}
 			DBManager.getInstnace().updateTF_IDFByEvent(ed.url, ed.userid, Tf_map);
 			
 		} catch (Exception e) {
@@ -104,6 +104,7 @@ public class KeywordManager {
 				if(Tf_Title.size() !=0 && Tf_Title.containsKey(key)){
 					
 					tf += Tf_Title.get(key)*W_TITLE;
+					Tf_Title.remove(key);
 				}
 
 				Double idf;
@@ -111,6 +112,14 @@ public class KeywordManager {
 					idf = 0.0;
 				}
 				//System.out.println("tf :"+tf+" idf: "+idf);
+				TF_IDF_list.put(key, tf*idf);
+			}
+			for(String key : Tf_Title.keySet()){
+				Double tf = Tf_Title.get(key)*W_TITLE;
+				Double idf;
+				if((idf =idfList.get(key)) == null){
+					idf = 0.0;
+				}
 				TF_IDF_list.put(key, tf*idf);
 			}
 			
