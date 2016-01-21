@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import kr.co.MapUtil;
 import kr.co.data.TF_IDF;
 import kr.co.data.origin.EventData;
+import kr.co.data.origin.EventData_deprecated;
 import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.EventParsedData;
 import kr.co.data.parsed.HtmlParsedData;
@@ -31,7 +32,7 @@ public class KeywordManager {
 	}
 	
 	private KeywordManager(){
-		
+		//timer로 쓰레드 시작.
 	}
 	
 	public void applyEvent(EventData ed){
@@ -84,13 +85,10 @@ public class KeywordManager {
 		
 		try {
 			// 이미 방문했던 사이트인진 체크			
-			Map<String, Double> idfList = cal_IDF(hpd.keywordList);
-		 
-//			System.out.println("idfList size"+idfList.size());
+			Map<String, Double> idfList = cal_IDF(hpd.keywordList);		 	
 //			for(String key : idfList.keySet()){
-//				System.out.println(key+" "+idfList.get(key));
+//				System.out.println("key: "+key+" val:"+idfList.get(key));
 //			}
-			
 			//본문 가중치 계산
 			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList);			
 			//title 가중치 계산

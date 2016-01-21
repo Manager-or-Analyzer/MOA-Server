@@ -149,7 +149,7 @@ public class SearchingDocumentController extends HttpServlet {
 
 		ArrayList<TF_IDF> arr = new ArrayList<TF_IDF>();
 
-		
+		System.out.println("searches" + searches);
 		while(cursor.hasNext()){
 			//parsing
 			BasicDBObject obj = (BasicDBObject) cursor.next();

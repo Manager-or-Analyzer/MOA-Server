@@ -209,8 +209,16 @@ public class HtmlParser {
 		
 		//title 가져오기
 		hdp.snippet.title = doc.title();
-		//decription 가져오기
-		hdp.snippet.img = getImagesrc(doc);
+		//img 가져오기
+		String img = getImagesrc(doc);
+		if(img != null && img.contains("//")){
+			hdp.snippet.img = img;
+		}else if(img != null){
+			String[] tokens = hd.url.split("/");
+			img = tokens[0]+"//"+tokens[2]+img;
+			hdp.snippet.img = img;
+		}
+			
 		// decription tag 삭제 및 iframe 추가
 		for(Element e : doc.getAllElements()){
 			if(uselessTag.containsKey(e.tagName())){
