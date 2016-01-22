@@ -43,28 +43,7 @@ public class KeywordsSenderController extends HttpServlet {
 		DateData datedata = new Gson().fromJson(receiveData, DateData.class);
 		List<String> urls = DBManager.getInstnace().getUrls(datedata);
 		System.out.println("urls size:"+urls.size());
-		List<TF_IDF> list_snippet = new ArrayList<TF_IDF>();
-		
-		
-		for(int i=0; i<100 ;++i){
-			TF_IDF sn = new TF_IDF();
-			sn.snippet = new Snippet();
-			sn.keywordList = new HashMap<String, Double>();
-			sn.snippet.title = "김세미다"+i;
-			sn.keywordList.put("세미"+i*i*i*i, i+0.0);
-			sn.keywordList.put("세미1"+i*i*i*i, i+0.0);
-			sn.keywordList.put("세미2"+i*i*i*i, i+0.0);
-			sn.snippet.url ="http://www.facebook.com";
-			sn.snippet.time = "Fri Jan 08 2016 03:31:59 GMT+0900 (대한민국 표준시)";
-			if(i==0)
-				sn.snippet.img = "";
-			else if(i%2 == 0)
-				sn.snippet.img = "http://blog.naver.com/favicon.ico";
-			else
-				sn.snippet.img = "https://fbstatic-a.akamaihd.net/rsrc.php/yl/r/H3nktOa7ZMg.ico";
-			
-			list_snippet.add(sn);
-		}
+
 		
 		try {
 			SendData sd = new SendData();

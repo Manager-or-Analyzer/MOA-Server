@@ -145,9 +145,9 @@ public class DBManager {
     }    
     public KeywordsSenderController.Dictionary_custom getKeywordList(List<String> urls, String userid, DateData datedata) throws Exception{
     	db = mongoClient.getDB(DB_NAME);
-      	for(String s: urls){
-      		System.out.println("url :"+s+" "+userid);
-      	}
+//      	for(String s: urls){
+//      		System.out.println("url :"+s+" "+userid);
+//      	}
    	 	DBCollection collection = db.getCollection("KeywordCollection");
    	 	String map = "function() { "
 	 			+		"var key = {name: this.collectionName};"
