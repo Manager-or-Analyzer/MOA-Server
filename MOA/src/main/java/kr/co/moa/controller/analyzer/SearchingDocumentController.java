@@ -23,6 +23,7 @@ import kr.co.data.DomTimeData;
 import kr.co.data.SearchData;
 import kr.co.data.TF_IDF;
 import kr.co.data.receive.DateData;
+import kr.co.data.send.SearchingDocResult;
 import kr.co.data.send.Snippet;
 import kr.co.moa.DBManager;
 import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
@@ -76,7 +77,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = {"toluna"};//getKeywords(sd.searches);
+		String[] keywords = getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
@@ -99,16 +100,13 @@ public class SearchingDocumentController extends HttpServlet {
 		//sorting
 		similarDoc = (HashMap<String, Double>) MapUtil.Map_sortByValue(similarDoc);
 		//rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
-		List<TF_IDF> result = MapUtil.sortRawdataAsSimilarityInArray(rawdata, similarDoc);
+		List<TF_IDF> sni = MapUtil.sortRawdataAsSimilarityInArray(rawdata, similarDoc);
 		
-		//ArrayList<Snippet> sni_list = makeSniArray(rawdata, similarDoc);
+		SearchingDocResult result = new SearchingDocResult();
+		result.keywords 	= keywords;
+		result.snippetList 	= sni;
 		
-		//System.out.println(similarDoc);
-		//System.out.println(sni_list);		
-		//System.out.println(new Gson().toJson(sni_list));
 		String res = new Gson().toJson(result);
-		//out.print("snippet : " +new Gson().toJson(sni_list));
-		//out.println("success");
 		out.println(res);
 	}
 	
