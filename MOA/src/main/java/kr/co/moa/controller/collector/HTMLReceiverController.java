@@ -28,41 +28,36 @@ import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 /**
  * Servlet implementation class SendHTML
  */
-// url; moa/send/HTML
+// url; /moa/send/HTML
 public class HTMLReceiverController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String CLASS = "HTMLReceiverController";
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		//Log.getInstance().info(CLASS, "start");
 		PrintWriter out = response.getWriter();	
-		
 		String htmlData = request.getParameter("data");
-		//System.out.println(htmlData);
 		
-		//DebuggingLog.getInstance().info(CLASS, htmlData);		
 		HtmlData hd = new Gson().fromJson(htmlData, HtmlData.class);
-		
-		//System.out.println(hd);
 		
 		if(!htmlData.equals("") && htmlData != null){
 			try {
 				DBManager.getInstnace().insertData("HtmlData", htmlData);				
-				//Log.getInstance().info(CLASS, "DB :insertData success");
 				if(!DBManager.getInstnace().isDocExist(hd.url, hd.userid)){
 					KeywordManager.getInstance().calTF_IDF(hd);
+					DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
 					
 				}else{
-					//update
+					//update time.
+					DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
 		  			System.out.println("already exist");
 				}
 				
 			} catch (Exception e) {
-				//Log.getInstance().severe(CLASS, "DB :insertData fail");
+				Log.getInstance().severe(CLASS, "DB :insertData fail : "+e);
 			}			
 			out.println("success");
 		}else
-			//Log.getInstance().severe(CLASS, "client fails to send htmlData");
+			Log.getInstance().severe(CLASS, "client fails to send htmlData");
 			out.println("fail");
 	}
 }

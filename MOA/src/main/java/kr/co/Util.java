@@ -32,26 +32,26 @@ public class Util {
 		return sdf.format(date);
 	}
 	
-	public static List<String> urlFromTo (DateData raw){
-		Date from = strToDate(raw.start);
-		Date to = strToDate(raw.end);
-		System.out.println("from :"+raw.start+" end:"+raw.end);
-
-		BasicDBObject query = new BasicDBObject();
-		BasicDBObject date_query = new BasicDBObject();
-		date_query.put("$gte", from);
-		date_query.put("$lte", to);
-		query.put("userid", raw.userid);
-		query.put("time", date_query);
-		
-		DBCursor cursor = DBManager.getInstnace().getFromToUrl(query);
-		
-		List<String> result = new ArrayList<String>();
-		while(cursor.hasNext()){
-			result.add((String) cursor.next().get("url"));
-		}
-		
-		return result;
-		
-	}
+//	public static List<String> urlFromTo (DateData raw){
+//		Date from = strToDate(raw.start);
+//		Date to = strToDate(raw.end);
+//		System.out.println("from :"+raw.start+" end:"+raw.end);
+//
+//		BasicDBObject query = new BasicDBObject();
+//		BasicDBObject date_query = new BasicDBObject();
+//		date_query.put("$gte", from);
+//		date_query.put("$lte", to);
+//		query.put("userid", raw.userid);
+//		query.put("time", date_query);
+//		
+//		DBCursor cursor = DBManager.getInstnace().getFromToUrl(query);
+//		
+//		List<String> result = new ArrayList<String>();
+//		while(cursor.hasNext()){
+//			result.add((String) cursor.next().get("url"));
+//		}
+//		
+//		return result;
+//		
+//	}
 }

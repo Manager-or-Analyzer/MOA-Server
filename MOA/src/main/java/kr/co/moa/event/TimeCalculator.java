@@ -50,7 +50,7 @@ public class TimeCalculator {
 			start = true;
 			eventTimes.add(e.time.getTime());
 		}
-
+		
 		//start calc stay time
 		Long total = (eventTimes.get(events.size()-1) - eventTimes.get(0));
 		if( (total/1000) < minCalcTime ){

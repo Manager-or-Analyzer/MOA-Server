@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import kr.co.DebuggingLog;
 import kr.co.data.origin.EventData;
+import kr.co.data.origin.EventData_deprecated;
 import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.EventParsedData;
 import kr.co.data.parsed.HtmlParsedData;
