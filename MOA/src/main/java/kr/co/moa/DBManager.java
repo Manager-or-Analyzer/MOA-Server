@@ -19,6 +19,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
+import kr.co.data.DomTimeData;
 import kr.co.data.origin.EventData;
 import kr.co.data.origin.HtmlData;
 import kr.co.data.parsed.HtmlParsedData;
@@ -493,13 +494,13 @@ public class DBManager {
     	
     	return collection.find(query);
 	}
-	public List getTimeEvent(EventData pageout) {
+	public List getTimeEvent(EventData evt) {
 		db = mongoClient.getDB(DB_NAME);
     	
     	DBCollection collection = db.getCollection("EventData");
     	BasicDBObject whereQuery = new BasicDBObject();
-    	whereQuery.put("userid", pageout.userid);
-    	whereQuery.put("url", pageout.url);
+    	whereQuery.put("userid", evt.userid);
+    	whereQuery.put("url", evt.url);
     	whereQuery.put("isUsed", false);
     	
     	//get data from MongoDB
@@ -526,22 +527,19 @@ public class DBManager {
     		
        		events.add(ed);
     	}
-    	    	
-    	//update data in MongoDB
-    	BasicDBObject updateData = new BasicDBObject();
-    	updateData.append("$set", new BasicDBObject().append("isUsed", true));
-    	BasicDBObject updateQuery = new BasicDBObject();
-    	updateQuery.
-    			append("userid", pageout.userid).
-    			append("url", pageout.url).
-    			append("isUsed", false);
-    	
-
-		System.out.println("beforeQuery");
-    	collection.update(updateQuery, updateData, false, true);
-
-		System.out.println("afterQuery");
-    	//return cursor;
+    	if(evt.type.equals("pageout")){	//pageout일때만 eventdata업데이트  
+	    	//update data in MongoDB
+	    	BasicDBObject updateData = new BasicDBObject();
+	    	updateData.append("$set", new BasicDBObject().append("isUsed", true));
+	    	BasicDBObject updateQuery = new BasicDBObject();
+	    	updateQuery.
+	    			append("userid", evt.userid).
+	    			append("url", 	 evt.url).
+	    			append("isUsed", false);
+	    	
+	    	collection.update(updateQuery, updateData, false, true);
+	
+    	}
 		return events;
 	}
 	
@@ -616,23 +614,26 @@ public class DBManager {
 		db.getCollection("EventData").insert(query);
 	}
 	
-	public void insertDurationData(BasicDBObject query) {
+	public void updateDurationData(DomTimeData dd) {
 		db = mongoClient.getDB(DB_NAME);
-		db.getCollection("DurationData").insert(query);
+		
+		BasicDBObject domkey   = new BasicDBObject();
+		domkey.put("userid", 	 dd.userid);
+		domkey.put("url", 	  	 dd.url);
+		domkey.put("time", 	     dd.time);
+		
+		BasicDBObject newValue = new BasicDBObject();
+		newValue.put("userid",   dd.userid);
+		newValue.put("url", 	 dd.url);
+		newValue.put("time", 	 dd.time);
+		newValue.put("duration", dd.duration);
+		
+		db.getCollection("DurationData").update(domkey, newValue, true, false);	//upsert : true
 	}
 	
 	public DBCursor getFromToUrl(BasicDBObject query) {
 		db = mongoClient.getDB(DB_NAME);
 		return db.getCollection("DurationData").find(query);
 	}
-	
-	
-	
-
-	
-	
-	
-	
-	
 	
 }

@@ -95,14 +95,14 @@ public class SearchingDocumentController extends HttpServlet {
 		reflectDuration(userid, startDay, endDay, similarDoc);
 		//sorting
 		similarDoc = (HashMap<String, Double>) MapUtil.Map_sortByValue(similarDoc);
-		//rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
-		ArrayList<Snippet> sni_list = makeSniArray(rawdata, similarDoc);
+		rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
+		//ArrayList<Snippet> sni_list = makeSniArray(rawdata, similarDoc);
 		
-		System.out.println(similarDoc);
-		System.out.println(sni_list);		
-		System.out.println(new Gson().toJson(sni_list));
+		//System.out.println(similarDoc);
+		//System.out.println(sni_list);		
+		//System.out.println(new Gson().toJson(sni_list));
 		
-		String res = new Gson().toJson(sni_list);
+		String res = new Gson().toJson(rawdata);
 		//out.print("snippet : " +new Gson().toJson(sni_list));
 		//out.println("success");
 		out.println(res);

@@ -26,33 +26,16 @@ public class TimeCalculator {
 		
 	}
 
-	public void calcTime(EventData pageout) {
-		ArrayList<EventData> events;// = new ArrayList<EventData>();
-		ArrayList<Long> eventTimes = new ArrayList<Long>();
-		
+	@SuppressWarnings("unchecked")
+	public void calcTime(EventData evt){
+		ArrayList<EventData> events = new ArrayList<EventData>();
+		ArrayList<Long> eventTimes  = new ArrayList<Long>();
 
-/*		System.out.println("calctime");
-		DBCursor cursor = DBManager.getInstnace().getTimeEvent(pageout);
-		System.out.println("cursor size : " + cursor.length());
-		while(cursor.hasNext()){
-			System.out.println("asdfsadfasdfsadf");
-    		BasicDBObject obj = (BasicDBObject) cursor.next();
-    		EventData ed = new EventData();
-    		
-    		ed.userid = obj.getString("userid");
-    		ed.url 	  = obj.getString("url");
-    		ed.type   = obj.getString("type");
-    		ed.data   = obj.getString("data");
-    		ed.time   = obj.getDate("time");
-    		ed.x 	  = obj.getString("x");
-    		ed.y 	  = obj.getString("y");
-    		ed.isUsed = obj.getBoolean("isUsed");
-
-    		
-    		events.add(ed);
-    	}
-	*/	
-		events = (ArrayList<EventData>) DBManager.getInstnace().getTimeEvent(pageout);
+		events = (ArrayList<EventData>) DBManager.getInstnace().getTimeEvent(evt);
+		if(events.size() <= 0){
+			System.out.println("TimeCalculator : number of event is 0");
+			return;
+		}
 		//Sorting
 		Collections.sort(events, new Comparator<EventData>() {
 			@Override
@@ -62,7 +45,6 @@ public class TimeCalculator {
 		});
 		
 		boolean start = false;
-		int cnt = 0;
 		for(EventData e : events){
 			if(!start && !e.type.equals("pagein")) continue;
 			start = true;
@@ -86,29 +68,26 @@ public class TimeCalculator {
 				if(gap > maxWaitTime * 60 * 1000) total -= gap;	
 			}
 		}
-		
+
 		total /= 1000;
+		
 		DomTimeData dd = new DomTimeData();
-		dd.userid = pageout.userid;
-		dd.url = pageout.url;
+		dd.userid = evt.userid;
+		dd.url = evt.url;
 		dd.time = events.get(0).time;
 		dd.duration = (double) total;
 
-		System.out.println("userid : " + dd.userid);
-		System.out.println("url : " + dd.url);
-		System.out.println("time : " + dd.time);
-		System.out.println("duration : " + dd.duration);
+//		System.out.println("userid : " + dd.userid);
+//		System.out.println("url : " + dd.url);
+//		System.out.println("time : " + dd.time);
+//		System.out.println("duration : " + dd.duration);
 		
-		BasicDBObject query = new BasicDBObject();
-		query.put("userid", dd.userid);
-		query.put("url", dd.url);
-		query.put("time", dd.time);
-		query.put("duration", dd.duration);
 		try {
-			DBManager.getInstnace().insertDurationData(query);
+			DBManager.getInstnace().updateDurationData(dd);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		//total/1000
 	}
+	
 }

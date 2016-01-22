@@ -57,6 +57,8 @@ public class EventReceiverController extends HttpServlet {
 		try {
 			if (ed.type.equals("drag")) {
 				KeywordManager.getInstance().applyEvent(ed);
+			} else if (ed.type.equals("tabout" )) {
+				TimeCalculator.getInstance().calcTime(ed);
 			} else if (ed.type.equals("pageout")) {
 				TimeCalculator.getInstance().calcTime(ed);
 				ed.isUsed = true;
