@@ -103,7 +103,10 @@ public class SearchingDocumentController extends HttpServlet {
 		List<TF_IDF> sni = MapUtil.sortRawdataAsSimilarityInArray(rawdata, similarDoc);
 		
 		SearchingDocResult result = new SearchingDocResult();
-		result.keywords 	= keywords;
+		result.keywords = "";
+		for(int i = 0; i < keywords.length; i++){
+			result.keywords += keywords[i] + " ";
+		}
 		result.snippetList 	= sni;
 		
 		String res = new Gson().toJson(result);
