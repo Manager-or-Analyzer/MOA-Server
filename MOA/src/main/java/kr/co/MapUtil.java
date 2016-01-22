@@ -42,4 +42,24 @@ public class MapUtil<K,V> {
 		}
 		return result;
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static List<TF_IDF> sortRawdataAsSimilarityInArray(Map rawdata, Map similarDoc){
+		/*
+		 * rawdata를 simildoc의 순서에 맞게 정렬해 주는 함수 
+		 * 자료형에 종속적임.
+		 */
+		if(similarDoc == null){
+			System.out.println("Error : similarDoc is null");
+			return null;
+		}
+		List<TF_IDF> result = new ArrayList<TF_IDF> ();
+		
+		int index = 0;
+		List<Map.Entry<String, Double>> list = new LinkedList<Map.Entry<String, Double>>( similarDoc.entrySet());
+		for(Map.Entry<String, Double> entry : list){
+			result.add( index++, (TF_IDF) rawdata.get(entry.getKey()) );
+		}
+		return result;
+	}
 }

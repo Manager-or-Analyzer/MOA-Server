@@ -57,6 +57,9 @@ public class SearchingDocumentController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("application/json");
+		response.setCharacterEncoding("utf-8");
+		
 		String userid;
 		HashMap<String, TF_IDF> rawdata    = new HashMap<String, TF_IDF>();;
 		HashMap<String, Double> similarDoc = new HashMap<String, Double>();
@@ -73,7 +76,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = getKeywords(sd.searches);
+		String[] keywords = {"toluna"};//getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
@@ -95,14 +98,15 @@ public class SearchingDocumentController extends HttpServlet {
 		reflectDuration(userid, startDay, endDay, similarDoc);
 		//sorting
 		similarDoc = (HashMap<String, Double>) MapUtil.Map_sortByValue(similarDoc);
-		rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
+		//rawdata    = (HashMap<String, TF_IDF>) MapUtil.sortRawdataAsSimilarity(rawdata, similarDoc);
+		List<TF_IDF> result = MapUtil.sortRawdataAsSimilarityInArray(rawdata, similarDoc);
+		
 		//ArrayList<Snippet> sni_list = makeSniArray(rawdata, similarDoc);
 		
 		//System.out.println(similarDoc);
 		//System.out.println(sni_list);		
 		//System.out.println(new Gson().toJson(sni_list));
-		
-		String res = new Gson().toJson(rawdata);
+		String res = new Gson().toJson(result);
 		//out.print("snippet : " +new Gson().toJson(sni_list));
 		//out.println("success");
 		out.println(res);
