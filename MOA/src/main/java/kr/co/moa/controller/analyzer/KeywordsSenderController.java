@@ -35,6 +35,8 @@ public class KeywordsSenderController extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("utf-8");
+		request.setCharacterEncoding("utf-8");
+		
 		PrintWriter out = response.getWriter();	
 		
 		String receiveData = request.getParameter("data");	

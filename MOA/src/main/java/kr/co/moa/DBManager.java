@@ -218,7 +218,7 @@ public class DBManager {
 			tfidf.snippet.url = obj2.getString("url");
 			tfidf.snippet.img = obj2.getString("img");
 			
-			Date time = obj.getDate("snippet.time");
+			Date time = obj2.getDate("time");
 			tfidf.snippet.time = Util.dateToStr(time);
 			keyCollections.add(tfidf);
 		}
