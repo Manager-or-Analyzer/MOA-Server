@@ -218,7 +218,7 @@ public class DBManager {
 			tfidf.snippet.url = obj2.getString("url");
 			tfidf.snippet.img = obj2.getString("img");
 			
-			Date time = obj.getDate("snippet.time");
+			Date time = obj2.getDate("time");
 			tfidf.snippet.time = Util.dateToStr(time);
 			keyCollections.add(tfidf);
 		}
@@ -559,23 +559,34 @@ public class DBManager {
 	 			+		"emit(key, {idfwordsList : this.keywordList});"
 	 			+	"};";
 	 	
-	 	String reduce = "function (key, values) {"
+   	 	String reduce = "function (key, values) {"
 	 			+			"var map = {};"
-	 			+			"var totalDoc = values.length;var j=values;"
+	 			+			"var totalDoc = values.length;"
 	 			+			"values.forEach(function (doc){"
 	 			+					"for(var k in doc['idfwordsList']){ "
 	 			+						"if(k in map){"
-	 			+							"continue;"
-	 			+						"}"
-	 			+						"var i; var cnt=0; var val=0;"
-	 			+						"for(i=0; i<totalDoc; i++){"
-	 			+						"	if(k in values[i]['idfwordsList'])cnt++;"
-	 			+						"}"
-	 			+						"if(cnt != 0)"
-	 			+							"val = Math.log(totalDoc/cnt);"
-	 			+						"if(val <0)val=0; map[k] = val;"
+	 			+							"map[k] += doc['idfwordsList'][k];"
+	 			+						"}else{"
+	 			+						" map[k] = doc['idfwordsList'][k]};"
 	 			+					"}});"
-	 			+		"return {total :totalDoc , idfwordsList :map};};";
+	 			+		"return {total :totalDoc, res:values, idfwordsList :map};};";
+//	 	String reduce = "function (key, values) {"
+//	 			+			"var map = {};"
+//	 			+			"var totalDoc = values.length;var j=values;"
+//	 			+			"values.forEach(function (doc){"
+//	 			+					"for(var k in doc['idfwordsList']){ "
+//	 			+						"if(k in map){"
+//	 			+							"continue;"
+//	 			+						"}"
+//	 			+						"var i; var cnt=0; var val=0;"
+//	 			+						"for(i=0; i<totalDoc; i++){"
+//	 			+						"	if(k in values[i]['idfwordsList'])cnt++;"
+//	 			+						"}"
+//	 			+						"if(cnt != 0)"
+//	 			+							"val = Math.log(totalDoc/cnt);"
+//	 			+						"if(val <0)val=0; map[k] = val;"
+//	 			+					"}});"
+//	 			+		"return {total :totalDoc, idfwordsList :map};};";
 	 	
 	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
 	 			"IdfCollection", MapReduceCommand.OutputType.REPLACE, null);
