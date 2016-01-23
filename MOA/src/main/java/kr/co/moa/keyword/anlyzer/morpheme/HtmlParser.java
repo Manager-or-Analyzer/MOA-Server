@@ -258,7 +258,13 @@ public class HtmlParser {
 			for(Element e : ele.children()){
 				if(TextTag.containsKey(e.tagName())){
 					continue;
-				}					
+				}				
+				//iframe, frame 내용이 있을경우 날ㄹ기
+				if(e.tagName().contains("frame" ) || e.tagName().contains("iframe")){
+					//System.out.println(e.tagName()+" "+e.text());
+					e.text("");
+					//System.out.println(e.tagName()+" 22 "+e.text());
+				}
 				e.tagName(e.tagName()+tagCnt++);
 				que.add(e);				
 				Node n = new Node(e.tagName(), e.text());				

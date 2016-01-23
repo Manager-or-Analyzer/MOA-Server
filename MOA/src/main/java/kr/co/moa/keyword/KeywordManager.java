@@ -49,22 +49,31 @@ public class KeywordManager {
 				System.out.println("There is no TFList at url :"+ed.url);
 				return;
 			}
-			Map<String, Double> idfList = DBManager.getInstnace().getIDFList(Tf_Event);
+			Map<String, Double> idfList = DBManager.getInstnace().getIDFList(hpd.keywordList);
 						
 			//event 가중치 계산.
 			
+			for(String key : Tf_map.keySet()){
+				Double tf = Tf_map.get(key)*W_BODY;			
+				if(Tf_Event.size() !=0 && Tf_Event.containsKey(key)){
+					
+					tf += Tf_Event.get(key)*W_EVNET;
+					Tf_Event.remove(key);
+				}
+				Double idf;
+				if((idf =idfList.get(key)) == null){
+					idf = 0.0;
+				}				
+				Tf_map.replace(key, tf*idf );
+				
+			}
 			for(String key : Tf_Event.keySet()){
-				Double tf = Tf_Event.get(key)*W_EVNET;				
+				Double tf = Tf_Event.get(key)*W_EVNET;
 				Double idf;
 				if((idf =idfList.get(key)) == null){
 					idf = 0.0;
 				}
-				if(Tf_map.containsKey(key)){					
-					tf += Tf_map.get(key);
-					Tf_map.replace(key, tf*idf );
-				}else{
-					Tf_map.put(key, tf*idf);
-				}
+				Tf_map.put(key, tf*idf);
 			}
 
 			Tf_map = MapUtil.Map_sortByValue(Tf_map);
