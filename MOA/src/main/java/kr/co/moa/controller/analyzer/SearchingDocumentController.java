@@ -164,7 +164,7 @@ public class SearchingDocumentController extends HttpServlet {
 
 			sni.title = sni_obj.getString("title");
 			sni.url   = sni_obj.getString("url");
-			sni.time  = sni_obj.getDate("time").toString();
+			sni.time  = Util.dateToStr(sni_obj.getDate("time"));
 			sni.img   = sni_obj.getString("img");
 			temp.userid = (String) obj.get("userid");
 			temp.snippet = sni;

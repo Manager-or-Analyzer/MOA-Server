@@ -39,25 +39,27 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		HtmlData hd = new Gson().fromJson(htmlData, HtmlData.class);
 		
-		if(!htmlData.equals("") && htmlData != null){
-			try {
-				DBManager.getInstnace().insertData("HtmlData", htmlData);				
-				if(!DBManager.getInstnace().isDocExist(hd.url, hd.userid)){
-					KeywordManager.getInstance().calTF_IDF(hd);
-					DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
-					
-				}else{
-					//update time.
-					DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
-		  			System.out.println("already exist");
-				}
-				
-			} catch (Exception e) {
-				Log.getInstance().severe(CLASS, "DB :insertData fail : "+e);
-			}			
-			out.println("success");
-		}else
+		if(htmlData == null || htmlData.equals("")){
 			Log.getInstance().severe(CLASS, "client fails to send htmlData");
 			out.println("fail");
+			return;
+		}
+		
+		try {
+			DBManager.getInstnace().insertData("HtmlData", htmlData);				
+			if(!DBManager.getInstnace().isDocExist(hd.url, hd.userid)){
+				KeywordManager.getInstance().calTF_IDF(hd);
+				DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
+				
+			}else{
+				//update time.
+				DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
+	  			System.out.println("already exist");
+			}
+			
+		} catch (Exception e) {
+			Log.getInstance().severe(CLASS, "DB :insertData fail : "+e);
+		}			
+		out.println("success");
 	}
 }
