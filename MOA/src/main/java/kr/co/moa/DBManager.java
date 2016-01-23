@@ -156,7 +156,11 @@ public class DBManager {
 	 			+	"};";
 	 	
 	 	String reduce = "function (key, values) {"
-	 			+			"var map = {}; var cnt = 0; var totalDoc = values.length;"
+	 			+		"var totalDoc = values.length;"
+	 			+		"return {total : totalDoc, result : values};};";
+	 	
+	 	String reduce2 = 
+	 						"values = tmp; var map = {}; var cnt = 0; var totalDoc = values.length;"
 	 			+			"values.forEach(function (doc){"
 	 			+				"cnt =0;"
 	 			+					"for(var k in doc['keywordsList']){ "
@@ -173,15 +177,41 @@ public class DBManager {
    	 			+						"}}"
    	 			+ 					  "else{"
    	 			+ 						"break;}}});"
-	 			+		"return {res : totalDoc, val : values[0]['keywordsList']  , keywordsList :map};};";
+	 			+		"return {tmp : tmp, total : totalDoc, val : values[0]['keywordsList']  , keywordsList :map};";
+	 	
+	 	String finalize = "function (key, values) {"
+	 			+			"var map = {}; var tmp = values['result'];"
+	 			+			"if('result' in values['result'][0]){"
+	 			+			"var totalDoc = 0; var i;"
+	 			+			"for(i=0; i<values['result'].length; i++){"
+	 			+				"totalDoc += values['result'][i]['total'];}"	 	
+	 			+			"for(i=0; i<values['result'].length; i++){"
+	 			+				"var j; var obj = values['result'][i]['result']; "
+	 			+				"for(j=0; j< obj.length; j++){"
+	 			+					"var cnt = 0;"
+	 			+					"for(var k in obj[j]['keywordsList']){"
+	 			+						"if(cnt++ <3){"
+	 			+							"if(k in map){"
+	 			+								"map[k] += obj[j]['keywordsList'][k];"
+	 			+								"cnt--;"
+	 			+							"}else{"
+	 			+								"map[k] = 0.0;"
+	 			+								"map[k] = obj[j]['keywordsList'][k];"
+	 			+							"}"
+	 			+						"}else break;"
+	 			+					"}}};"
+	 			+		"return {tmp : tmp, total :totalDoc,keywordsList: map};}"
+	 			+		"else {"+reduce2+"}}";	
+	 	
+	 	
 
 	 	BasicDBObject query = new BasicDBObject();
 	 		query.append("userid", userid);
 	 		query.append("snippet.url", new BasicDBObject("$in", urls));
 	 		
 	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
-	 			null, MapReduceCommand.OutputType.INLINE, query);
-	 	
+	 			"kTest", MapReduceCommand.OutputType.REPLACE, query);
+	 	cmd.setFinalize(finalize);
 	 		
 	 	MapReduceOutput out = collection.mapReduce(cmd);
 	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
@@ -192,7 +222,7 @@ public class DBManager {
 	 		keywordlist.putAll((Map)tmp.get("keywordsList"));
 	 		//return keywordlist;
 	 	}
-	 	
+	 	System.out.println("bubble "+keywordlist.size());
 	 	BasicDBObject timeQuery = new BasicDBObject();
 	 	
 	 	Date from = Util.strToDate(datedata.start);
@@ -562,14 +592,25 @@ public class DBManager {
    	 	String reduce = "function (key, values) {"
 	 			+			"var map = {};"
 	 			+			"var totalDoc = values.length;"
-	 			+			"values.forEach(function (doc){"
-	 			+					"for(var k in doc['idfwordsList']){ "
-	 			+						"if(k in map){"
-	 			+							"map[k] += doc['idfwordsList'][k];"
-	 			+						"}else{"
-	 			+						" map[k] = doc['idfwordsList'][k]};"
-	 			+					"}});"
-	 			+		"return {total :totalDoc, res:values, idfwordsList :map};};";
+	 			+		"return {total :totalDoc, result: values};};";
+   	 	String finalize = "function (key, values) {"
+	 			+			"var map = {}; var tmp = {};"
+	 			+			"var totalDoc = 0; var i;"
+	 			+			"for(i=0; i<values['result'].length; i++){"
+	 			+				"totalDoc += values['result'][i]['total'];}"	 	
+	 			+			"for(i=0; i<values['result'].length; i++){"
+	 			+				"var j; var obj = values['result'][i]['result'];"
+	 			+				"for(j=0; j< obj.length; j++){"
+	 			+					"for(var k in obj[j]['idfwordsList']){"
+	 			+						"if(k in tmp) tmp[k] += 1;"
+	 			+						"else tmp[k] =1;"
+	 			+					"}}};"
+	 			+			"for(var k in tmp){"
+	 			+				"var val = Math.log(totalDoc/tmp[k]);"
+	 			+				"if(val<0)val=0; map[k]=val;"
+	 			+			"}"
+	 			+		"return {total :totalDoc,idfwordsList: map};};";
+   	 	
 //	 	String reduce = "function (key, values) {"
 //	 			+			"var map = {};"
 //	 			+			"var totalDoc = values.length;var j=values;"
@@ -590,6 +631,7 @@ public class DBManager {
 	 	
 	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
 	 			"IdfCollection", MapReduceCommand.OutputType.REPLACE, null);
+	 	cmd.setFinalize(finalize);
 	 	
 	 	MapReduceOutput out = collection.mapReduce(cmd);
 	 	Map<String, Double> keywordlist = new HashMap<String, Double>();

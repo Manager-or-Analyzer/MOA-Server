@@ -50,9 +50,12 @@ public class TimeCalculator {
 			start = true;
 			eventTimes.add(e.time.getTime());
 		}
-		
+		if(eventTimes.size() <= 0){
+			System.out.println("TimeCalculator : number of event is 0");
+			return;
+		}
 		//start calc stay time
-		Long total = (eventTimes.get(events.size()-1) - eventTimes.get(0));
+		Long total = (eventTimes.get(eventTimes.size()-1) - eventTimes.get(0));
 		if( (total/1000) < minCalcTime ){
 			//계산끝 그냥 total을 머문시간으로 가정 (큰 의미없는 페이지들)
 		}else{
