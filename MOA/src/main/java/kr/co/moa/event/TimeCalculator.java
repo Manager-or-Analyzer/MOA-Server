@@ -71,7 +71,6 @@ public class TimeCalculator {
 				if(gap > maxWaitTime * 60 * 1000) total -= gap;	
 			}
 		}
-
 		total /= 1000;
 		
 		DomTimeData dd = new DomTimeData();
