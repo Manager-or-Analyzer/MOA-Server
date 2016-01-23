@@ -77,7 +77,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = getKeywords(sd.searches);
+		String[] keywords = {"amp"};//getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
@@ -164,7 +164,7 @@ public class SearchingDocumentController extends HttpServlet {
 
 			sni.title = sni_obj.getString("title");
 			sni.url   = sni_obj.getString("url");
-			sni.time  = sni_obj.getString("time");
+			sni.time  = sni_obj.getDate("time").toString();
 			sni.img   = sni_obj.getString("img");
 			temp.userid = (String) obj.get("userid");
 			temp.snippet = sni;
