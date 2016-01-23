@@ -77,7 +77,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = getKeywords(sd.searches);
+		String[] keywords = {"amp"};//getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
