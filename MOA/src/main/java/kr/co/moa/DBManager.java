@@ -25,6 +25,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
 import kr.co.data.DomTimeData;
+import kr.co.data.ScrollLocation;
 import kr.co.Util;
 import kr.co.data.TF_IDF;
 import kr.co.data.origin.EventData;
@@ -472,6 +473,26 @@ public class DBManager {
 		db.getCollection("DurationData").update(domkey, newValue, true, false);	//upsert : true
 	}
 	
+	public void updateScrollLocation(ScrollLocation sl) {
+		db = mongoClient.getDB(DB_NAME);
+		
+		BasicDBObject domkey   = new BasicDBObject();
+		domkey.put("userid", 	 sl.userid);
+		domkey.put("url", 	  	 sl.url);
+		domkey.put("time", 	     sl.time);
+		
+		BasicDBObject newValue = new BasicDBObject();
+		newValue.put("userid",   sl.userid);
+		newValue.put("url", 	 sl.url);
+		newValue.put("time", 	 sl.time);
+		newValue.put("x", 	 	 sl.x);
+		newValue.put("y", 	 	 sl.y);
+		newValue.put("duration", sl.duration);
+		
+		db.getCollection("ScrollLocation").update(domkey, newValue, true, false);	//upsert : true
+		
+	}
+	
 	public DBCursor getFromToUrl(BasicDBObject query) {
 		db = mongoClient.getDB(DB_NAME);
 		return db.getCollection("DurationData").find(query);
@@ -644,6 +665,7 @@ public class DBManager {
 	 	}
     	
     }
+	
     
 
 

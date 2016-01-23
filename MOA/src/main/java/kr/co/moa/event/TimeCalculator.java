@@ -8,13 +8,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 
 import kr.co.data.DomTimeData;
+import kr.co.data.ScrollLocation;
 import kr.co.data.origin.EventData;
 import kr.co.moa.DBManager;
 
 public class TimeCalculator {
 	private static TimeCalculator instance;
-	private static final long minCalcTime = (long) 15; //second
-	private static final long maxWaitTime = (long) 5;  //minute
+	private static final long minCalcTime  = (long) 15; //second
+	private static final long maxWaitTime  = (long) 5;  //minute
+	private static final long minValidTime = (long) 2;  //minute
 	
 	
 	public static TimeCalculator getInstance(){
@@ -43,6 +45,7 @@ public class TimeCalculator {
 				return o1.time.compareTo(o2.time);
 			}
 		});
+		//calcLocation(events);
 		
 		boolean start = false;
 		for(EventData e : events){
@@ -92,5 +95,64 @@ public class TimeCalculator {
 		}
 		//total/1000
 	}
+	
+	public void calcLocation(ArrayList<EventData> events){
+		int  maxLocationX  	 = 0;
+		int  maxLocationY  	 = 0;
+		long maxTime	  	 = 0;
+		EventData prevEvt    = events.get(0);
+		EventData prevScroll = events.get(0);
+		EventData pagein 	 = null;
+		
+		
+		long time = 0;
+		for(EventData e : events){
+			if(e.type.equals("pagein"))	pagein = e;	//pagein for store to DB
+			
+			if(e == null || prevEvt.type.equals("tabout") ||
+					e.time.getTime() - prevEvt.time.getTime() > maxWaitTime * 60 * 1000){
+				prevEvt = e;
+				continue;
+			}
+			time += (e.time.getTime() - prevEvt.time.getTime());
+			prevEvt = e;
+			if(!e.type.equals("scroll")) continue;
+			if(time > maxTime){
+				maxLocationX = Integer.parseInt(prevScroll.x);
+				maxLocationY = Integer.parseInt(prevScroll.y);
+				maxTime 	 = time;
+			}
+			prevScroll  = e;
+			time 		= 0;
+		}
+		
+		if(maxTime <= minValidTime * 60 * 1000) return;
+		//minValidTime보다 오래 머물었을 때만 의미있는 스크롤 구간이라고 가정한다  
+		
+		ScrollLocation sl = new ScrollLocation();
+		if(pagein == null)	pagein = events.get(0);
+		sl.userid 	= pagein.userid;
+		sl.url 		= pagein.url;
+		sl.time 	= pagein.time;
+		sl.x 		= maxLocationX;
+		sl.y 		= maxLocationY;
+		sl.duration	= maxTime;
+		try {
+			DBManager.getInstnace().updateScrollLocation(sl);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }
