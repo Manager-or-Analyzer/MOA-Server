@@ -9,7 +9,7 @@ public class DebuggingLog {
 	
 	public DebuggingLog(String fileName){
 		try {
-			out = new BufferedWriter(new FileWriter("C:\\"+fileName+".txt"));
+			out = new BufferedWriter(new FileWriter("D:\\debuggi_log"+fileName+".txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

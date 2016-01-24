@@ -77,7 +77,7 @@ public class SearchingDocumentController extends HttpServlet {
 			return;
 		}
 		userid = sd.userid;
-		String[] keywords = {"amp"};//getKeywords(sd.searches);
+		String[] keywords = getKeywords(sd.searches);
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
@@ -272,7 +272,7 @@ public class SearchingDocumentController extends HttpServlet {
 	private String[] getKeywords(String searches) {
 		
 		searches = searches.replace('+', ' ');
-		Map temp = MorphemeAnalyzer.getInstance().doMecabProcess(searches, null);	
+		Map temp = MorphemeAnalyzer.getInstance().doMecabProcess(searches, null,"search","search");	
 		Iterator iter = temp.keySet().iterator();
 		String[] result = new String[temp.size()];
 		int cnt = 0;

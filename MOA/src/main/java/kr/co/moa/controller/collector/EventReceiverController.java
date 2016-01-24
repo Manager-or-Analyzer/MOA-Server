@@ -52,6 +52,8 @@ public class EventReceiverController extends HttpServlet {
 			} else if (ed.type.equals("pageout")) {
 				TimeCalculator.getInstance().calcTime(ed);
 				ed.isUsed = true;
+			} else if(ed.type.equals("tabin")||ed.type.equals("pagein")){
+				DBManager.getInstnace().updateTime(edd.url, edd.userid, edd.time);
 			}
 			BasicDBObject query = new BasicDBObject();
 			//BasicDBObject date = new BasicDBObject(

@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import kr.co.DebuggingLog;
+import kr.co.MapUtil;
 import kr.co.data.origin.EventData;
 import kr.co.data.origin.EventData_deprecated;
 import kr.co.data.origin.HtmlData;
@@ -46,10 +47,8 @@ public class MorphemeAnalyzer {
 	private static MorphemeAnalyzer instance;
 	private Map<String,String> TagsMap;
 	private Map<String,String> TexttagMap;
-	private String userid;
-	private String url;
-	
-	
+	private Map<String,String> FilteringWord;
+		
 	 private static final String[] uselessTags = {
 	            "script", 	"noscript", "style", 	"meta", 	"link",
 	            "noframes", "nav", 		"aside", 	"hgroup", 	"header", 
@@ -68,6 +67,11 @@ public class MorphemeAnalyzer {
 	         "span",	"b",		"font",			"strong"
 	 };
 	
+	 private static final String[] uselessWords = {
+			 "네이버","다음","블로그","구글","네이트","뉴스",
+			 "naver","daum","blog","google","nate"
+	 };
+	 
 	public static MorphemeAnalyzer getInstance(){
 		if(instance == null) 	instance = new MorphemeAnalyzer();
 		return 					instance;
@@ -78,9 +82,14 @@ public class MorphemeAnalyzer {
 		for(String tag : uselessTags){	TagsMap.put(tag, null);		}
 		TexttagMap = new HashMap<String,String>();
 		for(String tag : textTags)   {	TexttagMap.put(tag, null);	}
+		FilteringWord = new HashMap<String,String>();
+		for(String tag : uselessWords)   {	FilteringWord.put(tag, null);	}
 	}
 	
 	public HtmlParsedData parsingHTML(HtmlData html){
+		 String userid;
+		 String url;
+		
 		url = html.url;
 		userid = html.userid;
 		//DebuggingLog debug = new DebuggingLog("Content");
@@ -104,8 +113,14 @@ public class MorphemeAnalyzer {
 		if(content.equals("") || content.trim().length() <120){
 			System.out.println("lamda decrease");
 	        hp = new HtmlParser();
-	        hp.lamda = 0.05;
+	        hp.lamda = 0.15;
 	        content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
+	        if(content.equals("") || content.trim().length() <120){
+	        	System.out.println("lamda2 decrease");
+		        hp = new HtmlParser();
+		        hp.lamda = 0.05;
+		        content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
+	        }
 	    }else
 	        System.out.println("length :" + content.length());
 	      
@@ -116,16 +131,12 @@ public class MorphemeAnalyzer {
 	  	System.out.println("content : "		+ content   );
 	  	System.out.println("decription : "	+ hpd.snippet.img);
 //	    Map words_map = doMecab(content, "html");
-	  	Map words_map = doMecabProcess(content, "html");
+	  	Map words_map = doMecabProcess(content, "html",userid,url);
 	  	hpd.keywordList = words_map;
 	     
 	  	//debug.close();
 	  	try {
-	  		if(!DBManager.getInstnace().isParsedDataExist(html.url))	
-	  			DBManager.getInstnace().insertData("ParsedHtmlCollection", new Gson().toJson(hpd));
-	  		else{
-	  			DBManager.getInstnace().updateParsedData(html.url, unicode_userid);
-	  		}
+	  		DBManager.getInstnace().updateParsedData(html.url, unicode_userid, hpd);
 	  	} catch (Exception e) {
 	  		e.printStackTrace();
 	  	}
@@ -133,7 +144,7 @@ public class MorphemeAnalyzer {
 	  	return hpd;
 	}
 	
-	public EventParsedData parsingEvent(EventData eventData){
+	public EventParsedData parsingEvent(EventData eventData,String userid, String url){		
 		url = eventData.url;
 		userid = eventData.userid;
 		String content = eventData.data;
@@ -145,7 +156,7 @@ public class MorphemeAnalyzer {
 		//debug.writeln();
 		
 //		Map words_map = doMecab(content, "event");
-		Map words_map = doMecabProcess(content, "event");
+		Map words_map = doMecabProcess(content, "event",userid,url);
 		EventParsedData epd = new EventParsedData(  eventData.userid, 
 													eventData.url, 
 												    eventData.time.toString(), 
@@ -161,7 +172,7 @@ public class MorphemeAnalyzer {
 	
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Map doMecab(String content, String kind){
+	private Map doMecab(String content, String kind,String userid, String url){
 //		DebuggingLog debug;
 //		if(kind.equals("event"))
 //			 debug = new DebuggingLog("KeywordsEvent");
@@ -233,7 +244,7 @@ public class MorphemeAnalyzer {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Map doMecabProcess(String content, String kind){
+	public Map doMecabProcess(String content, String kind,String userid, String url){
 		DebuggingLog debug;
 //		if(kind.equals("event"))
 //			 debug = new DebuggingLog("KeywordsEvent");
@@ -253,7 +264,7 @@ public class MorphemeAnalyzer {
 		
 		System.out.println(uuid);
 		
-		if(!makeInputFile(inputPath + inputFile, content)){
+		if(!makeInputFile(inputPath + inputFile, content,userid)){
 			//inputfile 생성 오류처리
 		}
 		
@@ -344,7 +355,101 @@ public class MorphemeAnalyzer {
 		
 		*/
 		//debug.close();
-		return sorted_map;
+		countingMap = MapUtil.Map_sortByValue(countingMap);
+		return countingMap;
+	}
+	
+	public Map doMecabTitleProcess(String title,String userid, String url){
+		DebuggingLog debug;
+
+		UUID uuid = UUID.randomUUID();
+		String inputPath  = "D:/mecab/" + userid + "/";
+		String outputPath = "D:/mecab/" + userid + "/";
+		String inputFile  = uuid+".txt";
+		String outputFile = uuid+"_out.txt";		
+		
+		System.out.println(uuid);
+		
+		if(!makeInputFile(inputPath + inputFile, title,userid)){
+			//inputfile 생성 오류처리
+		}
+		
+		List<String> arg = new ArrayList<String>();
+		arg.add("D:/mecab/mecab-ko/mecab");
+		arg.add("-d");
+		arg.add("D:/mecab/mecab-ko/dic/mecab-ko-dic");
+		arg.add(inputPath + inputFile);
+		arg.add("-o");
+		arg.add(outputPath + outputFile);
+		
+		try {
+			System.out.println("start process------------------------");
+			ProcessBuilder mecab_builder = new ProcessBuilder(arg);
+			mecab_builder.redirectOutput(Redirect.INHERIT);	//에러와 출력을 표준스트림으로 출력시킴
+			mecab_builder.redirectError(Redirect.INHERIT);	//input-buffer overflow. The line is split. use -b #SIZE option.
+			Process mecab_process = mecab_builder.start();
+			mecab_process.waitFor();
+			System.out.println("end process--------------------------");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//Stanford POS tagger
+        MaxentTagger tagger = null;
+	    try {
+	    	tagger = new MaxentTagger("C:\\Users\\dong\\Documents\\moa_gitt\\MOA\\left3words-wsj-0-18.tagger");
+	    } catch (ClassNotFoundException e1) {
+	    	e1.printStackTrace();
+	    } catch (IOException e1) {
+	    	e1.printStackTrace();
+	    }
+	    
+	    String word, type;
+		
+        Map<String, Integer> countingMap = new HashMap<String, Integer>();
+		
+        List<WordTagPair> result = getVaildTag(outputPath + outputFile);
+        if(result == null){
+        	//mecab오류 예외처리
+        }
+        
+        for (WordTagPair term: result) {
+			type = term.tag;
+			
+			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
+				word = tagger.tagString(term.word);
+				//System.out.println(word);
+				String[] temp = word.split("/");
+				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
+			}
+			word = term.word.toLowerCase();
+			
+			if(FilteringWord.containsKey(word)) continue;
+			if(countingMap.containsKey(word)) 	
+				countingMap.put(word, countingMap.get(word) + 1);
+			else 								
+				countingMap.put(word, 1);
+		}
+
+        countingMap = MapUtil.Map_sortByValue(countingMap);
+		Collection<String>  keys 	= countingMap.keySet();
+		Collection<Integer> values	= countingMap.values();
+		Iterator key_iter = keys.iterator();
+		Iterator val_iter = values.iterator();
+		int count = 10;
+		
+		System.out.println("key\t count\t");
+		while(key_iter.hasNext()){//count-- > 0){
+			String ikey = (String)  key_iter.next();
+			int ival 	= (Integer) val_iter.next();
+			System.out.println(ikey + "\t " + ival);
+		}
+		System.out.println("done");
+
+		//debug.close();
+		return countingMap;
 	}
 	
 	class ValueComparator implements Comparator {
@@ -402,7 +507,7 @@ public class MorphemeAnalyzer {
 		return null;
 	}
 	
-	private boolean makeInputFile(String path, String content){
+	private boolean makeInputFile(String path, String content,String userid){
 		String dirpath = "/mecab/" + userid;
 		dirpath.replace("/", "\\\\");
 		dirpath = "D:" + dirpath;

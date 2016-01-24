@@ -79,11 +79,11 @@ public class HtmlParser {
 			TT.deleteNode(info.parent, info.child);
 		}
 		//debug용
-		//debug.write("TT----------------------");
-		//debug.writeln();
-		//TT.print_debug(debug);
-		//debug.close();
-		//TT.print();
+//		debug.write("TT----------------------");
+//		debug.writeln();
+//		TT.print_debug(debug);
+//		debug.close();
+//		TT.print();
 		return TT.getRoot().getContent();
 		//System.out.println(TT.getRoot().getContent());
 			
@@ -178,7 +178,9 @@ public class HtmlParser {
 				for(Element ee : body.getAllElements()){
 					if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
 						//System.out.println("makechild "+ ee.tagName());
-						makeChild(ee,hd,uselessTag);
+						if(ee.ownText().equals(""))
+							if(hd.children.size() != 0)
+								makeChild(ee,hd,uselessTag);
 					}
 				}				
 				break;					
@@ -190,8 +192,8 @@ public class HtmlParser {
 		Elements metaTags = doc.head().select("link");
 		if(metaTags.size() != 0){
 			for(Element e :metaTags){
-				String name = e.attr("rel");
-				if(name.equals("shortcut icon")){
+				String name = e.attr("rel").toLowerCase();
+				if(name.equals("shortcut icon") || name.equals("fluid-icon")){
 					return e.attr("href");
 				}
 			}
@@ -215,7 +217,11 @@ public class HtmlParser {
 			hdp.snippet.img = img;
 		}else if(img != null){
 			String[] tokens = hd.url.split("/");
-			img = tokens[0]+"//"+tokens[2]+img;
+			if(img.startsWith("/"))
+				img = tokens[0]+"//"+tokens[2]+img;
+			else
+				img = tokens[0]+"//"+tokens[2]+"/"+img;
+			
 			hdp.snippet.img = img;
 		}
 			
@@ -228,7 +234,8 @@ public class HtmlParser {
 				
 		for(Element e : doc.getAllElements()){
 			if(e.tagName() == "frame" || e.tagName() == "iframe"){
-				makeChild(e,hd,uselessTag);
+				if(hd.children.size() != 0)
+					makeChild(e,hd,uselessTag);
 			}
 		}
 			
@@ -259,12 +266,6 @@ public class HtmlParser {
 				if(TextTag.containsKey(e.tagName())){
 					continue;
 				}				
-				//iframe, frame 내용이 있을경우 날ㄹ기
-				if(e.tagName().contains("frame" ) || e.tagName().contains("iframe")){
-					//System.out.println(e.tagName()+" "+e.text());
-					e.text("");
-					//System.out.println(e.tagName()+" 22 "+e.text());
-				}
 				e.tagName(e.tagName()+tagCnt++);
 				que.add(e);				
 				Node n = new Node(e.tagName(), e.text());				
@@ -281,7 +282,7 @@ public class HtmlParser {
 //		debug.write("CBT----------------------");
 //		debug.writeln();
 //		CBT.print_debug(debug);
-		//CBT.print();	
+//		CBT.print();	
 		return this;
 	}
 	

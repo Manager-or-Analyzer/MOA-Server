@@ -13,6 +13,7 @@ import java.util.Set;
 import org.bson.BasicBSONObject;
 
 import com.google.gson.Gson;
+import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -35,6 +36,7 @@ import kr.co.data.receive.DateData;
 import kr.co.data.send.Snippet;
 import kr.co.moa.controller.analyzer.KeywordsSenderController;
 import kr.co.moa.controller.analyzer.KeywordsSenderController.Dictionary_custom;
+import scala.collection.parallel.ParIterableLike.Aggregate;
 
 //singleton���� ���� 
 public class DBManager {	
@@ -119,10 +121,10 @@ public class DBManager {
    	 			+			"values.forEach(function (doc){"
    	 			+					"for(var k in doc['eventwordsList']){ "
    	 			+						"if(k in map){"
-   	 			+							"map[k] = map[k]+doc['eventwordsList'][k]+0.0;"
+   	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
    	 			+							"check = 1;"
    	 			+						"}else{"
-   	 			+							"map[k] = doc['eventwordsList'][k]+0.0;"
+   	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
    	 			+						"}}});"
    	 			+		"return {eventwordsList :map};};";
    	 	
@@ -145,6 +147,23 @@ public class DBManager {
    	 	return keywordlist;
    	 	
     }    
+	public Map getTfCollection(String userid, String url){
+		db = mongoClient.getDB(DB_NAME);
+	
+		DBCollection collection = db.getCollection("KeywordCollection");
+		
+		BasicDBObject query = new BasicDBObject();
+			query.put("snippet.url", url);
+			query.put("userid", userid);
+		DBCursor cursor = collection.find(query);
+		if(cursor.hasNext()){
+			Map res = (Map) cursor.next().get("keywordList");
+			return res;
+		}    		
+		else{
+			return null;
+		}    	
+	}
     public KeywordsSenderController.Dictionary_custom getKeywordList(List<String> urls, String userid, DateData datedata) throws Exception{
     	db = mongoClient.getDB(DB_NAME);
 //      	for(String s: urls){
@@ -167,14 +186,10 @@ public class DBManager {
 	 			+					"for(var k in doc['keywordsList']){ "
 	 			+					  "if(cnt++ <3){"
 	 			+						"if(k in map){"
+	 			+							"map[k] += doc['keywordsList'][k];"
 	 			+							"cnt--;"
    	 			+						"}else{"
-	 			+							"map[k]=0.0;"
-	 			+							"for(i=0; i<totalDoc; i++){"
-	 			+								"var maplist = values[i]['keywordsList'];"
-	 			+								"if(k in maplist)"
-	 			+									"map[k] = map[k]+maplist[k];"
-	 			+							"}"
+	 			+							"map[k] = doc['keywordsList'][k];"
    	 			+						"}}"
    	 			+ 					  "else{"
    	 			+ 						"break;}}});"
@@ -205,25 +220,36 @@ public class DBManager {
 	 			+		"else {"+reduce2+"}}";	
 	 	
 	 	
-
 	 	BasicDBObject query = new BasicDBObject();
 	 		query.append("userid", userid);
-	 		query.append("snippet.url", new BasicDBObject("$in", urls));
-	 		
-	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
-	 			"kTest", MapReduceCommand.OutputType.REPLACE, query);
-	 	cmd.setFinalize(finalize);
-	 		
-	 	MapReduceOutput out = collection.mapReduce(cmd);
+ 			query.append("snippet.url", new BasicDBObject("$in", urls));
 	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
-	 	for(DBObject res :  out.results()){
-	 		System.out.println("bubble "+res.get("value").toString());
-	 		Object obj = res.get("value");
-	 		DBObject tmp = (DBObject)obj;
-	 		keywordlist.putAll((Map)tmp.get("keywordsList"));
-	 		//return keywordlist;
+	 	if(urls.size() > 1){		 			 				 
+		 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
+		 			"kTest", MapReduceCommand.OutputType.REPLACE, query);
+		 	cmd.setFinalize(finalize);
+		 		
+		 	MapReduceOutput out = collection.mapReduce(cmd);	 	
+		 	for(DBObject res :  out.results()){
+		 		System.out.println("bubble "+res.get("value").toString());
+		 		Object obj = res.get("value");
+		 		DBObject tmp = (DBObject)obj;
+		 		keywordlist.putAll((Map)tmp.get("keywordsList"));
+		 		//return keywordlist;
+		 	}
+		 	System.out.println("bubble "+keywordlist.size());
+	 	}else if(urls.size() == 1){
+	 		DBCursor cursor = collection.find(query);
+	 		while(cursor.hasNext()){
+	 			Map<String, Double> tmp = (Map<String, Double>) cursor.next().get("keywordList");
+	 			int cnt =0;
+	 			for(String key : tmp.keySet()){
+	 				if(cnt++<3){
+	 					keywordlist.put(key, tmp.get(key));
+	 				}break;
+	 			}
+	 		}	 		
 	 	}
-	 	System.out.println("bubble "+keywordlist.size());
 	 	BasicDBObject timeQuery = new BasicDBObject();
 	 	
 	 	Date from = Util.strToDate(datedata.start);
@@ -235,7 +261,7 @@ public class DBManager {
 			query.put("snippet.time", date_query);
 	
 		List<TF_IDF> keyCollections = new ArrayList<TF_IDF>();	
-		DBCursor cursor = collection.find(query);
+		DBCursor cursor = collection.find(query).sort(new BasicDBObject("snippet.time",-1));
 		
 		while(cursor.hasNext()){
 			BasicDBObject obj = (BasicDBObject) cursor.next();
@@ -275,11 +301,11 @@ public class DBManager {
 	 		keywordlist =  (Map)tmp.get("idfwordsList");
 	 	}
 	 	
-	 	Map<String, Double> res= new HashMap<String, Double>();
-	 	for(String key : idfList.keySet()){
-	 		res.put(key, keywordlist.get(key));
-	 	}
-	 	return res;
+//	 	Map<String, Double> res= new HashMap<String, Double>();
+//	 	for(String key : idfList.keySet()){
+//	 		res.put(key, keywordlist.get(key));
+//	 	}
+	 	return keywordlist;
 	 	
     }
     public List getUrls(DateData datedata){
@@ -356,7 +382,7 @@ public class DBManager {
 		
 		ArrayList<EventData> events = new ArrayList<EventData>();
 		while(cursor.hasNext()){
-			System.out.println("asdfsadfasdfsadf");
+			//System.out.println("asdfsadfasdfsadf");
     		BasicDBObject obj = (BasicDBObject) cursor.next();
     		EventData ed = new EventData();
     		
@@ -538,35 +564,14 @@ public class DBManager {
     	}
     		
     }
-    public boolean isParsedDataExist(String url){
-    	db = mongoClient.getDB(DB_NAME);
 
-    	DBCollection collection = db.getCollection("ParsedHtmlCollection");
-    	
-    	BasicDBObject query = new BasicDBObject();
-    	query.put("snippet.url", url);
-    	
-    	DBCursor cursor = collection.find(query);
-    	
-    	if(cursor.hasNext()){
-    		System.out.println("isParsedDataExist true");
-    		return true;
-    	}    		
-    	else{
-    		System.out.println("isParsedDataExist false");
-    		return false;
-    	}
-    		
-    }
-    
  
-
     //update
     public void updateTime(String url, String userid, String time){
     	db = mongoClient.getDB(DB_NAME);
 
     	DBCollection collection = db.getCollection("KeywordCollection");
-    	
+    	System.out.println("updateTime "+Util.strToDate(time));
     	BasicDBObject searchQuery = new BasicDBObject();
     		searchQuery.put("snippet.url", url);
     		searchQuery.put("userid", userid);
@@ -574,17 +579,30 @@ public class DBManager {
     		updateQuery.append("$set", new BasicDBObject().append("snippet.time", Util.strToDate(time)));
     	collection.update(searchQuery, updateQuery);	
     }  
-    public void updateParsedData(String url, String userid){
+    public void updateParsedData(String url, String userid, HtmlParsedData hpd){
     	userid = userid.replace(".", "\uff0E");
     	db = mongoClient.getDB(DB_NAME);
 
     	DBCollection collection = db.getCollection("ParsedHtmlCollection");
     	
+    	
     	BasicDBObject searchQuery = new BasicDBObject();
     		searchQuery.put("snippet.url", url);
+    		
+    	BasicBSONObject snippetBSON = new BasicBSONObject();
+    		snippetBSON.put("title",hpd.snippet.title);
+    		snippetBSON.put("url",hpd.snippet.url);
+    		snippetBSON.put("time",hpd.snippet.time);
+    		snippetBSON.put("img",hpd.snippet.img);
+    	
     	BasicDBObject updateQuery = new BasicDBObject();
-    		updateQuery.append("$set", new BasicDBObject().append("userList."+userid, true));
-    	collection.update(searchQuery, updateQuery);	
+    		updateQuery.append("$set", new BasicDBObject()
+    										.append("snippet", snippetBSON)
+    										.append("collectionName", hpd.collectionName)
+    										.append("keywordList", hpd.keywordList)
+    										.append("userList."+userid, true));
+    		
+    	collection.update(searchQuery, updateQuery ,true , false);	
     }  
     public void updateTF_IDFByEvent(String url, String userid, Map<String, Double> keywordList){
     	db = mongoClient.getDB(DB_NAME);
@@ -598,6 +616,63 @@ public class DBManager {
     	BasicDBObject updateQuery = new BasicDBObject();
     		updateQuery.append("$set", new BasicDBObject().append("keywordList", keywordList));
     	collection.update(searchQuery, updateQuery);	
+    }
+    public void updateTF_IDFByEvent( TF_IDF tfidf){
+    	db = mongoClient.getDB(DB_NAME);
+    	
+    	DBCollection collection = db.getCollection("KeywordCollection");
+    	
+    	BasicDBObject kl = new BasicDBObject();
+    	BasicDBObject searchQuery = new BasicDBObject();
+    		searchQuery.put("snippet.url", tfidf.snippet.url);
+    		searchQuery.put("userid", tfidf.userid);
+    	
+    	BasicBSONObject snippetBSON = new BasicBSONObject();
+			snippetBSON.put("title",tfidf.snippet.title);
+			snippetBSON.put("url",tfidf.snippet.url);
+			snippetBSON.put("time",Util.strToDate(tfidf.snippet.time));
+			snippetBSON.put("img",tfidf.snippet.img);
+    	BasicDBObject updateQuery = new BasicDBObject();    	
+    		updateQuery.append("$set", new BasicDBObject()
+    										.append("keywordList", tfidf.keywordList)
+    										.append("collectionName", tfidf.collectionName)
+    										.append("snippet", snippetBSON));
+    		
+    	collection.update(searchQuery, updateQuery, true, false);	
+    }
+    
+    public List updateAll(){
+    	db = mongoClient.getDB(DB_NAME);
+    	
+    	DBCollection collection = db.getCollection("ParsedHtmlCollection");
+    	DBCursor cursor = collection.find();
+    	
+    	List<HtmlParsedData> list = new ArrayList<HtmlParsedData>();
+    	while(cursor.hasNext()){
+    		Gson gson = new Gson();
+    		HtmlParsedData hpd = gson.fromJson(cursor.next().toString(), HtmlParsedData.class);
+    		list.add(hpd);
+//    		DBObject obj = cursor.next();
+//    		Map<String,Boolean> map = (Map<String, Boolean>) obj.get("userList");
+//    		String url =  ((BasicBSONObject)obj.get("snippet")).getString("url");
+//    		for(String key: map.keySet()){
+//    			key = key.replace("\uff0E", ".");
+//    			System.out.println(url+" "+key);
+//    		}    		    	
+    	}
+    	return list;
+    	
+//    	AggregationOutput agout = collection.aggregate(
+//    			new BasicDBObject("$group",
+//    					new BasicDBObject("_id","$userid").append("_id","$snippet.url").append("value", new BasicDBObject("$push","$snippet"))));
+//    	
+//    	Iterator<DBObject> results = agout.results().iterator();
+//    	
+//    	System.out.println("start updateAll");
+//    	while(results.hasNext()){
+//    		DBObject obj = results.next();
+//    		System.out.println(obj.get("_id")+" "+obj.get("value"));
+//    	}
     }
   
     
@@ -708,23 +783,7 @@ public class DBManager {
 //	return cnt;
 //}
 	
-//  public Map getTfCollection(String userid, String url){
-//	db = mongoClient.getDB(DB_NAME);
-//
-//	DBCollection collection = db.getCollection("KeywordCollection");
-//	
-//	BasicDBObject query = new BasicDBObject();
-//		query.put("snippet.url", url);
-//		query.put("userid", userid);
-//	DBCursor cursor = collection.find(query);
-//	if(cursor.hasNext()){
-//		Map res = (Map) cursor.next().get("keywordList");
-//		return res;
-//	}    		
-//	else{
-//		return null;
-//	}    	
-//}
+
 
 //  public void updateData_IDF(IDf updateList) throws Exception{
 //	db = mongoClient.getDB(DB_NAME);
@@ -806,5 +865,27 @@ public class DBManager {
 //	db = mongoClient.getDB(DB_NAME);
 //	return db.getCollection("DurationData").find(query);
 //}
+    
+//  public boolean isParsedDataExist(String url){
+//	db = mongoClient.getDB(DB_NAME);
+//
+//	DBCollection collection = db.getCollection("ParsedHtmlCollection");
+//	
+//	BasicDBObject query = new BasicDBObject();
+//	query.put("snippet.url", url);
+//	
+//	DBCursor cursor = collection.find(query);
+//	
+//	if(cursor.hasNext()){
+//		System.out.println("isParsedDataExist true");
+//		return true;
+//	}    		
+//	else{
+//		System.out.println("isParsedDataExist false");
+//		return false;
+//	}
+//		
+//}
+//
 	
 }

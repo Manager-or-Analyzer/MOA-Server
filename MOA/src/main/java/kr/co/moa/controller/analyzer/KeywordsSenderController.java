@@ -61,8 +61,9 @@ public class KeywordsSenderController extends HttpServlet {
 			sd.bChart.children = new ArrayList<MainKeywordData>();
 			
 			for(String key : dc.keywordList.keySet()){
-				System.out.println("key :"+ key);
-				sd.bChart.children.add(new MainKeywordData(key, dc.keywordList.get(key)));
+				//System.out.println("key :"+ key);
+				if(dc.keywordList.get(key) != 0)
+					sd.bChart.children.add(new MainKeywordData(key, dc.keywordList.get(key)));
 			}
 			sd.snippetList = dc.keyCollections;
 			//sd.snippetList = list_snippet;

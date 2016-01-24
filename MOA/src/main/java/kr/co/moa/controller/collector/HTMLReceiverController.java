@@ -47,16 +47,7 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		try {
 			DBManager.getInstnace().insertData("HtmlData", htmlData);				
-			if(!DBManager.getInstnace().isDocExist(hd.url, hd.userid)){
-				KeywordManager.getInstance().calTF_IDF(hd);
-				DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
-				
-			}else{
-				//update time.
-				DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
-	  			System.out.println("already exist");
-			}
-			
+			KeywordManager.getInstance().calTF_IDF(hd);				
 		} catch (Exception e) {
 			Log.getInstance().severe(CLASS, "DB :insertData fail : "+e);
 		}			
