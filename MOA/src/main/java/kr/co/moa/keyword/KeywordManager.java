@@ -19,7 +19,7 @@ import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 public class KeywordManager {
 	
 	private static final double W_BODY = 0.5;
-	private static final double W_TITLE = 0.3;
+	private static final double W_TITLE = 0.5;
 	private static final double W_EVNET = 0.2;
 	private static final int MAX_KEYWORDS = 50;
 	
@@ -84,9 +84,9 @@ public class KeywordManager {
 			Tf_map = MapUtil.Map_sortByValue(Tf_map);
 			System.out.println("start");
 			
-			for(String key: Tf_map.keySet()){
-				System.out.println("key : "+key+" val:"+Tf_map.get(key));
-			}
+//			for(String key: Tf_map.keySet()){
+//				System.out.println("key : "+key+" val:"+Tf_map.get(key));
+//			}
 			
 			DBManager.getInstnace().updateTF_IDFByEvent(ed.url, ed.userid, Tf_map);
 			//updateAll();
@@ -196,7 +196,9 @@ public class KeywordManager {
 			int count = 10;
 			System.out.println("key\t count\t");
 			for(String key : tfid.keywordList.keySet()){
-				System.out.println(key + "\t " + tfid.keywordList.get(key));
+				if(count-->0)
+					System.out.println(key + "\t " + tfid.keywordList.get(key));
+				else break;
 			}
 			DBManager.getInstnace().updateTF_IDFByEvent(tfid);
 			

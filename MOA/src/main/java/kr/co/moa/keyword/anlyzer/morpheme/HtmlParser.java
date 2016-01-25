@@ -1,5 +1,6 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,7 @@ public class HtmlParser {
 		}
 		return findPart(str,hd);
 	}
-	private void makeChild(Element e, HtmlData hd, Map<String,String> uselessTag){
+	private void makeChild(Element e, HtmlData hd, Map<String,String> uselessTag, List<Boolean> isUsedList ){
 		
 		String src = e.attr("src");
 		
@@ -150,12 +151,14 @@ public class HtmlParser {
 			if(!flag){
 				src = findPart(src, hd);
 			}
-			//System.out.println("src " + src);
+			System.out.println("src " + src);
 		}		
 		int i;
+		//System.out.println("src :"+src);
+		//System.out.println("size :"+hd.children.size());
 		for(i=0; i<hd.children.size(); i++){
-			if(hd.children.get(i).url.equals(src)){
-				//System.out.println("element :"+e.tagName());
+			if(hd.children.get(i).url.equals(src) ){
+				isUsedList.set(i, true);
 				String html = hd.children.get(i).doc;
 				html = html.replaceAll("&nbsp;","").trim();
 				Document doc = Jsoup.parse(html);
@@ -178,12 +181,56 @@ public class HtmlParser {
 				for(Element ee : body.getAllElements()){
 					if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
 						//System.out.println("makechild "+ ee.tagName());
-						if(ee.ownText().equals(""))
+						if(ee.ownText().equals("")){
 							if(hd.children.size() != 0)
-								makeChild(ee,hd,uselessTag);
+								makeChild(ee,hd,uselessTag,isUsedList);
+							else
+								System.out.println("makeChild chid size 0");
+						}else
+							System.out.println("makeChild own text != 0");
 					}
 				}				
 				break;					
+			}
+			else if(i == hd.children.size()-1){
+				//System.out.println("size :"+hd.children.size());
+				for(int j=0; j<isUsedList.size(); j++){
+					if(!isUsedList.get(j)){
+						//System.out.println("isUsedList :"+hd.children.size());
+						isUsedList.set(j, true);
+						String html = hd.children.get(j).doc;
+						html = html.replaceAll("&nbsp;","").trim();
+						Document doc = Jsoup.parse(html);
+						
+						for(Element ee : doc.getAllElements()){
+							if(uselessTag.containsKey(ee.tagName())){
+								ee.remove();
+							}
+						}		
+						Element body = doc.body();
+						// body가 없고 frameset이 있을경우 -> html 엤날 방식.
+						if(body == null){
+							body = doc.select("frameset").first();
+						}
+						
+						body.tagName(body.tagName()+"child"+i+j);				
+						e.appendChild(body);
+						
+						///System.out.println(e.outerHtml());
+						for(Element ee : body.getAllElements()){
+							if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
+								//System.out.println("makechild "+ ee.tagName());
+								if(ee.ownText().equals("")){
+									if(hd.children.size() != 0)
+										makeChild(ee,hd,uselessTag,isUsedList);
+									else
+										System.out.println("makeChild chid size 0");
+								}else
+									System.out.println("makeChild own text != 0");
+							}
+						}				
+					}
+				}
 			}
 		}	
 	}
@@ -232,10 +279,17 @@ public class HtmlParser {
 			}
 		}
 				
+		//boolean List 만들기
+		List<Boolean> isUsedList = new ArrayList<Boolean>();
+		for(int i=0; i<hd.children.size(); i++)
+			isUsedList.add(false);
+		
 		for(Element e : doc.getAllElements()){
 			if(e.tagName() == "frame" || e.tagName() == "iframe"){
 				if(hd.children.size() != 0)
-					makeChild(e,hd,uselessTag);
+					makeChild(e,hd,uselessTag, isUsedList);
+				else
+					System.out.println("chid size 0");
 			}
 		}
 			
@@ -254,6 +308,8 @@ public class HtmlParser {
 		// CBT에 add <body>
 		Node body_node = new Node(body_e.tagName(), body_e.text());
 		CBT.addNode("ROOT", body_node);
+		//System.out.println("전체------------------------");
+		//System.out.println(body_e.text());
 		
 		// 3. child 추출
 		/*
@@ -282,7 +338,7 @@ public class HtmlParser {
 //		debug.write("CBT----------------------");
 //		debug.writeln();
 //		CBT.print_debug(debug);
-//		CBT.print();	
+		//CBT.print();	
 		return this;
 	}
 	

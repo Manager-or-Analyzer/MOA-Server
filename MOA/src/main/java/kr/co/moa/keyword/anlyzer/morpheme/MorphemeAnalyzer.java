@@ -396,6 +396,8 @@ public class MorphemeAnalyzer {
 			e.printStackTrace();
 		}
 		
+		
+		
 		//Stanford POS tagger
         MaxentTagger tagger = null;
 	    try {
@@ -433,19 +435,19 @@ public class MorphemeAnalyzer {
 				countingMap.put(word, 1);
 		}
 
-        countingMap = MapUtil.Map_sortByValue(countingMap);
-		Collection<String>  keys 	= countingMap.keySet();
-		Collection<Integer> values	= countingMap.values();
-		Iterator key_iter = keys.iterator();
-		Iterator val_iter = values.iterator();
-		int count = 10;
-		
-		System.out.println("key\t count\t");
-		while(key_iter.hasNext()){//count-- > 0){
-			String ikey = (String)  key_iter.next();
-			int ival 	= (Integer) val_iter.next();
-			System.out.println(ikey + "\t " + ival);
-		}
+//        countingMap = MapUtil.Map_sortByValue(countingMap);
+//		Collection<String>  keys 	= countingMap.keySet();
+//		Collection<Integer> values	= countingMap.values();
+//		Iterator key_iter = keys.iterator();
+//		Iterator val_iter = values.iterator();
+//		int count = 10;
+//		
+//		System.out.println("key\t count\t");
+//		while(key_iter.hasNext()){//count-- > 0){
+//			String ikey = (String)  key_iter.next();
+//			int ival 	= (Integer) val_iter.next();
+//			System.out.println(ikey + "\t " + ival);
+//		}
 		System.out.println("done");
 
 		//debug.close();

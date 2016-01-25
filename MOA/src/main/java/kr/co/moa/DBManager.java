@@ -69,7 +69,7 @@ public class DBManager {
     	 
     	 DBCollection collection = db.getCollection(collection_name);
     	 DBObject dbObject = (DBObject)JSON.parse(data_json);
-    	 System.out.println("insertData log :"+data_json);
+    	 //System.out.println("insertData log :"+data_json);
     	 collection.insert(dbObject);    	    
     }
 	public void insertEventData(BasicDBObject query) {
@@ -117,16 +117,28 @@ public class DBManager {
    	 			+	"};";
    	 	
    	 	String reduce = "function (key, values) {"
-   	 			+			"var map = {};"
-   	 			+			"values.forEach(function (doc){"
-   	 			+					"for(var k in doc['eventwordsList']){ "
-   	 			+						"if(k in map){"
-   	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
-   	 			+							"check = 1;"
-   	 			+						"}else{"
-   	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
-   	 			+						"}}});"
-   	 			+		"return {eventwordsList :map};};";
+	 			+			"var map = {};"
+	 			+			"values.forEach(function (doc){"
+	 			+					"for(var k in doc['eventwordsList']){ "
+	 			+						"if(k in map){"
+	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
+	 			+							"check = 1;"
+	 			+						"}else{"
+	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
+	 			+						"}}});"
+	 			+		"return {eventwordsList :map};};";
+   	 	
+//   	 	String reduce = "function (key, values) {"
+//   	 			+			"var map = {};"
+//   	 			+			"values.forEach(function (doc){"
+//   	 			+					"for(var k in doc['eventwordsList']){ "
+//   	 			+						"if(k in map){"
+//   	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
+//   	 			+							"check = 1;"
+//   	 			+						"}else{"
+//   	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
+//   	 			+						"}}});"
+//   	 			+		"return {eventwordsList :map};};";
    	 	
    	 	BasicDBObject query = new BasicDBObject();
    	 	query.append("url", url);
