@@ -163,7 +163,8 @@ public class MorphemeAnalyzer {
 												    words_map);
 		
 		try {
-			DBManager.getInstnace().insertData("ParsedEventCollection", new Gson().toJson(epd));
+			//DBManager.getInstnace().insertData("ParsedEventCollection", new Gson().toJson(epd));
+			DBManager.getInstnace().updateEventParsedData(epd);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

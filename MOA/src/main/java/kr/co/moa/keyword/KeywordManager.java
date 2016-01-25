@@ -44,8 +44,8 @@ public class KeywordManager {
 //		}
 		try {			
 			Map<String, Double> Tf_map = DBManager.getInstnace().getTfCollection(ed.userid, ed.url);
-			Map<String, Double> tmp = DBManager.getInstnace().getParsedEvents(ed.userid, ed.url);
-			Map<String, Double> Tf_Event = cal_TF_Event(epd.keywordList,tmp);
+			int eventCnt = DBManager.getInstnace().getParsedEventsCnt(ed.userid, ed.url);
+			Map<String, Double> Tf_Event = cal_TF_Event(epd.keywordList,eventCnt);
 			if(Tf_map == null){
 				System.out.println("There is no TFList at url :"+ed.url);
 				return;
@@ -84,10 +84,14 @@ public class KeywordManager {
 			Tf_map = MapUtil.Map_sortByValue(Tf_map);
 			System.out.println("start");
 			
-//			for(String key: Tf_map.keySet()){
-//				System.out.println("key : "+key+" val:"+Tf_map.get(key));
-//			}
-			
+			int count = 10;
+			System.out.println("key\t count\t");
+			for(String key : Tf_map.keySet()){
+				if(count-->0)
+					System.out.println(key + "\t " + Tf_map.get(key));
+				else break;
+			}
+		
 			DBManager.getInstnace().updateTF_IDFByEvent(ed.url, ed.userid, Tf_map);
 			//updateAll();
 			
@@ -245,15 +249,9 @@ public class KeywordManager {
 		return Tf;
 		
 	}
-	private Map cal_TF_Event(Map<String,Integer> wordsByMecab, Map<String,Double> tmp) throws Exception{
+	private Map cal_TF_Event(Map<String,Integer> wordsByMecab, int totalSize) throws Exception{
 		Map<String,Double> Tf = new HashMap<String, Double>();
-		
-		double totalSize = 0.0;
-		for(String key: tmp.keySet()){
-			totalSize += tmp.get(key);
-		}
-		totalSize *= 10;
-		
+					
 		System.out.println("size :"+totalSize);
 		int cnt = 0;
 		for(Map.Entry<String, Integer> me : wordsByMecab.entrySet()){

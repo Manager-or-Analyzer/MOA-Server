@@ -31,6 +31,7 @@ import kr.co.Util;
 import kr.co.data.TF_IDF;
 import kr.co.data.origin.EventData;
 import kr.co.data.origin.HtmlData;
+import kr.co.data.parsed.EventParsedData;
 import kr.co.data.parsed.HtmlParsedData;
 import kr.co.data.receive.DateData;
 import kr.co.data.send.Snippet;
@@ -106,58 +107,23 @@ public class DBManager {
     	return hd;
     	
     }   
-    public Map getParsedEvents(String userId, String url) throws Exception{
+ 
+    public int getParsedEventsCnt(String userId, String url) throws Exception{
     	db = mongoClient.getDB(DB_NAME);
       	 
    	 	DBCollection collection = db.getCollection("ParsedEventCollection");
-   	 	
-   	 	String map = "function() { "
-   	 			+		"var key = {userId: this.userid, url:this.url};"
-   	 			+		"emit(key, {eventwordsList : this.keywordList});"
-   	 			+	"};";
-   	 	
-   	 	String reduce = "function (key, values) {"
-	 			+			"var map = {};"
-	 			+			"values.forEach(function (doc){"
-	 			+					"for(var k in doc['eventwordsList']){ "
-	 			+						"if(k in map){"
-	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
-	 			+							"check = 1;"
-	 			+						"}else{"
-	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
-	 			+						"}}});"
-	 			+		"return {eventwordsList :map};};";
-   	 	
-//   	 	String reduce = "function (key, values) {"
-//   	 			+			"var map = {};"
-//   	 			+			"values.forEach(function (doc){"
-//   	 			+					"for(var k in doc['eventwordsList']){ "
-//   	 			+						"if(k in map){"
-//   	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
-//   	 			+							"check = 1;"
-//   	 			+						"}else{"
-//   	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
-//   	 			+						"}}});"
-//   	 			+		"return {eventwordsList :map};};";
-   	 	
+   	 	   
    	 	BasicDBObject query = new BasicDBObject();
-   	 	query.append("url", url);
-   	 	query.append("userid", userId);
-   	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
-   	 			null, MapReduceCommand.OutputType.INLINE, query);
-   	 	
-   	 	MapReduceOutput out = collection.mapReduce(cmd);
-   	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
-   	 	int cnt = 1;
-   	 	for(DBObject res :  out.results()){
-   	 		System.out.println(res.get("value").toString());
-   	 		Object obj = res.get("value");
-   	 		DBObject tmp = (DBObject)obj;
-   	 		keywordlist.putAll((Map)tmp.get("eventwordsList"));
+   	 		query.append("url", url);
+   	 		query.append("userid", userId);
+   	 		
+   	 	DBCursor cursor = collection.find(query);
+   	 	while(cursor.hasNext()){
+   	 		DBObject obj = cursor.next();
+   	 		return (Integer) obj.get("totalCnt");
    	 	}
-   	 	
-   	 	return keywordlist;
-   	 	
+   	 	  
+   	 	return 0;
     }    
 	public Map getTfCollection(String userid, String url){
 		db = mongoClient.getDB(DB_NAME);
@@ -616,6 +582,22 @@ public class DBManager {
     		
     	collection.update(searchQuery, updateQuery ,true , false);	
     }  
+    public void updateEventParsedData(EventParsedData epd){
+    	db = mongoClient.getDB(DB_NAME);
+
+    	DBCollection collection = db.getCollection("ParsedEventCollection");
+    	
+    	
+    	BasicDBObject searchQuery = new BasicDBObject();
+    		searchQuery.put("url", epd.url);
+    		searchQuery.put("userid", epd.userid);
+    		    	    	
+    	BasicDBObject updateQuery = new BasicDBObject();
+    		updateQuery.append("$set", new BasicDBObject().append("time", epd.time));
+    		updateQuery.append("$inc", new BasicDBObject().append("totalCnt",epd.totalCnt));
+    		
+    	collection.update(searchQuery, updateQuery ,true , false);	
+    }  
     public void updateTF_IDFByEvent(String url, String userid, Map<String, Double> keywordList){
     	db = mongoClient.getDB(DB_NAME);
     	
@@ -899,5 +881,57 @@ public class DBManager {
 //		
 //}
 //
-	
+//  public Map getParsedEvents(String userId, String url) throws Exception{
+//	db = mongoClient.getDB(DB_NAME);
+//  	 
+//	 	DBCollection collection = db.getCollection("ParsedEventCollection");
+//	 	
+//	 	String map = "function() { "
+//	 			+		"var key = {userId: this.userid, url:this.url};"
+//	 			+		"emit(key, {eventwordsList : this.keywordList});"
+//	 			+	"};";
+//	 	
+//	 	String reduce = "function (key, values) {"
+// 			+			"var map = {};"
+// 			+			"values.forEach(function (doc){"
+// 			+					"for(var k in doc['eventwordsList']){ "
+// 			+						"if(k in map){"
+// 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
+// 			+							"check = 1;"
+// 			+						"}else{"
+// 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
+// 			+						"}}});"
+// 			+		"return {eventwordsList :map};};";
+//	 	
+////	 	String reduce = "function (key, values) {"
+////	 			+			"var map = {};"
+////	 			+			"values.forEach(function (doc){"
+////	 			+					"for(var k in doc['eventwordsList']){ "
+////	 			+						"if(k in map){"
+////	 			+							"map[k] = map[k]+doc['eventwordsList'][k]*0.1;"
+////	 			+							"check = 1;"
+////	 			+						"}else{"
+////	 			+							"map[k] = doc['eventwordsList'][k]*0.1;"
+////	 			+						"}}});"
+////	 			+		"return {eventwordsList :map};};";
+//	 	
+//	 	BasicDBObject query = new BasicDBObject();
+//	 	query.append("url", url);
+//	 	query.append("userid", userId);
+//	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
+//	 			null, MapReduceCommand.OutputType.INLINE, query);
+//	 	
+//	 	MapReduceOutput out = collection.mapReduce(cmd);
+//	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
+//	 	int cnt = 1;
+//	 	for(DBObject res :  out.results()){
+//	 		System.out.println(res.get("value").toString());
+//	 		Object obj = res.get("value");
+//	 		DBObject tmp = (DBObject)obj;
+//	 		keywordlist.putAll((Map)tmp.get("eventwordsList"));
+//	 	}
+//	 	
+//	 	return keywordlist;
+//	 	
+//}  
 }
