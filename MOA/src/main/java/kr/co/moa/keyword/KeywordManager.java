@@ -151,7 +151,7 @@ public class KeywordManager {
 	}
 	public void calTF_IDF(HtmlData hd){
 		HtmlParsedData hpd = MorphemeAnalyzer.getInstance().parsingHTML(hd);
-		
+			
 		try {
 			// 이미 방문했던 사이트인진 체크			
 			Map<String, Double> idfList = cal_IDF(hpd.keywordList);		 	

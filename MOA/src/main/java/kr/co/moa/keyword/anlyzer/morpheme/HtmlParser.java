@@ -179,15 +179,21 @@ public class HtmlParser {
 				
 				///System.out.println(e.outerHtml());
 				for(Element ee : body.getAllElements()){
-					if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
+					if(ee.tagName() == "frame" || ee.tagName() == "iframe"){						
 						//System.out.println("makechild "+ ee.tagName());
 						if(ee.ownText().equals("")){
-							if(hd.children.size() != 0)
+							if(hd.children.size() != 0){
 								makeChild(ee,hd,uselessTag,isUsedList);
+							}
+								
 							else
 								System.out.println("makeChild chid size 0");
-						}else
-							System.out.println("makeChild own text != 0");
+						}else{
+							//System.out.println("iframe:"+ee.ownText());
+							ee.text("");
+							//System.out.println("makeChild own text != 0");
+						}
+							
 					}
 				}				
 				break;					
@@ -218,15 +224,19 @@ public class HtmlParser {
 						
 						///System.out.println(e.outerHtml());
 						for(Element ee : body.getAllElements()){
-							if(ee.tagName() == "frame" || ee.tagName() == "iframe"){
+							if(ee.tagName() == "frame" || ee.tagName() == "iframe"){								
 								//System.out.println("makechild "+ ee.tagName());
-								if(ee.ownText().equals("")){
+								if(ee.ownText().equals("")){									
 									if(hd.children.size() != 0)
 										makeChild(ee,hd,uselessTag,isUsedList);
 									else
 										System.out.println("makeChild chid size 0");
-								}else
-									System.out.println("makeChild own text != 0");
+								}else{
+									//System.out.println("iframe:"+ee.ownText());
+									ee.text("");
+									//System.out.println("makeChild own text != 0");
+								}
+									
 							}
 						}				
 					}
@@ -286,10 +296,17 @@ public class HtmlParser {
 		
 		for(Element e : doc.getAllElements()){
 			if(e.tagName() == "frame" || e.tagName() == "iframe"){
-				if(hd.children.size() != 0)
-					makeChild(e,hd,uselessTag, isUsedList);
-				else
-					System.out.println("chid size 0");
+				if(e.ownText().equals("")){
+					if(hd.children.size() != 0)
+						makeChild(e,hd,uselessTag, isUsedList);
+					else
+						System.out.println("chid size 0");
+				}else{
+					//System.out.println("iframe:"+e.ownText());
+					e.text("");
+					//System.out.println("main iframe own text != 0");
+				}
+					
 			}
 		}
 			

@@ -549,7 +549,7 @@ public class DBManager {
     	db = mongoClient.getDB(DB_NAME);
 
     	DBCollection collection = db.getCollection("KeywordCollection");
-    	System.out.println("updateTime "+Util.strToDate(time));
+    	//System.out.println("updateTime "+Util.strToDate(time));
     	BasicDBObject searchQuery = new BasicDBObject();
     		searchQuery.put("snippet.url", url);
     		searchQuery.put("userid", userid);

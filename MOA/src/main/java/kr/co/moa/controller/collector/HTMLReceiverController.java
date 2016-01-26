@@ -33,17 +33,20 @@ public class HTMLReceiverController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String CLASS = "HTMLReceiverController";
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+		request.setCharacterEncoding("utf-8");
 		PrintWriter out = response.getWriter();	
 		String htmlData = request.getParameter("data");
 		
 		HtmlData hd = new Gson().fromJson(htmlData, HtmlData.class);
 		
-		if(htmlData == null || htmlData.equals("")){
+		if(htmlData == null || htmlData.equals("") || hd.userid.equals("")){
 			Log.getInstance().severe(CLASS, "client fails to send htmlData");
 			out.println("fail");
 			return;
 		}
+
+		System.out.println("htmlreceivercontroller : " + htmlData);
+		System.out.println("htmlreceivercontroller : " + hd.userid);
 		
 		try {
 			DBManager.getInstnace().insertData("HtmlData", htmlData);				

@@ -170,80 +170,7 @@ public class MorphemeAnalyzer {
 		}
 		return epd;
 	}
-	
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Map doMecab(String content, String kind,String userid, String url){
-//		DebuggingLog debug;
-//		if(kind.equals("event"))
-//			 debug = new DebuggingLog("KeywordsEvent");
-//		else
-//			 debug = new DebuggingLog("KeywordsHTml");
-		List<LNode> result = Analyzer.parseJava(content);
-		String word, type;
-		Map<String, Integer> countingMap = new HashMap<String, Integer>();
-		ValueComparator bvc = new ValueComparator(countingMap);
-        TreeMap sorted_map = new TreeMap(bvc);
-        
-        //Stanford POS tagger
-        MaxentTagger tagger = null;
-	    try {
-	    	tagger = new MaxentTagger("C:\\Users\\dong\\Documents\\moa_gitt\\MOA\\left3words-wsj-0-18.tagger");
-	    } catch (ClassNotFoundException e1) {
-	    	e1.printStackTrace();
-	    } catch (IOException e1) {
-	    	e1.printStackTrace();
-	    }
-	    
-	    //System.out.println(tagger.tagString(content));
-        
-        for (LNode term: result) {
-			type = term.morpheme().feature().head();
-			
-			if(type.charAt(0) != 'N' && 			//ignore NOT a noun
-					!type.equals("SL")) continue;	//ignore NOT a foreign language	
-			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
-				word = tagger.tagString(term.morpheme().surface());
-				String[] temp = word.split("/");
-				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
-			}
-			word = term.morpheme().surface();
-			//System.out.println(type + " : " + word +"\n");
-			
-			if(countingMap.containsKey(word)) 	countingMap.put(word, countingMap.get(word) + 1);
-			else 								countingMap.put(word, 1);
-		}
-
-		sorted_map.putAll(countingMap);
-		Collection<String>  keys 	= sorted_map.keySet();
-		Collection<Integer> values	= sorted_map.values();
-		Iterator key_iter = keys.iterator();
-		Iterator val_iter = values.iterator();
-		int count = 10;
-		System.out.println("key\t count\t");
-		//debug.write("key\t count\t");
-		while(key_iter.hasNext()){//count-- > 0){
-			String ikey = (String)  key_iter.next();
-			int ival 	= (Integer) val_iter.next();
-			System.out.println(ikey + "\t " + ival);
-			//debug.write(ikey + "\t " + ival);
-			//debug.writeln();
-		}
-		System.out.println("done");
-		// return 저장할 Json 형태
-		// Event 경우 
-		/*
-		"url" : "http://yeop9657.blog.me/220374891289",
-		"keword" : cnt,
-		"keword" : cnt,
-		"type" : "scroll",
-		 등등 등
 		
-		*/
-		//debug.close();
-		return sorted_map;
-	}
-	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Map doMecabProcess(String content, String kind,String userid, String url){
 		DebuggingLog debug;
@@ -335,15 +262,15 @@ public class MorphemeAnalyzer {
 		Iterator key_iter = keys.iterator();
 		Iterator val_iter = values.iterator();
 		int count = 10;
-		System.out.println("key\t count\t");
-		//debug.write("key\t count\t");
-		while(key_iter.hasNext()){//count-- > 0){
-			String ikey = (String)  key_iter.next();
-			int ival 	= (Integer) val_iter.next();
-			System.out.println(ikey + "\t " + ival);
-			//debug.write(ikey + "\t " + ival);
-			//debug.writeln();
-		}
+//		System.out.println("key\t count\t");
+//		//debug.write("key\t count\t");
+//		while(key_iter.hasNext()){//count-- > 0){
+//			String ikey = (String)  key_iter.next();
+//			int ival 	= (Integer) val_iter.next();
+//			System.out.println(ikey + "\t " + ival);
+//			//debug.write(ikey + "\t " + ival);
+//			//debug.writeln();
+//		}
 		System.out.println("done");
 		// return 저장할 Json 형태
 		// Event 경우 
@@ -532,6 +459,77 @@ public class MorphemeAnalyzer {
 		}
 	    return false;
 	}
+//	@SuppressWarnings({ "rawtypes", "unchecked" })
+//	private Map doMecab(String content, String kind,String userid, String url){
+////		DebuggingLog debug;
+////		if(kind.equals("event"))
+////			 debug = new DebuggingLog("KeywordsEvent");
+////		else
+////			 debug = new DebuggingLog("KeywordsHTml");
+//		List<LNode> result = Analyzer.parseJava(content);
+//		String word, type;
+//		Map<String, Integer> countingMap = new HashMap<String, Integer>();
+//		ValueComparator bvc = new ValueComparator(countingMap);
+//        TreeMap sorted_map = new TreeMap(bvc);
+//        
+//        //Stanford POS tagger
+//        MaxentTagger tagger = null;
+//	    try {
+//	    	tagger = new MaxentTagger("C:\\Users\\dong\\Documents\\moa_gitt\\MOA\\left3words-wsj-0-18.tagger");
+//	    } catch (ClassNotFoundException e1) {
+//	    	e1.printStackTrace();
+//	    } catch (IOException e1) {
+//	    	e1.printStackTrace();
+//	    }
+//	    
+//	    //System.out.println(tagger.tagString(content));
+//        
+//        for (LNode term: result) {
+//			type = term.morpheme().feature().head();
+//			
+//			if(type.charAt(0) != 'N' && 			//ignore NOT a noun
+//					!type.equals("SL")) continue;	//ignore NOT a foreign language	
+//			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
+//				word = tagger.tagString(term.morpheme().surface());
+//				String[] temp = word.split("/");
+//				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
+//			}
+//			word = term.morpheme().surface();
+//			//System.out.println(type + " : " + word +"\n");
+//			
+//			if(countingMap.containsKey(word)) 	countingMap.put(word, countingMap.get(word) + 1);
+//			else 								countingMap.put(word, 1);
+//		}
+//
+//		sorted_map.putAll(countingMap);
+//		Collection<String>  keys 	= sorted_map.keySet();
+//		Collection<Integer> values	= sorted_map.values();
+//		Iterator key_iter = keys.iterator();
+//		Iterator val_iter = values.iterator();
+//		int count = 10;
+//		System.out.println("key\t count\t");
+//		//debug.write("key\t count\t");
+////		while(key_iter.hasNext()){//count-- > 0){
+////			String ikey = (String)  key_iter.next();
+////			int ival 	= (Integer) val_iter.next();
+////			System.out.println(ikey + "\t " + ival);
+////			//debug.write(ikey + "\t " + ival);
+////			//debug.writeln();
+////		}
+//		System.out.println("done");
+//		// return 저장할 Json 형태
+//		// Event 경우 
+//		/*
+//		"url" : "http://yeop9657.blog.me/220374891289",
+//		"keword" : cnt,
+//		"keword" : cnt,
+//		"type" : "scroll",
+//		 등등 등
+//		
+//		*/
+//		//debug.close();
+//		return sorted_map;
+//	}
 }
 
 

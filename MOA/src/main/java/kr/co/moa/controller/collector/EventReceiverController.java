@@ -43,6 +43,10 @@ public class EventReceiverController extends HttpServlet {
 		//Log.getInstance().info(CLASS, "eventData: " + eventData);
 		
 		EventData_deprecated edd = new Gson().fromJson(eventData, EventData_deprecated.class);
+		if(edd.userid.equals("")){
+			out.println("fail");
+			return;
+		}
 		EventData ed = new EventData(edd);
 		
 		try {
