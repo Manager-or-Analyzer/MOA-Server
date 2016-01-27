@@ -41,6 +41,7 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		if(htmlData == null || htmlData.equals("") || hd.userid.equals("")){
 			Log.getInstance().severe(CLASS, "client fails to send htmlData");
+			System.out.println("fail");
 			out.println("fail");
 			return;
 		}

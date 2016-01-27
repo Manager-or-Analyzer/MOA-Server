@@ -44,6 +44,11 @@ public class KeywordsSenderController extends HttpServlet {
 		
 		DateData datedata = new Gson().fromJson(receiveData, DateData.class);
 		List<String> urls = DBManager.getInstnace().getUrls(datedata);
+		
+		if(urls == null || urls.size() ==0){
+			System.out.println("urls size:"+urls.size());
+			return;
+		}
 		System.out.println("urls size:"+urls.size());
 
 		
@@ -52,7 +57,7 @@ public class KeywordsSenderController extends HttpServlet {
 			
 			Dictionary_custom dc = DBManager.getInstnace().getKeywordList(urls, datedata.userid, datedata);
 			//Map<String,Double> keywordList = DBManager.getInstnace().getKeywordList(urls, datedata.userid);			
-			if(dc.keywordList == null || dc.keyCollections == null){
+			if(dc == null || dc.keywordList == null || dc.keyCollections == null){
 				System.out.println("getKeywordList fail. at userid :"+datedata.userid);
 				return;
 			}

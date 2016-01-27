@@ -142,107 +142,45 @@ public class DBManager {
 			return null;
 		}    	
 	}
-    public KeywordsSenderController.Dictionary_custom getKeywordList(List<String> urls, String userid, DateData datedata) throws Exception{
+	public KeywordsSenderController.Dictionary_custom getKeywordList(List<String> urls, String userid, DateData datedata) throws Exception{
     	db = mongoClient.getDB(DB_NAME);
-//      	for(String s: urls){
-//      		System.out.println("url :"+s+" "+userid);
-//      	}
-   	 	DBCollection collection = db.getCollection("KeywordCollection");
-   	 	String map = "function() { "
-	 			+		"var key = {name: this.collectionName};"
-	 			+		"emit(key, {keywordsList : this.keywordList});"
-	 			+	"};";
-	 	
-	 	String reduce = "function (key, values) {"
-	 			+		"var totalDoc = values.length;"
-	 			+		"return {total : totalDoc, result : values};};";
-	 	
-	 	String reduce2 = 
-	 						"values = tmp; var map = {}; var cnt = 0; var totalDoc = values.length;"
-	 			+			"values.forEach(function (doc){"
-	 			+				"cnt =0;"
-	 			+					"for(var k in doc['keywordsList']){ "
-	 			+					  "if(cnt++ <3){"
-	 			+						"if(k in map){"
-	 			+							"map[k] += doc['keywordsList'][k];"
-	 			+							"cnt--;"
-   	 			+						"}else{"
-	 			+							"map[k] = doc['keywordsList'][k];"
-   	 			+						"}}"
-   	 			+ 					  "else{"
-   	 			+ 						"break;}}});"
-	 			+		"return {tmp : tmp, total : totalDoc, val : values[0]['keywordsList']  , keywordsList :map};";
-	 	
-	 	String finalize = "function (key, values) {"
-	 			+			"var map = {}; var tmp = values['result'];"
-	 			+			"if('result' in values['result'][0]){"
-	 			+			"var totalDoc = 0; var i;"
-	 			+			"for(i=0; i<values['result'].length; i++){"
-	 			+				"totalDoc += values['result'][i]['total'];}"	 	
-	 			+			"for(i=0; i<values['result'].length; i++){"
-	 			+				"var j; var obj = values['result'][i]['result']; "
-	 			+				"for(j=0; j< obj.length; j++){"
-	 			+					"var cnt = 0;"
-	 			+					"for(var k in obj[j]['keywordsList']){"
-	 			+						"if(cnt++ <3){"
-	 			+							"if(k in map){"
-	 			+								"map[k] += obj[j]['keywordsList'][k];"
-	 			+								"cnt--;"
-	 			+							"}else{"
-	 			+								"map[k] = 0.0;"
-	 			+								"map[k] = obj[j]['keywordsList'][k];"
-	 			+							"}"
-	 			+						"}else break;"
-	 			+					"}}};"
-	 			+		"return {tmp : tmp, total :totalDoc,keywordsList: map};}"
-	 			+		"else {"+reduce2+"}}";	
-	 	
-	 	
-	 	BasicDBObject query = new BasicDBObject();
-	 		query.append("userid", userid);
- 			query.append("snippet.url", new BasicDBObject("$in", urls));
-	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
-	 	if(urls.size() > 1){		 			 				 
-		 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
-		 			"kTest", MapReduceCommand.OutputType.REPLACE, query);
-		 	cmd.setFinalize(finalize);
-		 		
-		 	MapReduceOutput out = collection.mapReduce(cmd);	 	
-		 	for(DBObject res :  out.results()){
-		 		System.out.println("bubble "+res.get("value").toString());
-		 		Object obj = res.get("value");
-		 		DBObject tmp = (DBObject)obj;
-		 		keywordlist.putAll((Map)tmp.get("keywordsList"));
-		 		//return keywordlist;
-		 	}
-		 	System.out.println("bubble "+keywordlist.size());
-	 	}else if(urls.size() == 1){
-	 		DBCursor cursor = collection.find(query);
-	 		while(cursor.hasNext()){
-	 			Map<String, Double> tmp = (Map<String, Double>) cursor.next().get("keywordList");
-	 			int cnt =0;
-	 			for(String key : tmp.keySet()){
-	 				if(cnt++<3){
-	 					keywordlist.put(key, tmp.get(key));
-	 				}break;
-	 			}
-	 		}	 		
-	 	}
-	 	BasicDBObject timeQuery = new BasicDBObject();
-	 	
-	 	Date from = Util.strToDate(datedata.start);
-    	Date to = Util.strToDate(datedata.end);
-	 	BasicDBObject date_query = new BasicDBObject();
-	 			date_query.put("$gte", from);
-	 			date_query.put("$lte", to);
-			query.put("userid", datedata.userid);
-			query.put("snippet.time", date_query);
-	
-		List<TF_IDF> keyCollections = new ArrayList<TF_IDF>();	
-		DBCursor cursor = collection.find(query).sort(new BasicDBObject("snippet.time",-1));
-		
-		while(cursor.hasNext()){
-			BasicDBObject obj = (BasicDBObject) cursor.next();
+   	 	
+    	Date startDay = Util.strToDate(datedata.start);
+    	Date endDay = Util.strToDate(datedata.end);
+ 		Map<String,Double> urlandTimeList = new HashMap<String, Double>();
+ 	 	DBCollection collection2 = db.getCollection("DurationData");
+ 	 	BasicDBObject query1 = new BasicDBObject();
+	 		query1.append("userid", userid);
+	 		query1.append("url", new BasicDBObject("$in", urls));
+ 	 	DBCursor cursor = collection2.find(query1);
+ 	 	
+ 	 	while(cursor.hasNext()){
+ 	 			BasicDBObject raw = (BasicDBObject) cursor.next();
+ 	 			String url = (String) raw.getString("url");
+ 	 			Date date = raw.getDate("time");
+ 	 			Double duration = raw.getDouble("duration");
+ 	 			
+ 	 			if(startDay.compareTo(date) > 0 && endDay.compareTo(date) < 0) continue;		//기간 내 데이터만 고려 
+ 				if(urlandTimeList.containsKey(url)) urlandTimeList.put(url, urlandTimeList.get(url) + duration);
+ 				else 						 urlandTimeList.put(url, duration);
+ 	 			urlandTimeList.put(url, duration);
+ 	 		}
+// 	 	for(String url : urlandTimeList.keySet()){
+// 	 		System.out.println("url :"+ url+" duration:"+urlandTimeList.get(url));
+// 	 	}
+ 	 		
+ 	 	DBCollection collection = db.getCollection("KeywordCollection");
+ 	 	
+ 	 	BasicDBObject query = new BasicDBObject();
+ 	 		query.append("userid", userid);
+			query.append("snippet.url", new BasicDBObject("$in", urls));
+			
+ 		List<TF_IDF> keyCollections = new ArrayList<TF_IDF>();	
+ 		cursor = collection.find(query).sort(new BasicDBObject("snippet.time",-1));
+ 		
+ 		Map<String, Double> keywordlist = new HashMap<String, Double>();
+ 		while(cursor.hasNext()){
+ 			BasicDBObject obj = (BasicDBObject) cursor.next();
 			TF_IDF tfidf = new TF_IDF();
 			tfidf.userid = obj.getString("userid");
 			tfidf.keywordList = (Map<String, Double>) obj.get("keywordList");
@@ -256,35 +194,65 @@ public class DBManager {
 			Date time = obj2.getDate("time");
 			tfidf.snippet.time = Util.dateToStr(time);
 			keyCollections.add(tfidf);
-		}
-	 	
+ 			
+ 			int cnt=3;
+ 			for(String key: tfidf.keywordList.keySet()){
+ 				if(cnt-->0){
+ 					//System.out.println("keyword url"+tfidf.snippet.url);
+ 					double val = tfidf.keywordList.get(key);
+						if(urlandTimeList.containsKey(tfidf.snippet.url)){
+							//System.out.println("url "+urlandTimeList.get(tfidf.snippet.url)/300);
+							val *= urlandTimeList.get(tfidf.snippet.url)/300;
+						}
+ 					if(!keywordlist.containsKey(key)){ 						
+ 						keywordlist.put(key, val );
+ 					}else{
+ 						
+ 						keywordlist.replace(key,val+keywordlist.get(key));
+ 					}
+ 				}else
+ 					break;
+ 			}
+ 			
+ 		}
+ 		
+	 		 					
 		KeywordsSenderController.Dictionary_custom res = new Dictionary_custom();
 		res.keywordList = keywordlist;
 		res.keyCollections = keyCollections;
 	 	return res;
-    	
-    }    
+	}
+
     public <K> Map getIDFList(Map<String, K> idfList){
 	  	db = mongoClient.getDB(DB_NAME);
   	 
-	 	DBCollection collection = db.getCollection("IdfCollection");
+	 	DBCollection collection = db.getCollection("IdfCollection1");
 	 	BasicDBObject query = new BasicDBObject();
 	 	DBCursor cursor = collection.find(query);	
 	 	
 	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
 	 	while(cursor.hasNext()){
 	 		DBObject data = (DBObject)cursor.next();
-	 		Object obj = data.get("value");
-	 		DBObject tmp = (DBObject)obj;
-	 		keywordlist =  (Map)tmp.get("idfwordsList");
+	 		keywordlist =  (Map)data.get("realIdfList");
 	 	}
 	 	
-//	 	Map<String, Double> res= new HashMap<String, Double>();
-//	 	for(String key : idfList.keySet()){
-//	 		res.put(key, keywordlist.get(key));
-//	 	}
 	 	return keywordlist;
 	 	
+    }
+    public void test(){
+	  	db = mongoClient.getDB(DB_NAME);
+  	 
+	 	DBCollection collection = db.getCollection("ParsedHtmlCollection");
+	 	DBCursor cursor = collection.find();	
+	 	
+	 	Map<String, Integer> keywordlist = new HashMap<String, Integer>();
+	 	while(cursor.hasNext()){
+	 		DBObject data = (DBObject)cursor.next();
+	 		keywordlist =  (Map)data.get("keywordList");
+	 		
+	 		updateIDFData(keywordlist);
+	 	}
+		
     }
     public List getUrls(DateData datedata){
     	db = mongoClient.getDB(DB_NAME);
@@ -582,6 +550,42 @@ public class DBManager {
     		
     	collection.update(searchQuery, updateQuery ,true , false);	
     }  
+    public void updateIDFData(Map<String,Integer> keywordList){
+    	db = mongoClient.getDB(DB_NAME);
+    	System.out.println("updateIdf start:"+keywordList.size());
+    	DBCollection collection = db.getCollection("IdfCollection1");
+    	
+    	
+    	BasicDBObject searchQuery = new BasicDBObject();
+    		searchQuery.put("name", "idfCollection");
+    		    	    	
+    	BasicDBObject updateQuery = new BasicDBObject();
+    	BasicDBObject updateList = new BasicDBObject();
+    		updateList.append("totalCnt",1);
+    		for(String key : keywordList.keySet()){
+    			updateList.append("idfwordsList."+key,1);
+    		}
+    	updateQuery.append("$inc", updateList);
+    		
+    	collection.update(searchQuery, updateQuery ,true , false);	
+    	
+    	DBCursor cursor = collection.find();
+    	while(cursor.hasNext()){
+    		BasicDBObject obj = (BasicDBObject) cursor.next();
+    		int totalCnt = obj.getInt("totalCnt");
+    		Map<String,Integer> wordsList = (Map<String, Integer>) obj.get("idfwordsList");
+    		
+    		Map<String,Double> idfList = new HashMap<String, Double>();
+    		for(String key : wordsList.keySet()){
+    			double val = Math.log(totalCnt/wordsList.get(key));
+    			idfList.put(key, val);
+    		}
+    		BasicDBObject update2Query = new BasicDBObject()
+    				.append("$set", new BasicDBObject().append("realIdfList", idfList));
+    		
+    		collection.update(searchQuery, update2Query ,true , false);	
+    	}
+    }  
     public void updateEventParsedData(EventParsedData epd){
     	db = mongoClient.getDB(DB_NAME);
 
@@ -670,82 +674,82 @@ public class DBManager {
     }
   
     
-    public void makeData_IDF() throws Exception{
-    	db = mongoClient.getDB(DB_NAME);
-      	 
-   	 	DBCollection collection = db.getCollection("ParsedHtmlCollection");
-   	 	String map = "function() { "
-	 			+		"var key = {name: this.collectionName};"
-	 			+		"emit(key, {idfwordsList : this.keywordList});"
-	 			+	"};";
-	 	
-   	 	String reduce = "function (key, values) {"
-	 			+			"var map = {};"
-	 			+			"var totalDoc = values.length;"
-	 			+		"return {total :totalDoc, result: values};};";
-   	 	String finalize = "function (key, values) {"
-	 			+			"var map = {}; var tmp = {};"
-	 			+			"var totalDoc = 0; var i;"
-	 			+			"for(i=0; i<values['result'].length; i++){"
-	 			+				"totalDoc += values['result'][i]['total'];}"	 	
-	 			+			"for(i=0; i<values['result'].length; i++){"
-	 			+				"var j; var obj = values['result'][i]['result'];"
-	 			+				"for(j=0; j< obj.length; j++){"
-	 			+					"for(var k in obj[j]['idfwordsList']){"
-	 			+						"if(k in tmp) tmp[k] += 1;"
-	 			+						"else tmp[k] =1;"
-	 			+					"}}};"
-	 			+			"for(var k in tmp){"
-	 			+				"var val = Math.log(totalDoc/tmp[k]);"
-	 			+				"if(val<0)val=0; map[k]=val;"
-	 			+			"}"
-	 			+		"return {total :totalDoc,idfwordsList: map};};";
-   	 	
-//	 	String reduce = "function (key, values) {"
+//    public void makeData_IDF() throws Exception{
+//    	db = mongoClient.getDB(DB_NAME);
+//      	 
+//   	 	DBCollection collection = db.getCollection("ParsedHtmlCollection");
+//   	 	String map = "function() { "
+//	 			+		"var key = {name: this.collectionName};"
+//	 			+		"emit(key, {idfwordsList : this.keywordList});"
+//	 			+	"};";
+//	 	
+//   	 	String reduce = "function (key, values) {"
 //	 			+			"var map = {};"
-//	 			+			"var totalDoc = values.length;var j=values;"
-//	 			+			"values.forEach(function (doc){"
-//	 			+					"for(var k in doc['idfwordsList']){ "
-//	 			+						"if(k in map){"
-//	 			+							"continue;"
-//	 			+						"}"
-//	 			+						"var i; var cnt=0; var val=0;"
-//	 			+						"for(i=0; i<totalDoc; i++){"
-//	 			+						"	if(k in values[i]['idfwordsList'])cnt++;"
-//	 			+						"}"
-//	 			+						"if(cnt != 0)"
-//	 			+							"val = Math.log(totalDoc/cnt);"
-//	 			+						"if(val <0)val=0; map[k] = val;"
-//	 			+					"}});"
-//	 			+		"return {total :totalDoc, idfwordsList :map};};";
-	 	
-	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
-	 			"IdfCollection", MapReduceCommand.OutputType.REPLACE, null);
-	 	cmd.setFinalize(finalize);
-	 	
-	 	MapReduceOutput out = collection.mapReduce(cmd);
-	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
-	 	int cnt = 1;
-	 	for(DBObject res :  out.results()){
-	 		System.out.println("makeIDF "+res.get("value").toString());
-	 		Object obj = res.get("value");
-	 		DBObject tmp = (DBObject)obj;
-	 		//keywordlist =  (Map)tmp.get("eventwordsList");
-	 	}
-    	
-    }
-	
-    
-
-
-
-
-
-
-	
-
-	
-	
+//	 			+			"var totalDoc = values.length;"
+//	 			+		"return {total :totalDoc, result: values};};";
+//   	 	String finalize = "function (key, values) {"
+//	 			+			"var map = {}; var tmp = {};"
+//	 			+			"var totalDoc = 0; var i;"
+//	 			+			"for(i=0; i<values['result'].length; i++){"
+//	 			+				"totalDoc += values['result'][i]['total'];}"	 	
+//	 			+			"for(i=0; i<values['result'].length; i++){"
+//	 			+				"var j; var obj = values['result'][i]['result'];"
+//	 			+				"for(j=0; j< obj.length; j++){"
+//	 			+					"for(var k in obj[j]['idfwordsList']){"
+//	 			+						"if(k in tmp) tmp[k] += 1;"
+//	 			+						"else tmp[k] =1;"
+//	 			+					"}}};"
+//	 			+			"for(var k in tmp){"
+//	 			+				"var val = Math.log(totalDoc/tmp[k]);"
+//	 			+				"if(val<0)val=0; map[k]=val;"
+//	 			+			"}"
+//	 			+		"return {total :totalDoc,idfwordsList: map};};";
+//   	 	
+////	 	String reduce = "function (key, values) {"
+////	 			+			"var map = {};"
+////	 			+			"var totalDoc = values.length;var j=values;"
+////	 			+			"values.forEach(function (doc){"
+////	 			+					"for(var k in doc['idfwordsList']){ "
+////	 			+						"if(k in map){"
+////	 			+							"continue;"
+////	 			+						"}"
+////	 			+						"var i; var cnt=0; var val=0;"
+////	 			+						"for(i=0; i<totalDoc; i++){"
+////	 			+						"	if(k in values[i]['idfwordsList'])cnt++;"
+////	 			+						"}"
+////	 			+						"if(cnt != 0)"
+////	 			+							"val = Math.log(totalDoc/cnt);"
+////	 			+						"if(val <0)val=0; map[k] = val;"
+////	 			+					"}});"
+////	 			+		"return {total :totalDoc, idfwordsList :map};};";
+//	 	
+//	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
+//	 			"IdfCollection", MapReduceCommand.OutputType.REPLACE, null);
+//	 	cmd.setFinalize(finalize);
+//	 	
+//	 	MapReduceOutput out = collection.mapReduce(cmd);
+//	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
+//	 	int cnt = 1;
+//	 	for(DBObject res :  out.results()){
+//	 		System.out.println("makeIDF "+res.get("value").toString());
+//	 		Object obj = res.get("value");
+//	 		DBObject tmp = (DBObject)obj;
+//	 		//keywordlist =  (Map)tmp.get("eventwordsList");
+//	 	}
+//    	
+//    }
+//	
+//    
+//
+//
+//
+//
+//
+//
+//	
+//
+//	
+//	
 
 //  public int getDocSize() throws Exception{
 //	db = mongoClient.getDB(DB_NAME);
@@ -934,4 +938,125 @@ public class DBManager {
 //	 	return keywordlist;
 //	 	
 //}  
+//  public KeywordsSenderController.Dictionary_custom getKeywordList(List<String> urls, String userid, DateData datedata) throws Exception{
+//	db = mongoClient.getDB(DB_NAME);
+//	 	DBCollection collection = db.getCollection("KeywordCollection");
+//	 	
+//	 	
+//	 	String map = "function() { "
+// 			+		"var key = {name: this.collectionName};"
+// 			+		"emit(key, {keywordsList : this.keywordList});"
+// 			+	"};";
+// 	
+// 	String reduce = "function (key, values) {"
+// 			+		"var totalDoc = values.length;"
+// 			+		"return {total : totalDoc, result : values};};";
+// 	
+// 	String reduce2 = 
+// 						"values = tmp; var map = {}; var cnt = 0; var totalDoc = values.length;"
+// 			+			"values.forEach(function (doc){"
+// 			+				"cnt =0;"
+// 			+					"for(var k in doc['keywordsList']){ "
+// 			+					  "if(cnt++ <3){"
+// 			+						"if(k in map){"
+// 			+							"map[k] += doc['keywordsList'][k];"
+// 			+							"cnt--;"
+//	 			+						"}else{"
+// 			+							"map[k] = doc['keywordsList'][k];"
+//	 			+						"}}"
+//	 			+ 					  "else{"
+//	 			+ 						"break;}}});"
+// 			+		"return {tmp : tmp, total : totalDoc, val : values[0]['keywordsList']  , keywordsList :map};";
+// 	
+// 	String finalize = "function (key, values) {"
+// 			+			"var map = {}; var tmp = values['result'];"
+// 			+			"if('result' in values['result'][0]){"
+// 			+			"var totalDoc = 0; var i;"
+// 			+			"for(i=0; i<values['result'].length; i++){"
+// 			+				"totalDoc += values['result'][i]['total'];}"	 	
+// 			+			"for(i=0; i<values['result'].length; i++){"
+// 			+				"var j; var obj = values['result'][i]['result']; "
+// 			+				"for(j=0; j< obj.length; j++){"
+// 			+					"var cnt = 0;"
+// 			+					"for(var k in obj[j]['keywordsList']){"
+// 			+						"if(cnt++ <3){"
+// 			+							"if(k in map){"
+// 			+								"map[k] += obj[j]['keywordsList'][k];"
+// 			+								"cnt--;"
+// 			+							"}else{"
+// 			+								"map[k] = 0.0;"
+// 			+								"map[k] = obj[j]['keywordsList'][k];"
+// 			+							"}"
+// 			+						"}else break;"
+// 			+					"}}};"
+// 			+		"return {tmp : tmp, total :totalDoc,keywordsList: map};}"
+// 			+		"else {"+reduce2+"}}";	
+// 	
+// 	
+// 	BasicDBObject query = new BasicDBObject();
+// 		query.append("userid", userid);
+//			query.append("snippet.url", new BasicDBObject("$in", urls));
+// 	Map<String, Double> keywordlist = new HashMap<String, Double>();
+// 	if(urls.size() > 1){		 			 				 
+//	 	MapReduceCommand cmd = new MapReduceCommand(collection, map, reduce, 
+//	 			"kTest", MapReduceCommand.OutputType.REPLACE, query);
+//	 	cmd.setFinalize(finalize);
+//	 		
+//	 	MapReduceOutput out = collection.mapReduce(cmd);	 	
+//	 	for(DBObject res :  out.results()){
+//	 		System.out.println("bubble "+res.get("value").toString());
+//	 		Object obj = res.get("value");
+//	 		DBObject tmp = (DBObject)obj;
+//	 		keywordlist.putAll((Map)tmp.get("keywordsList"));
+//	 		//return keywordlist;
+//	 	}
+//	 	System.out.println("bubble "+keywordlist.size());
+// 	}else if(urls.size() == 1){
+// 		DBCursor cursor = collection.find(query);
+// 		while(cursor.hasNext()){
+// 			Map<String, Double> tmp = (Map<String, Double>) cursor.next().get("keywordList");
+// 			int cnt =0;
+// 			for(String key : tmp.keySet()){
+// 				if(cnt++<3){
+// 					keywordlist.put(key, tmp.get(key));
+// 				}break;
+// 			}
+// 		}	 		
+// 	}
+// 	BasicDBObject timeQuery = new BasicDBObject();
+// 	
+// 	Date from = Util.strToDate(datedata.start);
+//	Date to = Util.strToDate(datedata.end);
+// 	BasicDBObject date_query = new BasicDBObject();
+// 			date_query.put("$gte", from);
+// 			date_query.put("$lte", to);
+//		query.put("userid", datedata.userid);
+//		query.put("snippet.time", date_query);
+//
+//	List<TF_IDF> keyCollections = new ArrayList<TF_IDF>();	
+//	DBCursor cursor = collection.find(query).sort(new BasicDBObject("snippet.time",-1));
+//	
+//	while(cursor.hasNext()){
+//		BasicDBObject obj = (BasicDBObject) cursor.next();
+//		TF_IDF tfidf = new TF_IDF();
+//		tfidf.userid = obj.getString("userid");
+//		tfidf.keywordList = (Map<String, Double>) obj.get("keywordList");
+//		tfidf.snippet = new Snippet();
+//		BasicBSONObject obj2 = (BasicBSONObject) obj.get("snippet");
+//		
+//		tfidf.snippet.title = obj2.getString("title");			
+//		tfidf.snippet.url = obj2.getString("url");
+//		tfidf.snippet.img = obj2.getString("img");
+//		
+//		Date time = obj2.getDate("time");
+//		tfidf.snippet.time = Util.dateToStr(time);
+//		keyCollections.add(tfidf);
+//	}
+// 	
+//	KeywordsSenderController.Dictionary_custom res = new Dictionary_custom();
+//	res.keywordList = keywordlist;
+//	res.keyCollections = keyCollections;
+// 	return res;
+//	
+//}    
 }

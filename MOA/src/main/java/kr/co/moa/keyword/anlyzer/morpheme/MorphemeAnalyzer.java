@@ -246,22 +246,26 @@ public class MorphemeAnalyzer {
 			
 			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
 				word = tagger.tagString(term.word);
-				//System.out.println(word);
+//				System.out.println("mecabprocess");
+//				System.out.println(word);
 				String[] temp = word.split("/");
 				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
 			}
 			word = term.word.toLowerCase();
 			
-			if(countingMap.containsKey(word)) 	countingMap.put(word, countingMap.get(word) + 1);
-			else 								countingMap.put(word, 1);
+			if(word.length() <=1) continue;
+			if(countingMap.containsKey(word)) 	
+				countingMap.put(word, countingMap.get(word) + 1);
+			else 								
+				countingMap.put(word, 1);
 		}
 
-		sorted_map.putAll(countingMap);
-		Collection<String>  keys 	= sorted_map.keySet();
-		Collection<Integer> values	= sorted_map.values();
-		Iterator key_iter = keys.iterator();
-		Iterator val_iter = values.iterator();
-		int count = 10;
+//		sorted_map.putAll(countingMap);
+//		Collection<String>  keys 	= sorted_map.keySet();
+//		Collection<Integer> values	= sorted_map.values();
+//		Iterator key_iter = keys.iterator();
+//		Iterator val_iter = values.iterator();
+//		int count = 10;
 //		System.out.println("key\t count\t");
 //		//debug.write("key\t count\t");
 //		while(key_iter.hasNext()){//count-- > 0){
@@ -271,7 +275,7 @@ public class MorphemeAnalyzer {
 //			//debug.write(ikey + "\t " + ival);
 //			//debug.writeln();
 //		}
-		System.out.println("done");
+//		System.out.println("done");
 		// return 저장할 Json 형태
 		// Event 경우 
 		/*
@@ -350,7 +354,8 @@ public class MorphemeAnalyzer {
 			
 			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
 				word = tagger.tagString(term.word);
-				//System.out.println(word);
+//				System.out.println("mecabtitle");
+//				System.out.println(word);
 				String[] temp = word.split("/");
 				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
 			}
@@ -376,7 +381,7 @@ public class MorphemeAnalyzer {
 //			int ival 	= (Integer) val_iter.next();
 //			System.out.println(ikey + "\t " + ival);
 //		}
-		System.out.println("done");
+//		System.out.println("done");
 
 		//debug.close();
 		return countingMap;

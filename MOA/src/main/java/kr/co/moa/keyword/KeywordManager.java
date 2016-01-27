@@ -2,6 +2,7 @@
 package kr.co.moa.keyword;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -110,9 +111,11 @@ public class KeywordManager {
 			
 			for(String key1: map.keySet()){
 				String userid = key1.replace("\uff0E", ".");
-						Map<String, Double> Tf_Body = cal_TF(list.get(i).keywordList);			
+						int totalCnt = getTotalCnt(list.get(i).keywordList);
+						Map<String, Double> Tf_Body = cal_TF(list.get(i).keywordList,totalCnt);			
 						//title 가중치 계산
-						Map<String, Double> Tf_Title = cal_TF_Title(MorphemeAnalyzer.getInstance().doMecabTitleProcess(list.get(i).snippet.title,userid,url),list.get(i).keywordList);	
+						Map<String, Double> Tf_Title = cal_TF_Title(MorphemeAnalyzer.getInstance().doMecabTitleProcess(list.get(i).snippet.title,userid,url),totalCnt);	
+						
 						
 						
 						Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
@@ -155,14 +158,17 @@ public class KeywordManager {
 		try {
 			// 이미 방문했던 사이트인진 체크			
 			Map<String, Double> idfList = cal_IDF(hpd.keywordList);		 	
+			if(idfList == null){
+				System.out.println("idfList null");
+			}
 //			for(String key : idfList.keySet()){
 //				System.out.println("key: "+key+" val:"+idfList.get(key));
 //			}
 			//본문 가중치 계산
-			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList);			
+			int totalCnt = getTotalCnt(hpd.keywordList);
+			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList,totalCnt);			
 			//title 가중치 계산
-			Map<String, Double> Tf_Title = cal_TF_Title(MorphemeAnalyzer.getInstance().doMecabTitleProcess(hpd.snippet.title, hd.userid,hd.url),hpd.keywordList);	
-			
+			Map<String, Double> Tf_Title = cal_TF_Title(MorphemeAnalyzer.getInstance().doMecabTitleProcess(hpd.snippet.title, hd.userid,hd.url),totalCnt);	
 			
 			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
 			
@@ -211,13 +217,17 @@ public class KeywordManager {
 		}
 	}
 	
-	private Map cal_TF(Map<String,Integer> wordsByMecab) throws Exception{
-		Map<String,Double> Tf = new HashMap<String, Double>();	
+	private int getTotalCnt(Map<String, Integer> keywordList) {
 		
 		int totalSize = 0;
-		for(String key: wordsByMecab.keySet()){			
-			totalSize += wordsByMecab.get(key);
+		for(String key: keywordList.keySet()){			
+			totalSize += keywordList.get(key);
 		}
+		return totalSize;
+	}
+
+	private Map cal_TF(Map<String,Integer> wordsByMecab,int totalSize) throws Exception{
+		Map<String,Double> Tf = new HashMap<String, Double>();	
 				
 		System.out.println("size :"+totalSize);
 		int cnt = 0;
@@ -230,13 +240,15 @@ public class KeywordManager {
 		return Tf;
 		
 	}
-	private Map cal_TF_Title(Map<String,Integer> titleMap ,Map<String,Integer> wordsByMecab) throws Exception{
+	private Map cal_TF_Title(Map<String,Integer> titleMap ,int totalSize) throws Exception{
 		Map<String,Double> Tf = new HashMap<String, Double>();	
 		
-		int totalSize = 0;
-		for(String key: wordsByMecab.keySet()){			
-			totalSize += wordsByMecab.get(key);
+		if(totalSize == 0){	//content(본문 내용)이 없는 경우
+			for(String key : titleMap.keySet()){
+				totalSize += titleMap.get(key);
+			}
 		}
+		totalSize *= 10;
 				
 		System.out.println("size :"+totalSize);
 		int cnt = 0;
@@ -265,7 +277,7 @@ public class KeywordManager {
 		
 	}
 	private Map cal_IDF(Map<String,Integer> keywordList) throws Exception{		
-		DBManager.getInstnace().makeData_IDF();
+		DBManager.getInstnace().updateIDFData(keywordList);
 		Map<String, Double> idfList = DBManager.getInstnace().getIDFList(keywordList);
 		return idfList;
 	}
