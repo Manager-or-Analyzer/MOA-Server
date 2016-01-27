@@ -41,8 +41,9 @@ import scala.collection.parallel.ParIterableLike.Aggregate;
 
 //singleton���� ���� 
 public class DBManager {	
-	
 	private static final String DB_NAME = "MOA";
+	//private static final String DB_NAME = "MOA_crawler";
+	//private static final String DB_NAME = "MOA_crawler_100";
     private static final String IP = "210.118.74.183";
     private static final int PORT = 27017;
     private static DBManager instance;
