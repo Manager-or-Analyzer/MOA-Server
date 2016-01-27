@@ -79,6 +79,10 @@ public class SearchingDocumentController extends HttpServlet {
 		}
 		userid = sd.userid;
 		String[] keywords = getKeywords(sd.searches);
+		//sd.searches가 동사로 분류되어 형태소 분석의 결과가 empty일때 예외 처리  
+		if(keywords.length == 0) keywords = sd.searches.split("\\+");
+		
+		
 		DBCursor[] cursor = new DBCursor[keywords.length];
 		
 		for(int i = 0; i < keywords.length; i++){
