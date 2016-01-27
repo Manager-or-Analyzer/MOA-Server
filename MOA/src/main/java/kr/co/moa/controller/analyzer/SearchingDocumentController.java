@@ -40,7 +40,8 @@ public class SearchingDocumentController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final int KEYWORD_NUM = 5;			//p		shrot doc : 5 / long doc : 10
 	private static final int DIFF_NUM = 100;			//q 
-	   
+	private static final double MAXWAITTIME = 5.0;  	//minute
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -125,8 +126,7 @@ public class SearchingDocumentController extends HttpServlet {
 			obj.userid = (String) raw.getString("userid");
 			obj.url = (String) raw.getString("url");
 			obj.time = raw.getDate("time");
-			obj.duration = Double.parseDouble(raw.getString("duration"));//(double) raw.getString("duration");
-			
+			obj.duration = raw.getDouble("duration");
 			
 			if(startDay.compareTo(obj.time) > 0 && endDay.compareTo(obj.time) < 0) continue;		//기간 내 데이터만 고려 
 			if(map.containsKey(obj.url)) map.put(obj.url, map.get(obj.url) + obj.duration);
@@ -137,7 +137,9 @@ public class SearchingDocumentController extends HttpServlet {
 		while(iter.hasNext()){
 			String url = iter.next();
 			if(!map.containsKey(url)) continue;
-			similarDoc.put( url, (similarDoc.get(url) * map.get(url)) );
+			similarDoc.put( url, 
+					( similarDoc.get(url) * (map.get(url) / (MAXWAITTIME * 60)) ) 
+			);
 		}
 	}
 
