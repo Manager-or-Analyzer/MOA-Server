@@ -31,7 +31,6 @@ public class TimeCalculator {
 	@SuppressWarnings("unchecked")
 	public void calcTime(EventData evt){
 		ArrayList<EventData> events = new ArrayList<EventData>();
-		//ArrayList<Long> eventTimes  = new ArrayList<Long>();
 		DomTimeData dd = new DomTimeData();
 		
 		events = (ArrayList<EventData>) DBManager.getInstnace().getTimeEvent(evt);
@@ -52,15 +51,21 @@ public class TimeCalculator {
 		int uselessCnt = 0;
 		for(EventData e : events){
 			if(!start && !e.type.equals("pagein")){
+				System.out.println("useless");
+				System.out.println(e.type);
+				System.out.println(e.time);
 				uselessCnt++;
 				continue;
 			}
 			else if(!start && e.type.equals("pagein")){
+				System.out.println("pagein");
+				System.out.println(e.type);
+				System.out.println(e.time);
+				
 				start = true;
 				dd.time = e.time;	//pagein의 시간을 삽입될 duration data에 대입 
 			}
 			break;
-//			eventTimes.add(e.time.getTime());
 		}
 		if(events.size() == uselessCnt){
 			System.out.println("TimeCalculator : All event is useless");
@@ -71,6 +76,8 @@ public class TimeCalculator {
 	//start calc stay time
 		//마지막 이벤트와 첫 이벤트의 시간차이 계산  
 		Long total = (events.get(events.size()-1).time.getTime() - dd.time.getTime());
+		System.out.println("total : " + total);
+		
 		if(total < 0){
 			//event 오류 시 
 			//마지막 이벤트(pageout 또는 tabout)와 pagein과의 시간차이가 음수라면 머문시간을 0으로 측정한다. 
@@ -81,13 +88,24 @@ public class TimeCalculator {
 			//계산끝 그냥 total을 머문시간으로 가정 (큰 의미없는 페이지들)
 		}else{
 			for(int i = uselessCnt; i<events.size()-1; i++){
+//				System.out.println("i : " + i);
+//				System.out.println(events.get(i+1).type + " / " +events.get(i+1).time);
+//				System.out.println(events.get(i).type + " / " +events.get(i).time);
+				
 				long gap = events.get(i+1).time.getTime() - events.get(i).time.getTime();
 				if(events.get(i).type.equals("tabout")){
 					total = total - gap;
+//					System.out.println("gap : " +gap);
+//					System.out.println("total : " +total);
 					continue;
 				}
 				//gap is more than maxWaitTime minute
 				if(gap > maxWaitTime * 60 * 1000) total -= gap;	
+				
+
+//				System.out.println("gap : " +gap);
+//				System.out.println("total : " +total);
+				
 			}
 		}
 
@@ -107,7 +125,6 @@ public class TimeCalculator {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		//total/1000
 	}
 	
 	public void calcLocation(ArrayList<EventData> events){
