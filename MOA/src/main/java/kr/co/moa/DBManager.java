@@ -640,26 +640,21 @@ public class DBManager {
     	collection.update(searchQuery, updateQuery, true, false);	
     }
     
-    public List updateAll(){
+    public Set updateAll(){
     	db = mongoClient.getDB(DB_NAME);
     	
-    	DBCollection collection = db.getCollection("ParsedHtmlCollection");
-    	DBCursor cursor = collection.find();
+    	DBCollection collection = db.getCollection("HtmlData");
     	
-    	List<HtmlParsedData> list = new ArrayList<HtmlParsedData>();
+    	DBCursor cursor = collection.find();
+    	Set<HtmlData> set = new HashSet<HtmlData>();
+    	
     	while(cursor.hasNext()){
     		Gson gson = new Gson();
-    		HtmlParsedData hpd = gson.fromJson(cursor.next().toString(), HtmlParsedData.class);
-    		list.add(hpd);
-//    		DBObject obj = cursor.next();
-//    		Map<String,Boolean> map = (Map<String, Boolean>) obj.get("userList");
-//    		String url =  ((BasicBSONObject)obj.get("snippet")).getString("url");
-//    		for(String key: map.keySet()){
-//    			key = key.replace("\uff0E", ".");
-//    			System.out.println(url+" "+key);
-//    		}    		    	
+    		HtmlData hpd = gson.fromJson(cursor.next().toString(), HtmlData.class);
+    		set.add(hpd);
     	}
-    	return list;
+    	
+    	return set;
     	
 //    	AggregationOutput agout = collection.aggregate(
 //    			new BasicDBObject("$group",

@@ -69,7 +69,7 @@ public class MorphemeAnalyzer {
 	
 	 private static final String[] uselessWords = {
 			 "네이버","다음","블로그","구글","네이트","뉴스",
-			 "naver","daum","blog","google","nate"
+			 "naver","daum","blog","google","nate","니다","vd","li"
 	 };
 	 
 	public static MorphemeAnalyzer getInstance(){
@@ -251,6 +251,7 @@ public class MorphemeAnalyzer {
 //				System.out.println("mecabprocess");
 //				System.out.println(word);
 				String[] temp = word.split("/");
+				if(temp.length != 2)			continue;	//stanford 오류상황 예외처리 
 				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
 			}
 			word = term.word.toLowerCase();

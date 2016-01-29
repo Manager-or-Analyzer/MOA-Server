@@ -321,22 +321,25 @@ public class HtmlParser {
 				
 		//boolean List 만들기
 		List<Boolean> isUsedList = new ArrayList<Boolean>();
-		for(int i=0; i<hd.children.size(); i++)
-			isUsedList.add(false);
+		if(hd.children != null){
+			for(int i=0; i<hd.children.size(); i++)
+				isUsedList.add(false);
 		
-		for(Element e : doc.getAllElements()){
-			if(e.tagName() == "frame" || e.tagName() == "iframe"){
-				if(e.ownText().equals("")){
-					if(hd.children.size() != 0)
-						makeChild(e,hd,uselessTag, isUsedList);
-					else
-						System.out.println("chid size 0");
-				}else{
-					//System.out.println("iframe:"+e.ownText());
-					e.text("");
-					//System.out.println("main iframe own text != 0");
+		
+			for(Element e : doc.getAllElements()){
+				if(e.tagName() == "frame" || e.tagName() == "iframe"){
+					if(e.ownText().equals("")){
+						if(hd.children.size() != 0)
+							makeChild(e,hd,uselessTag, isUsedList);
+						else
+							System.out.println("chid size 0");
+					}else{
+						//System.out.println("iframe:"+e.ownText());
+						e.text("");
+						//System.out.println("main iframe own text != 0");
+					}
+						
 				}
-					
 			}
 		}
 			
