@@ -256,9 +256,9 @@ public class KeywordManager {
 			for(String key : titleMap.keySet()){
 				totalSize += titleMap.get(key);
 			}
+			totalSize *= 10;
 		}
-		totalSize *= 10;
-				
+						
 		System.out.println("size :"+totalSize);
 		int cnt = 0;
 		for(Map.Entry<String, Integer> me : titleMap.entrySet()){

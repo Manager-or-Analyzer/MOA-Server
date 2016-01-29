@@ -265,6 +265,24 @@ public class HtmlParser {
 			System.out.println("meta size : 0");
 		return null;
 	}
+	private String getDescription(Document doc){
+		
+		Elements metaTags = doc.head().select("meta");
+		if(metaTags.size() != 0){
+			for(Element e :metaTags){				
+				String name = e.attr("name").toLowerCase();
+				if(name.equals("description")){
+					return e.attr("content");
+				}				
+				String name2 = e.attr("property").toLowerCase();
+				if(name2.equals("og:description")){
+					return e.attr("content");
+				}
+			}
+		}else
+			System.out.println("meta size : 0");
+		return null;
+	}
 	//make ContentBlockTree
 	public HtmlParser makeCBT(HtmlData hd, Map<String,String> uselessTag, Map<String,String> TextTag, HtmlParsedData hdp){
 		int tagCnt = 0;
@@ -274,7 +292,12 @@ public class HtmlParser {
 		Document doc = Jsoup.parse(html);
 		
 		//title 가져오기
-		hdp.snippet.title = doc.title();
+		String description = getDescription(doc);
+		if(description != null)
+			hdp.snippet.title = doc.title()+description;
+		else
+			hdp.snippet.title = doc.title();
+		System.out.println("description "+description);
 		//img 가져오기
 		String img = getImagesrc(doc);
 		if(img != null && img.contains("//")){
