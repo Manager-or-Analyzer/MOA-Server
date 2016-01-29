@@ -65,6 +65,26 @@ public class DBManager {
 		}    	
     }
     
+    public boolean isParsedDataExist(String url){
+		db = mongoClient.getDB(DB_NAME);
+	
+		DBCollection collection = db.getCollection("ParsedHtmlCollection");
+		
+		BasicDBObject query = new BasicDBObject();
+		query.put("snippet.url", url);
+		
+		DBCursor cursor = collection.find(query);
+		
+		if(cursor.hasNext()){
+			System.out.println("isParsedDataExist true");
+			return true;
+		}    		
+		else{
+			System.out.println("isParsedDataExist false");
+			return false;
+		}
+			
+	}
     //insert
     public void insertData(String collection_name, String data_json) throws Exception{
     	 db = mongoClient.getDB(DB_NAME);
@@ -511,6 +531,25 @@ public class DBManager {
     	}
     		
     }
+    public boolean isKeywordDocExist(String url,String userid){
+    	db = mongoClient.getDB(DB_NAME);
+
+    	DBCollection collection = db.getCollection("KeywordCollection");
+    	
+    	BasicDBObject query = new BasicDBObject();
+    	query.put("snippet.url", url);
+    	query.put("userid", userid);
+    	
+    	DBCursor cursor = collection.find(query);
+    	
+    	if(cursor.hasNext()){
+    		return true;
+    	}    		
+    	else{
+    		return false;
+    	}
+    		
+    }
 
  
     //update
@@ -860,26 +899,7 @@ public class DBManager {
 //	return db.getCollection("DurationData").find(query);
 //}
     
-//  public boolean isParsedDataExist(String url){
-//	db = mongoClient.getDB(DB_NAME);
-//
-//	DBCollection collection = db.getCollection("ParsedHtmlCollection");
-//	
-//	BasicDBObject query = new BasicDBObject();
-//	query.put("snippet.url", url);
-//	
-//	DBCursor cursor = collection.find(query);
-//	
-//	if(cursor.hasNext()){
-//		System.out.println("isParsedDataExist true");
-//		return true;
-//	}    		
-//	else{
-//		System.out.println("isParsedDataExist false");
-//		return false;
-//	}
-//		
-//}
+
 //
 //  public Map getParsedEvents(String userId, String url) throws Exception{
 //	db = mongoClient.getDB(DB_NAME);

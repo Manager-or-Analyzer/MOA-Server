@@ -115,76 +115,84 @@ public class KeywordManager {
 			
 	}
 	public void calTF_IDF(HtmlData hd){
-		HtmlParsedData hpd = MorphemeAnalyzer.getInstance().parsingHTML(hd);
-			
-		try {
+		if(!DBManager.getInstnace().isKeywordDocExist(hd.url, hd.userid)){
+			HtmlParsedData hpd = MorphemeAnalyzer.getInstance().parsingHTML(hd);
+				
+			try {
 			// 이미 방문했던 사이트인진 체크			
-			Map<String, Double> idfList = cal_IDF(hpd.keywordList);		 	
-			if(idfList == null){
-				System.out.println("idfList null");
-			}
-//			for(String key : idfList.keySet()){
-//				System.out.println("key: "+key+" val:"+idfList.get(key));
-//			}
-			//본문 가중치 계산
-			int totalCnt = getTotalCnt(hpd.keywordList);
-			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList,totalCnt);			
-			//title 가중치 계산
-			Map<String, Double> Tf_Title = cal_TF_Title(MorphemeAnalyzer.getInstance().doMecabTitleProcess(hpd.snippet.title, hd.userid,hd.url),totalCnt);	
-			
-			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
-			
-			if(hd.url.contains("stackoverflow.com")){
-				W_TITLE = 0.7;
-				System.out.println("stack");
-			}
-			for(String key : Tf_Body.keySet()){
-				Double tf = Tf_Body.get(key)*W_BODY;
-				if(Tf_Title.size() !=0 && Tf_Title.containsKey(key)){
-					
-					tf += Tf_Title.get(key)*W_TITLE;
-					Tf_Title.remove(key);
+				Map<String, Double> idfList = cal_IDF(hpd.keywordList, hpd.snippet.url);		 	
+				if(idfList == null){
+					System.out.println("idfList null");
 				}
-
-				Double idf;
-				if((idf =idfList.get(key)) == null){
-					idf = 0.0;
-				}
-				//System.out.println("tf :"+tf+" idf: "+idf+" "+key+" "+tf*idf);
-				TF_IDF_list.put(key, tf*idf);
-			}
-			
+	//			for(String key : idfList.keySet()){
+	//				System.out.println("key: "+key+" val:"+idfList.get(key));
+	//			}
+				//본문 가중치 계산
+				int totalCnt = getTotalCnt(hpd.keywordList);
+				Map<String, Double> Tf_Body = cal_TF(hpd.keywordList,totalCnt);			
+				//title 가중치 계산
+				Map<String, Double> Tf_Title = cal_TF_Title(MorphemeAnalyzer.getInstance().doMecabTitleProcess(hpd.snippet.title, hd.userid,hd.url),totalCnt);	
 				
-			for(String key : Tf_Title.keySet()){
+				Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
 				
-				Double tf = Tf_Title.get(key)*W_TITLE;
-				Double idf;
-				if((idf =idfList.get(key)) == null){
-					idf = 0.0;
+				if(hd.url.contains("stackoverflow.com")){
+					W_TITLE = 0.7;
+					System.out.println("stack");
 				}
-				TF_IDF_list.put(key, tf*idf);
-				//System.out.println("title "+"tf :"+tf+" idf: "+idf+" "+key+" "+tf*idf);
-			}
-			if(hd.url.contains("stackoverflow.com"))
-				W_TITLE = 0.5;
-			
-			TF_IDF tfid = new TF_IDF();
-
-			tfid.snippet = hpd.snippet;
-			tfid.userid = hd.userid;
-			tfid.keywordList = MapUtil.Map_sortByValue(TF_IDF_list);
+				for(String key : Tf_Body.keySet()){
+					Double tf = Tf_Body.get(key)*W_BODY;
+					if(Tf_Title.size() !=0 && Tf_Title.containsKey(key)){
 						
-			int count = 10;
-			System.out.println("key\t count\t");
-			for(String key : tfid.keywordList.keySet()){
-				if(count-->0)
-					System.out.println(key + "\t " + tfid.keywordList.get(key));
-				else break;
-			}
-			DBManager.getInstnace().updateTF_IDFByEvent(tfid);
+						tf += Tf_Title.get(key)*W_TITLE;
+						Tf_Title.remove(key);
+					}
+	
+					Double idf;
+					if((idf =idfList.get(key)) == null){
+						idf = 0.0;
+					}
+					//System.out.println("tf :"+tf+" idf: "+idf+" "+key+" "+tf*idf);
+					TF_IDF_list.put(key, tf*idf);
+				}
+				
+					
+				for(String key : Tf_Title.keySet()){
+					
+					Double tf = Tf_Title.get(key)*W_TITLE;
+					Double idf;
+					if((idf =idfList.get(key)) == null){
+						idf = 0.0;
+					}
+					TF_IDF_list.put(key, tf*idf);
+					//System.out.println("title "+"tf :"+tf+" idf: "+idf+" "+key+" "+tf*idf);
+				}
+				if(hd.url.contains("stackoverflow.com"))
+					W_TITLE = 0.5;
+				
+				TF_IDF tfid = new TF_IDF();
+	
+				tfid.snippet = hpd.snippet;
+				tfid.userid = hd.userid;
+				tfid.keywordList = MapUtil.Map_sortByValue(TF_IDF_list);
+							
+				int count = 10;
+				System.out.println("key\t count\t");
+				for(String key : tfid.keywordList.keySet()){
+					if(count-->0)
+						System.out.println(key + "\t " + tfid.keywordList.get(key));
+					else break;
+				}
+				DBManager.getInstnace().updateTF_IDFByEvent(tfid);
 			
-		}catch (Exception e) {
-			e.printStackTrace();
+			
+				
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+		}
+		else{
+			System.out.println("Already exist");
+			DBManager.getInstnace().updateTime(hd.url, hd.userid, hd.time);
 		}
 	}
 	
@@ -249,7 +257,8 @@ public class KeywordManager {
 		return Tf;
 		
 	}
-	private Map cal_IDF(Map<String,Integer> keywordList) throws Exception{		
+	private Map cal_IDF(Map<String,Integer> keywordList, String url) throws Exception{		
+		
 		DBManager.getInstnace().updateIDFData(keywordList);
 		Map<String, Double> idfList = DBManager.getInstnace().getIDFList(keywordList);
 		return idfList;

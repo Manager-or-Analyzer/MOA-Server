@@ -45,6 +45,9 @@ public class KeywordsSenderController extends HttpServlet {
 		DateData datedata = new Gson().fromJson(receiveData, DateData.class);
 		List<String> urls = DBManager.getInstnace().getUrls(datedata);
 		
+//		for(String url : urls){
+//			System.out.println("urls KeywordsSenderController: "+url);
+//		}
 		if(urls == null || urls.size() ==0){
 			System.out.println("urls size:"+urls.size());
 			return;

@@ -48,6 +48,7 @@ public class HTMLReceiverController extends HttpServlet {
 
 		System.out.println("htmlreceivercontroller : " + htmlData);
 		System.out.println("htmlreceivercontroller : " + hd.userid);
+		System.out.println("htmlreceivercontroller : " + hd.url);
 		
 		try {
 			DBManager.getInstnace().insertData("HtmlData", htmlData);				
