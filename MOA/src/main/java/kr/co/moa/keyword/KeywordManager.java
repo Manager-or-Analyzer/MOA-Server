@@ -20,7 +20,7 @@ import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 public class KeywordManager {
 	
 	private static final double W_BODY = 0.5;
-	private static final double W_TITLE = 0.5;
+	private static double W_TITLE = 0.5;
 	private static final double W_EVNET = 0.2;
 	private static final int MAX_KEYWORDS = 50;
 	
@@ -172,6 +172,10 @@ public class KeywordManager {
 			
 			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
 			
+			if(hd.url.contains("stackoverflow.com")){
+				W_TITLE = totalCnt/3;
+				System.out.println("stack");
+			}
 			for(String key : Tf_Body.keySet()){
 				Double tf = Tf_Body.get(key)*W_BODY;
 				if(Tf_Title.size() !=0 && Tf_Title.containsKey(key)){
@@ -187,7 +191,10 @@ public class KeywordManager {
 				//System.out.println("tf :"+tf+" idf: "+idf+" "+key+" "+tf*idf);
 				TF_IDF_list.put(key, tf*idf);
 			}
+			
+				
 			for(String key : Tf_Title.keySet()){
+				
 				Double tf = Tf_Title.get(key)*W_TITLE;
 				Double idf;
 				if((idf =idfList.get(key)) == null){
@@ -196,6 +203,8 @@ public class KeywordManager {
 				TF_IDF_list.put(key, tf*idf);
 				//System.out.println("title "+"tf :"+tf+" idf: "+idf+" "+key+" "+tf*idf);
 			}
+			if(hd.url.contains("stackoverflow.com"))
+				W_TITLE = 0.5;
 			
 			TF_IDF tfid = new TF_IDF();
 

@@ -35,7 +35,7 @@ public class TimeCalculator {
 		
 		events = (ArrayList<EventData>) DBManager.getInstnace().getTimeEvent(evt);
 		if(events.size() <= 0){
-			System.out.println("TimeCalculator : number of event is 0");
+			//System.out.println("TimeCalculator : number of event is 0");
 			return;
 		}
 		//Sorting
@@ -51,16 +51,16 @@ public class TimeCalculator {
 		int uselessCnt = 0;
 		for(EventData e : events){
 			if(!start && !e.type.equals("pagein")){
-				System.out.println("useless");
-				System.out.println(e.type);
-				System.out.println(e.time);
+				//System.out.println("useless");
+				//System.out.println(e.type);
+				//System.out.println(e.time);
 				uselessCnt++;
 				continue;
 			}
 			else if(!start && e.type.equals("pagein")){
-				System.out.println("pagein");
-				System.out.println(e.type);
-				System.out.println(e.time);
+				//System.out.println("pagein");
+				//System.out.println(e.type);
+				//System.out.println(e.time);
 				
 				start = true;
 				dd.time = e.time;	//pagein의 시간을 삽입될 duration data에 대입 
@@ -68,7 +68,7 @@ public class TimeCalculator {
 			break;
 		}
 		if(events.size() == uselessCnt){
-			System.out.println("TimeCalculator : All event is useless");
+			//System.out.println("TimeCalculator : All event is useless");
 			return;
 		}
 		
@@ -76,7 +76,7 @@ public class TimeCalculator {
 	//start calc stay time
 		//마지막 이벤트와 첫 이벤트의 시간차이 계산  
 		Long total = (events.get(events.size()-1).time.getTime() - dd.time.getTime());
-		System.out.println("total : " + total);
+		//System.out.println("total : " + total);
 		
 		if(total < 0){
 			//event 오류 시 

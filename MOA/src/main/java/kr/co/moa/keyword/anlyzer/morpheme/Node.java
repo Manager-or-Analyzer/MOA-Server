@@ -21,6 +21,9 @@ public class Node {
 		name= n;
 		content = data;
 	}
+	public String getName(){
+		return name;
+	}
 	public String getContent(){
 		return content;
 	}	

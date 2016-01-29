@@ -41,6 +41,13 @@ public class HtmlParser {
 		
 		double len_p = parent.getContent().trim().length();
 		double len_c = child.getContent().trim().length();
+//		if((child.getName().contains("iframe") || child.getName().contains("frame"))){
+//			len_c /= 100;
+//			if((parent.getName().contains("iframe") || parent.getName().contains("frame"))){
+//				len_p /= 100;
+//			}			
+//			System.out.println(parent.getName()+" "+child.getName()+" len_p: "+len_p+" len_c: "+len_c);
+//		}
 		
 		if(len_p == 0 || len_c == 0){
 			//System.out.println("0 parent: "+parent.name+" child :"+child.name);
@@ -151,7 +158,7 @@ public class HtmlParser {
 			if(!flag){
 				src = findPart(src, hd);
 			}
-			System.out.println("src " + src);
+			//System.out.println("src " + src);
 		}		
 		int i;
 		//System.out.println("src :"+src);

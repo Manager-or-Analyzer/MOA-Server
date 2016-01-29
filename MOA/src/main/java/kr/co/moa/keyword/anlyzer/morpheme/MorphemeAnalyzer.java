@@ -57,12 +57,12 @@ public class MorphemeAnalyzer {
 	            "img", 		"br", 		"wbr", 		"embed", 	"hr",
 	            "col", 		"colgroup", "command",	"device", 	"area", 
 	            "basefont", "bgsound", 	"menuitem", "param", 	"track",
-	            "a",		"i",		"aside"
+	            "a",		"i",		"aside",	"pre",		"code"
 	 };
 	 //표는 버린다.ㅋ
 	 private static final String[] textTags = {
 			 "title", 	"p", 		"h1", 			"h2", 		"h3", 
-			 "h4", 		"h5", 		"h6", 			"pre", 		"address",
+			 "h4", 		"h5", 		"h6", 			"address",	//"pre", 		
 	         "ins", 	"textarea",	"blockquote", 	"dt",		"dd",
 	         "span",	"b",		"font",			"strong"
 	 };
@@ -112,15 +112,17 @@ public class MorphemeAnalyzer {
 		String content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
 		if(content.equals("") || content.trim().length() <120){
 			System.out.println("lamda decrease");
+			System.out.println("length2 :" + content.length());
 	        hp = new HtmlParser();
 	        hp.lamda = 0.15;
 	        content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
 	        if(content.equals("") || content.trim().length() <120){
 	        	System.out.println("lamda2 decrease");
+	        	System.out.println("length2 :" + content.length());
 		        hp = new HtmlParser();
 		        hp.lamda = 0.05;
 		        content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
-	        }
+	        }	        
 	    }else
 	        System.out.println("length :" + content.length());
 	      
@@ -136,7 +138,7 @@ public class MorphemeAnalyzer {
 	     
 	  	//debug.close();
 	  	try {
-	  		DBManager.getInstnace().updateParsedData(html.url, unicode_userid, hpd);
+	  		DBManager.getInstnace().updateParsedData(html.url, unicode_userid, hpd, content);
 	  	} catch (Exception e) {
 	  		e.printStackTrace();
 	  	}
@@ -254,6 +256,7 @@ public class MorphemeAnalyzer {
 			word = term.word.toLowerCase();
 			
 			if(word.length() <=1) continue;
+			if(FilteringWord.containsKey(word)) continue;
 			if(countingMap.containsKey(word)) 	
 				countingMap.put(word, countingMap.get(word) + 1);
 			else 								

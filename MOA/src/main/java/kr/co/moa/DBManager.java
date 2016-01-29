@@ -526,7 +526,7 @@ public class DBManager {
     		updateQuery.append("$set", new BasicDBObject().append("snippet.time", Util.strToDate(time)));
     	collection.update(searchQuery, updateQuery);	
     }  
-    public void updateParsedData(String url, String userid, HtmlParsedData hpd){
+    public void updateParsedData(String url, String userid, HtmlParsedData hpd, String content){
     	userid = userid.replace(".", "\uff0E");
     	db = mongoClient.getDB(DB_NAME);
 
@@ -547,8 +547,8 @@ public class DBManager {
     										.append("snippet", snippetBSON)
     										.append("collectionName", hpd.collectionName)
     										.append("keywordList", hpd.keywordList)
-    										.append("userList."+userid, true));
-    		
+    										.append("userList."+userid, true)
+    										.append("content", content));
     	collection.update(searchQuery, updateQuery ,true , false);	
     }  
     public void updateIDFData(Map<String,Integer> keywordList){
