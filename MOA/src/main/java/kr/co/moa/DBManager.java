@@ -14,6 +14,7 @@ import org.bson.BasicBSONObject;
 
 import com.google.gson.Gson;
 import com.mongodb.AggregationOutput;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -260,6 +261,24 @@ public class DBManager {
 	 	return keywordlist;
 	 	
     }
+    public Map getEventCollect(String url, String userid){
+	  	db = mongoClient.getDB(DB_NAME);
+  	 
+	 	DBCollection collection = db.getCollection("ParsedEventCollectCollection");
+	 	BasicDBObject query = new BasicDBObject();
+	 		query.append("url", url);
+	 		query.append("userid", userid);
+	 	DBCursor cursor = collection.find(query);	
+	 	
+	 	Map<String, Double> keywordlist = new HashMap<String, Double>();
+	 	while(cursor.hasNext()){
+	 		DBObject data = (DBObject)cursor.next();
+	 		keywordlist =  (Map)data.get("keywordsList");
+	 	}
+	 	
+	 	return keywordlist;
+    }
+	 	
     public void test(){
 	  	db = mongoClient.getDB(DB_NAME);
   	 
@@ -284,27 +303,28 @@ public class DBManager {
     	Date to = Util.strToDate(datedata.end);
     	System.out.println("getUrls : "+ "from :"+datedata.start+" end:"+datedata.end);
     	
-    	BasicDBObject query = new BasicDBObject();
-		BasicDBObject date_query = new BasicDBObject();
-			date_query.put("$gte", from);
-			date_query.put("$lte", to);
-			query.put("userid", datedata.userid);
-			query.put("time", date_query);
-			query.put("type", "pagein");
-		
-		DBCursor cursor = collection.find(query);
-		
-		Set<String> set = new HashSet<String>();
-		while(cursor.hasNext()){
-			set.add((String) cursor.next().get("url"));
-		}
-		
-		List<String> res = new ArrayList<String>();
-		Iterator<String> it = set.iterator();
-		while(it.hasNext()){
-			res.add(it.next());
-		}
-		return res;    	   
+    	
+    	BasicDBObject date_query = new BasicDBObject();
+		date_query.put("$gte", from);
+		date_query.put("$lte", to);
+    	BasicDBObject key = new BasicDBObject();
+    	key.put("url", "");
+    	BasicDBObject cond = new BasicDBObject();
+    	cond.put("userid", datedata.userid);
+    	cond.put("time", date_query);
+    	BasicDBObject initial = new BasicDBObject();
+    	String reduce = "function(a,b){}";
+    	
+    	BasicDBList result = (BasicDBList) collection.group(key, cond, initial, reduce);
+    	
+    	List<String> res = new ArrayList<String>();
+    	for(Object o : result){
+    		BasicDBObject temp = (BasicDBObject) o;
+    		//System.out.println(temp.getString("url"));
+    		res.add(temp.getString("url"));
+    	}
+    	
+		return res; 	   
     }
     public HtmlParsedData getHtmlParsedData(String url){
     	db = mongoClient.getDB(DB_NAME);
@@ -635,10 +655,32 @@ public class DBManager {
     	BasicDBObject searchQuery = new BasicDBObject();
     		searchQuery.put("url", epd.url);
     		searchQuery.put("userid", epd.userid);
-    		    	    	
+    		
+    	System.out.println("totalCnt :"+epd.totalCnt);
+    	//DBObject listItm = new BasicDBObject("keywords",new BasicDBObject("keywordList",epd.keywordList).append("cnt", epd.totalCnt));	
     	BasicDBObject updateQuery = new BasicDBObject();
     		updateQuery.append("$set", new BasicDBObject().append("time", epd.time));
     		updateQuery.append("$inc", new BasicDBObject().append("totalCnt",epd.totalCnt));
+    		//updateQuery.append("$push", listItm);
+    		
+    	collection.update(searchQuery, updateQuery ,true , false);	
+    }  
+    public void updateEventCalData(Map<String,Double> Tf_event, String url, String userid){
+    	db = mongoClient.getDB(DB_NAME);
+
+    	DBCollection collection = db.getCollection("ParsedEventCollectCollection");
+    	    	
+    	BasicDBObject searchQuery = new BasicDBObject();
+    		searchQuery.put("url", url);
+    		searchQuery.put("userid", userid);
+    		
+    	//DBObject listItm = new BasicDBObject("keywords",new BasicDBObject("keywordList",epd.keywordList).append("cnt", epd.totalCnt));	
+    	BasicDBObject updateQuery = new BasicDBObject();
+    	BasicDBObject updateList = new BasicDBObject();
+		for(String key : Tf_event.keySet()){
+			updateList.append("keywordsList."+key,Tf_event.get(key));
+		}
+			updateQuery.append("$inc", updateList);
     		
     	collection.update(searchQuery, updateQuery ,true , false);	
     }  
