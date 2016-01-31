@@ -30,6 +30,8 @@ import kr.co.moa.DBManager;
 
 import org.bitbucket.eunjeon.seunjeon.Analyzer;
 import org.bitbucket.eunjeon.seunjeon.LNode;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import com.google.gson.Gson;
 
@@ -50,6 +52,7 @@ public class MorphemeAnalyzer {
 	private Map<String,String> FilteringWord;
 		
 	 private static final String[] uselessTags = {
+			 
 	            "script", 	"noscript", "style", 	"meta", 	"link",
 	            "noframes", "nav", 		"aside", 	"hgroup", 	"header", 
 	            "footer", 	"math",		"button", 	"fieldset", "input", 
@@ -86,6 +89,92 @@ public class MorphemeAnalyzer {
 		for(String tag : uselessWords)   {	FilteringWord.put(tag, null);	}
 	}
 	
+	public HtmlParsedData parsingRawHTML(HtmlData html){
+		Document doc = Jsoup.parse(html.doc);
+		String content = new HtmlParser().test(html);
+		System.out.println("content "+content);
+		UUID uuid = UUID.randomUUID();
+		String inputPath  = "D:/mecab/" + html.userid + "/";
+		String outputPath = "D:/mecab/" + html.userid + "/";
+		String inputFile  = uuid+".txt";
+		String outputFile = uuid+"_out.txt";
+		
+		System.out.println(uuid);
+		
+		if(!makeInputFile(inputPath + inputFile, content, html.userid)){
+			//inputfile 생성 오류처리
+		}
+		
+		List<String> arg = new ArrayList<String>();
+		arg.add("D:/mecab/mecab-ko/mecab");
+		arg.add("-d");
+		arg.add("D:/mecab/mecab-ko/dic/mecab-ko-dic");
+		arg.add(inputPath + inputFile);
+		arg.add("-o");
+		arg.add(outputPath + outputFile);
+		
+		try {
+			System.out.println("start process------------------------");
+			ProcessBuilder mecab_builder = new ProcessBuilder(arg);
+			mecab_builder.redirectOutput(Redirect.INHERIT);	//에러와 출력을 표준스트림으로 출력시킴
+			mecab_builder.redirectError(Redirect.INHERIT);	//input-buffer overflow. The line is split. use -b #SIZE option.
+			Process mecab_process = mecab_builder.start();
+			mecab_process.waitFor();
+			System.out.println("end process--------------------------");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+//		//Stanford POS tagger
+//        MaxentTagger tagger = null;
+//	    try {
+//	    	tagger = new MaxentTagger("C:\\Users\\dong\\Documents\\moa_gitt\\MOA\\left3words-wsj-0-18.tagger");
+//	    } catch (ClassNotFoundException e1) {
+//	    	e1.printStackTrace();
+//	    } catch (IOException e1) {
+//	    	e1.printStackTrace();
+//	    }
+//	    
+	    String word, type;
+		
+        Map<String, Integer> countingMap = new HashMap<String, Integer>();
+		ValueComparator bvc = new ValueComparator(countingMap);
+        TreeMap sorted_map = new TreeMap(bvc);
+        
+	    //System.out.println(tagger.tagString(content));
+        
+        List<WordTagPair> result = getVaildTag(outputPath + outputFile);
+        if(result == null){
+        	//mecab오류 예외처리
+        }
+        
+        for (WordTagPair term: result) {
+			type = term.tag;
+			
+//			if(type.equals("SL")){					//if foreign laguage do Stanford POS tagger
+//				word = tagger.tagString(term.word);
+////				System.out.println("mecabprocess");
+////				System.out.println(word);
+//				String[] temp = word.split("/");
+//				if(temp.length != 2)			continue;	//stanford 오류상황 예외처리 
+//				if(temp[1].charAt(0) != 'N') 	continue;	//명사가 아닌 영어 무시  
+//			}
+			word = term.word.toLowerCase();
+			
+			if(countingMap.containsKey(word)) 	
+				countingMap.put(word, countingMap.get(word) + 1);
+			else 								
+				countingMap.put(word, 1);
+		}
+
+		countingMap = MapUtil.Map_sortByValue(countingMap);
+		
+		HtmlParsedData hpd = new HtmlParsedData();
+		hpd.keywordList = countingMap;
+	  	return hpd;
+	}
 	public HtmlParsedData parsingHTML(HtmlData html){
 		 String userid;
 		 String url;
@@ -117,12 +206,12 @@ public class MorphemeAnalyzer {
 	        hp.lamda = 0.15;
 	        content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
 	        if(content.equals("") || content.trim().length() <120){
-	        	System.out.println("lamda2 decrease");
-	        	System.out.println("length2 :" + content.length());
+	        	System.out.println("lamda2 decrease");	        	
 		        hp = new HtmlParser();
-		        hp.lamda = 0.05;
+		        hp.lamda = 0.02;
 		        content = hp.makeCBT(html, TagsMap, TexttagMap, hpd).makeTopicTree();
-	        }	        
+		        System.out.println("length2 :" + content.length());
+	        }	            
 	    }else
 	        System.out.println("length :" + content.length());
 	      

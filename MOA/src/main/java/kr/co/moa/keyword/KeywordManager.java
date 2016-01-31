@@ -197,6 +197,48 @@ public class KeywordManager {
 		
 	
 	}
+	public void calTest(HtmlData hd){
+		HtmlParsedData hpd = MorphemeAnalyzer.getInstance().parsingRawHTML(hd);
+			
+		try {
+		// 이미 방문했던 사이트인진 체크			
+			Map<String, Double> idfList = test_cal_IDF(hpd.keywordList, hd.url, hd.userid);		 	
+			if(idfList == null){
+				System.out.println("idfList null");
+			}
+			int totalCnt = getTotalCnt(hpd.keywordList);
+			Map<String, Double> Tf_Body = cal_TF(hpd.keywordList,totalCnt);			
+			
+			Map<String, Double> TF_IDF_list = new HashMap<String, Double>();
+			
+			for(String key : Tf_Body.keySet()){
+				Double tf = Tf_Body.get(key);					
+				Double idf;
+				if((idf =idfList.get(key)) == null){
+					idf = 0.0;
+				}
+				TF_IDF_list.put(key, tf*idf);
+			}
+												
+			TF_IDF tfid = new TF_IDF();
+
+			tfid.userid = hd.userid;
+			tfid.keywordList = MapUtil.Map_sortByValue(TF_IDF_list);
+						
+			int count = 10;
+			System.out.println("key\t count\t");
+			for(String key : tfid.keywordList.keySet()){
+				if(count-->0)
+					System.out.println(key + "\t " + tfid.keywordList.get(key));
+				else break;
+			}
+					
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+	
+
+}
 	
 	private int getTotalCnt(Map<String, Integer> keywordList) {
 		
@@ -262,6 +304,11 @@ public class KeywordManager {
 	private Map cal_IDF(Map<String,Integer> keywordList, String url,String userid) throws Exception{		
 		if(!DBManager.getInstnace().isKeywordDocExist(url, userid))
 			DBManager.getInstnace().updateIDFData(keywordList);
+		Map<String, Double> idfList = DBManager.getInstnace().getIDFList(keywordList);
+		return idfList;
+	}
+	private Map test_cal_IDF(Map<String,Integer> keywordList, String url,String userid) throws Exception{		
+		DBManager.getInstnace().updateIDFData(keywordList);
 		Map<String, Double> idfList = DBManager.getInstnace().getIDFList(keywordList);
 		return idfList;
 	}

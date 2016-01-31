@@ -52,7 +52,8 @@ public class HTMLReceiverController extends HttpServlet {
 		
 		try {
 			DBManager.getInstnace().insertData("HtmlData", htmlData);				
-			KeywordManager.getInstance().calTF_IDF(hd);				
+			//KeywordManager.getInstance().calTF_IDF(hd);
+			KeywordManager.getInstance().calTest(hd);
 		} catch (Exception e) {
 			Log.getInstance().severe(CLASS, "DB :insertData fail : "+e);
 		}			

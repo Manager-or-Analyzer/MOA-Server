@@ -1,6 +1,7 @@
 package kr.co.moa.keyword.anlyzer.morpheme;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -328,15 +329,19 @@ public class HtmlParser {
 		
 			for(Element e : doc.getAllElements()){
 				if(e.tagName() == "frame" || e.tagName() == "iframe"){
-					if(e.ownText().equals("")){
-						if(hd.children.size() != 0)
-							makeChild(e,hd,uselessTag, isUsedList);
-						else
-							System.out.println("chid size 0");
-					}else{
-						//System.out.println("iframe:"+e.ownText());
+					if(hd.url.contains("news")){
 						e.text("");
-						//System.out.println("main iframe own text != 0");
+					}else{
+						if(e.ownText().equals("")){
+							if(hd.children.size() != 0)
+								makeChild(e,hd,uselessTag, isUsedList);
+							else
+								System.out.println("chid size 0");
+						}else{
+							//System.out.println("iframe:"+e.ownText());
+							e.text("");
+							//System.out.println("main iframe own text != 0");
+						}
 					}
 						
 				}
@@ -391,7 +396,63 @@ public class HtmlParser {
 		//CBT.print();	
 		return this;
 	}
-	
+	public String test(HtmlData hd){
+		// 1. 특수문자 처리 일단 &nbsp만 처리
+		String html = hd.doc;
+		html = html.replaceAll("&nbsp;","").trim();
+		Document doc = Jsoup.parse(html);
+		
+		//img 가져오기
+				
+		Map<String,String> testMap = new HashMap<String, String>();
+		
+		//boolean List 만들기
+		List<Boolean> isUsedList = new ArrayList<Boolean>();
+		if(hd.children != null){
+			for(int i=0; i<hd.children.size(); i++)
+				isUsedList.add(false);
+		
+		
+			for(Element e : doc.getAllElements()){
+				if(e.tagName() == "frame" || e.tagName() == "iframe"){
+					if(hd.url.contains("news")){
+						e.text("");
+					}else{
+						if(e.ownText().equals("")){
+							if(hd.children.size() != 0)
+								makeChild(e,hd,testMap, isUsedList);
+							else
+								System.out.println("chid size 0");
+						}else{
+							//System.out.println("iframe:"+e.ownText());
+							e.text("");
+							//System.out.println("main iframe own text != 0");
+						}
+					}
+						
+				}
+			}
+		}
+			
+		// 2. <body>만 추출
+		CBT = new Tree();		
+		Elements body_els = doc.getElementsByTag("body");
+		// body가 없고 frameset이 있을경우 -> html 엤날 방식.
+		if(body_els.isEmpty()){
+			body_els = doc.getElementsByTag("frameset");
+		}
+		Element body_e = body_els.first();		
+		//System.out.println("size :"+body_e.child(1).className()+" id: "+body_e.child(1).id());
+		body_e.tagName("body");
+		que.add( body_e);
+		
+		// CBT에 add <body>
+		Node body_node = new Node(body_e.tagName(), body_e.text());
+		CBT.addNode("ROOT", body_node);
+		//System.out.println("전체------------------------");
+		//System.out.println(body_e.text());
+		return body_e.text();
+	}
 			
 	void printLog(String msg, Element e){
 		System.out.println(msg);
