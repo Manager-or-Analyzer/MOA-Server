@@ -49,7 +49,7 @@ public class MorphemeAnalyzer {
 	private static MorphemeAnalyzer instance;
 	private Map<String,String> TagsMap;
 	private Map<String,String> TexttagMap;
-	private Map<String,String> FilteringWord;
+	public Map<String,String> FilteringWord;
 		
 	 private static final String[] uselessTags = {
 			 
@@ -71,8 +71,8 @@ public class MorphemeAnalyzer {
 	 };
 	
 	 private static final String[] uselessWords = {
-			 "네이버","다음","블로그","구글","네이트","뉴스",
-			 "naver","daum","blog","google","nate","니다","vd","li"
+			 "네이버","다음","블로그","구글","네이트","뉴스","검색","검색어","최근","밋","꼬미",
+			 "naver","daum","blog","google","nate","니다","vd","li","txt","searches"
 	 };
 	 
 	public static MorphemeAnalyzer getInstance(){

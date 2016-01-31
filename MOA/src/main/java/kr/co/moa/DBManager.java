@@ -38,12 +38,13 @@ import kr.co.data.receive.DateData;
 import kr.co.data.send.Snippet;
 import kr.co.moa.controller.analyzer.KeywordsSenderController;
 import kr.co.moa.controller.analyzer.KeywordsSenderController.Dictionary_custom;
+import kr.co.moa.keyword.anlyzer.morpheme.MorphemeAnalyzer;
 import scala.collection.parallel.ParIterableLike.Aggregate;
 
 //singleton���� ���� 
 public class DBManager {	
-	//private static final String DB_NAME = "MOA";
-	private static final String DB_NAME = "MOA_crawler";
+	private static final String DB_NAME = "MOA";
+	//private static final String DB_NAME = "MOA_crawler";
 	//private static final String DB_NAME = "MOA_crawler_100";
     private static final String IP = "210.118.74.183";
     private static final int PORT = 27017;
@@ -185,7 +186,7 @@ public class DBManager {
  	 			if(startDay.compareTo(date) > 0 && endDay.compareTo(date) < 0) continue;		//기간 내 데이터만 고려 
  				if(urlandTimeList.containsKey(url)) urlandTimeList.put(url, urlandTimeList.get(url) + duration);
  				else 						 urlandTimeList.put(url, duration);
- 	 			urlandTimeList.put(url, duration);
+ 	 			//urlandTimeList.put(url, duration);
  	 		}
 // 	 	for(String url : urlandTimeList.keySet()){
 // 	 		System.out.println("url :"+ url+" duration:"+urlandTimeList.get(url));
@@ -219,6 +220,7 @@ public class DBManager {
  			
  			int cnt=3;
  			for(String key: tfidf.keywordList.keySet()){
+ 				if(MorphemeAnalyzer.getInstance().FilteringWord.containsKey(key)) continue;
  				if(cnt-->0){
  					//System.out.println("keyword url"+tfidf.snippet.url);
  					double val = tfidf.keywordList.get(key);
