@@ -48,6 +48,7 @@ public class KeywordManager {
 			Map<String, Double> Tf_map = DBManager.getInstnace().getTfCollection(ed.userid, ed.url);
 						
 			int eventCnt = DBManager.getInstnace().getParsedEventsCnt(ed.userid, ed.url);
+			if(eventCnt < 10) eventCnt = 10;
 			System.out.println("evecnt: "+eventCnt);
 			Map<String, Double> Tf_Event = cal_TF_Event(epd.keywordList,eventCnt);
 			if(Tf_map == null){
