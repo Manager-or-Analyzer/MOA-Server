@@ -94,8 +94,8 @@ public class MorphemeAnalyzer {
 		String content = new HtmlParser().test(html);
 		System.out.println("content "+content);
 		UUID uuid = UUID.randomUUID();
-		String inputPath  = "D:/mecab/" + html.userid + "/";
-		String outputPath = "D:/mecab/" + html.userid + "/";
+		String inputPath  = "E:/mecab/" + html.userid + "/";
+		String outputPath = "E:/mecab/" + html.userid + "/";
 		String inputFile  = uuid+".txt";
 		String outputFile = uuid+"_out.txt";
 		
@@ -106,9 +106,9 @@ public class MorphemeAnalyzer {
 		}
 		
 		List<String> arg = new ArrayList<String>();
-		arg.add("D:/mecab/mecab-ko/mecab");
+		arg.add("E:/mecab/mecab-ko/mecab");
 		arg.add("-d");
-		arg.add("D:/mecab/mecab-ko/dic/mecab-ko-dic");
+		arg.add("E:/mecab/mecab-ko/dic/mecab-ko-dic");
 		arg.add(inputPath + inputFile);
 		arg.add("-o");
 		arg.add(outputPath + outputFile);
@@ -271,8 +271,8 @@ public class MorphemeAnalyzer {
 //			 debug = new DebuggingLog("KeywordsHTml");
 //		
 		UUID uuid = UUID.randomUUID();
-		String inputPath  = "D:/mecab/" + userid + "/";
-		String outputPath = "D:/mecab/" + userid + "/";
+		String inputPath  = "E:/mecab/" + userid + "/";
+		String outputPath = "E:/mecab/" + userid + "/";
 		String inputFile  = uuid+".txt";
 		String outputFile = uuid+"_out.txt";
 		
@@ -288,9 +288,9 @@ public class MorphemeAnalyzer {
 		}
 		
 		List<String> arg = new ArrayList<String>();
-		arg.add("D:/mecab/mecab-ko/mecab");
+		arg.add("E:/mecab/mecab-ko/mecab");
 		arg.add("-d");
-		arg.add("D:/mecab/mecab-ko/dic/mecab-ko-dic");
+		arg.add("E:/mecab/mecab-ko/dic/mecab-ko-dic");
 		arg.add(inputPath + inputFile);
 		arg.add("-o");
 		arg.add(outputPath + outputFile);
@@ -388,8 +388,8 @@ public class MorphemeAnalyzer {
 		DebuggingLog debug;
 
 		UUID uuid = UUID.randomUUID();
-		String inputPath  = "D:/mecab/" + userid + "/";
-		String outputPath = "D:/mecab/" + userid + "/";
+		String inputPath  = "E:/mecab/" + userid + "/";
+		String outputPath = "E:/mecab/" + userid + "/";
 		String inputFile  = uuid+".txt";
 		String outputFile = uuid+"_out.txt";		
 		
@@ -400,9 +400,9 @@ public class MorphemeAnalyzer {
 		}
 		
 		List<String> arg = new ArrayList<String>();
-		arg.add("D:/mecab/mecab-ko/mecab");
+		arg.add("E:/mecab/mecab-ko/mecab");
 		arg.add("-d");
-		arg.add("D:/mecab/mecab-ko/dic/mecab-ko-dic");
+		arg.add("E:/mecab/mecab-ko/dic/mecab-ko-dic");
 		arg.add(inputPath + inputFile);
 		arg.add("-o");
 		arg.add(outputPath + outputFile);
@@ -538,7 +538,7 @@ public class MorphemeAnalyzer {
 	private boolean makeInputFile(String path, String content,String userid){
 		String dirpath = "/mecab/" + userid;
 		dirpath.replace("/", "\\\\");
-		dirpath = "D:" + dirpath;
+		dirpath = "E:" + dirpath;
 		File dir = new File(dirpath);
 		if( !dir.exists() ){
 			dir.mkdir();
